@@ -1,5 +1,6 @@
 package fr.bhecquet.entities;
 
+import fr.bhecquet.exceptions.NotImplementedException;
 import fr.bhecquet.exceptions.SquashTmException;
 import kong.unirest.core.UnirestException;
 import kong.unirest.core.json.JSONException;
@@ -12,14 +13,28 @@ public class ExecutionStep extends Entity {
     public static final String FIELD_COMMENT = "comment";
 
     public ExecutionStep(String url, int id, String name) {
-        super(url, id, name);
+        this(url, "", id, name);
+    }
+
+    public ExecutionStep(String url, String type, int id, String name) {
+        super(url, type, id, name);
+    }
+
+
+    @Override
+    public void completeDetails() {
+        throw new NotImplementedException();
     }
 
     public static ExecutionStep fromJson(JSONObject json) {
         try {
-            return new ExecutionStep(json.getJSONObject("_links").getJSONObject("self").getString("href"),
+            return new ExecutionStep(
+                    json.getJSONObject("_links").getJSONObject("self").getString("href"),
+                    json.getString(FIELD_TYPE),
                     json.getInt(FIELD_ID),
-                    json.getString(FIELD_ACTION));
+                    json.getString(FIELD_ACTION)
+            );
+
         } catch (JSONException e) {
             throw new SquashTmException(String.format("Cannot create execution step from JSON [%s] data: %s", json.toString(), e.getMessage()));
         }

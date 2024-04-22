@@ -1,5 +1,6 @@
 package fr.bhecquet.entities;
 
+import fr.bhecquet.exceptions.NotImplementedException;
 import fr.bhecquet.exceptions.SquashTmException;
 import kong.unirest.core.UnirestException;
 import kong.unirest.core.json.JSONException;
@@ -12,18 +13,24 @@ public class Dataset extends Entity {
 
     private TestCase testCase;
 
-    public Dataset(String url, int id, String name) {
-        this(url, id, name, null);
+    public Dataset(String url, String type, int id, String name) {
+        this(url, type, id, name, null);
     }
 
-    public Dataset(String url, int id, String name, TestCase testCase) {
-        super(url, id, name);
+    public Dataset(String url, String type, int id, String name, TestCase testCase) {
+        super(url, type, id, name);
         this.testCase = testCase;
+    }
+
+    @Override
+    public void completeDetails() {
+        throw new NotImplementedException();
     }
 
     public static Dataset fromJson(JSONObject json) {
         try {
             Dataset dataset = new Dataset(json.getJSONObject("_links").getJSONObject("self").getString("href"),
+                    json.getString(FIELD_TYPE),
                     json.getInt(FIELD_ID),
                     json.optString(FIELD_NAME));
 

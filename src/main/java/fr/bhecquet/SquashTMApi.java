@@ -1,15 +1,15 @@
 package fr.bhecquet;
 
 
-import fr.bhecquet.entities.*;
+import fr.bhecquet.entities.Entity;
+import fr.bhecquet.entities.IterationTestPlanItem;
+import fr.bhecquet.entities.Project;
+import fr.bhecquet.entities.TestPlanItemExecution;
 import fr.bhecquet.exceptions.ConfigurationException;
-import fr.bhecquet.exceptions.SquashTmException;
 import kong.unirest.core.HttpResponse;
 import kong.unirest.core.JsonNode;
 import kong.unirest.core.Unirest;
 import kong.unirest.core.UnirestException;
-
-import java.util.List;
 
 public class SquashTMApi {
 
@@ -48,127 +48,6 @@ public class SquashTMApi {
         }
 
 
-    }
-
-    /**
-     * Creates a campaign if it does not exist
-     *
-     * @param campaignName name of the campaign to create
-     * @param folder       folder to which campaign will be created
-     */
-    public Campaign createCampaign(String campaignName, String folder) {
-
-        if (folder == null) {
-            folder = "";
-        }
-
-        List<CampaignFolder> campaignFolders = CampaignFolder.getAll(currentProject);
-
-        // create folder where campaign will be located
-        CampaignFolder parentFolder = null;
-        for (String folderName : folder.split("/")) {
-
-            if (folderName.isEmpty()) {
-                continue;
-            }
-
-            parentFolder = createCampaignFolders(campaignFolders, folderName, parentFolder);
-        }
-
-        // do not create campaign if it exists
-        for (Campaign campaign : currentProject.getCampaigns()) {
-            if (campaign.getName().equals(campaignName)) {
-                return campaign;
-            }
-        }
-        return Campaign.create(currentProject, campaignName, parentFolder);
-    }
-
-    /**
-     * Creates an interation in a campaign if it does not exist
-     *
-     * @param campaign      the campaign where iteration will be created
-     * @param iterationName name of the iteration to create
-     * @return
-     */
-    public Iteration createIteration(Campaign campaign, String iterationName) {
-        for (Iteration iteration : campaign.getIterations()) {
-            if (iteration.getName().equals(iterationName)) {
-                return iteration;
-            }
-        }
-        return Iteration.create(campaign, iterationName);
-    }
-
-    /**
-     * Creates folders to store a campaign
-     *
-     * @param campaignFolders
-     * @param folderName
-     * @param parentFolder
-     * @return
-     */
-    private CampaignFolder createCampaignFolders(List<CampaignFolder> campaignFolders, String folderName, CampaignFolder parentFolder) {
-        boolean folderExists = false;
-        for (CampaignFolder existingFolder : campaignFolders) {
-            if (existingFolder.getName().equals(folderName)
-                    && (existingFolder.getProject() == null || existingFolder.getProject() != null && existingFolder.getProject().getId() == currentProject.getId())
-                    && (existingFolder.getParent() == null
-                    || parentFolder == null && existingFolder.getParent() != null && existingFolder.getParent() instanceof Project
-                    || (parentFolder != null && existingFolder.getParent() != null && existingFolder.getParent() instanceof CampaignFolder && existingFolder.getParent().getId() == parentFolder.getId()))) {
-                folderExists = true;
-                parentFolder = existingFolder;
-                break;
-            }
-        }
-
-        if (!folderExists) {
-            parentFolder = CampaignFolder.create(currentProject, parentFolder, folderName);
-        }
-
-        return parentFolder;
-    }
-
-    /**
-     * Add a test case in the selected iteration if it's not already there. Dataset are not handled
-     * Also check that the test case exists
-     *
-     * @param iteration  iteration in which test case will be added
-     * @param testCaseId id of the test case (can be found in Squash TM interface)
-     * @return
-     */
-    public IterationTestPlanItem addTestCaseInIteration(Iteration iteration, int testCaseId, Integer datasetId) {
-
-        for (IterationTestPlanItem testPlanItem : iteration.getAllTestCases()) {
-            if (testPlanItem.getTestCase() != null && testCaseId == testPlanItem.getTestCase().getId()
-                    && (testPlanItem.getDataset() == null || testPlanItem.getDataset() != null && datasetId == testPlanItem.getDataset().getId())) {
-                return testPlanItem;
-            }
-        }
-
-        // check that TestCase is valid
-        TestCase testCase;
-        try {
-            testCase = TestCase.get(testCaseId);
-        } catch (SquashTmException e) {
-            throw new SquashTmException(String.format("Test case with id %d does not exist in Squash", testCaseId));
-        }
-
-        // check that Dataset is valid
-        Dataset dataset = null;
-        if (datasetId != null) {
-            try {
-                dataset = Dataset.get(datasetId);
-            } catch (SquashTmException e) {
-                throw new SquashTmException(String.format("Dataset with id %d does not exist in Squash", datasetId));
-            }
-
-            if (dataset.getTestCase() == null || dataset.getTestCase().getId() != testCaseId) {
-                throw new ConfigurationException(String.format("Dataset with id %d does not belong to Test case with id %d", datasetId, testCaseId));
-            }
-        }
-
-        return iteration.addTestCase(testCase, dataset);
     }
 
     /**

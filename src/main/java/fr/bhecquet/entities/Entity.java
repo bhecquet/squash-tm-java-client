@@ -8,7 +8,7 @@ import kong.unirest.core.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Entity {
+public abstract class Entity {
 
     private static final String HEADER_CONTENT_TYPE = "Content-Type";
     private static final String MIMETYPE_APPLICATION_JSON = "application/json";
@@ -21,6 +21,7 @@ public class Entity {
     protected static final String FIELD_CAMPAIGNS = "campaigns";
     protected static final String FIELD_CAMPAIGN_FOLDERS = "campaign-folders";
     protected static final String FIELD_PROJECTS = "projects";
+    protected static final String FIELD_PATH = "path";
 
     protected static final String TYPE_PROJECT = "project";
     protected static final String TYPE_CAMPAIGN_FOLDER = "campaign-folder";
@@ -53,6 +54,8 @@ public class Entity {
         this.name = name;
         this.type = type;
     }
+
+    public abstract void completeDetails();
 
     public int getId() {
         return id;
@@ -190,5 +193,9 @@ public class Entity {
         for (JSONObject field : (List<JSONObject>) customFieldsJson.toList()) {
             customFields.add(CustomField.fromJson(field));
         }
+    }
+
+    public List<CustomField> getCustomFields() {
+        return customFields;
     }
 }

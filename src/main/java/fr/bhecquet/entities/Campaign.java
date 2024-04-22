@@ -2,6 +2,7 @@ package fr.bhecquet.entities;
 
 
 import fr.bhecquet.exceptions.SquashTmException;
+import kong.unirest.core.Unirest;
 import kong.unirest.core.UnirestException;
 import kong.unirest.core.json.JSONException;
 import kong.unirest.core.json.JSONObject;
@@ -13,10 +14,31 @@ public class Campaign extends Entity {
 
 
     public static final String CAMPAIGNS_URL = "campaigns";
+    private static final String CAMPAIGN_URL = "campaigns/%s";
     public static final String ITERATIONS_URL = "/iterations";
 
-    public Campaign(String url, int id, String name) {
-        super(url, id, name);
+    private static final String FIELD_SCHEDULE_START_DATE = "scheduled_start_date";
+    private static final String FIELD_SCHEDULE_END_DATE = "scheduled_end_date";
+    private static final String FIELD_ACTUAL_START_DATE = "actual_start_date";
+    private static final String FIELD_ACTUAL_END_DATE = "actual_end_date";
+    private static final String FIELD_ITERATIONS = "iterations";
+
+    private int projectId;
+    private String projectName;
+    private String scheduleStartDate;
+    private String scheduleEndDate;
+    private String actualStartDate;
+    private String actualEndDate;
+    private List<Iteration> iterations;
+    private String path;
+
+    public Campaign(int id) {
+        super("", "campaign", id, null);
+    }
+
+    public Campaign(String url, String type, int id, String name) {
+        super(url, type, id, name);
+        iterations = new ArrayList<>();
     }
 
 
@@ -47,10 +69,13 @@ public class Campaign extends Entity {
      */
     @SuppressWarnings("unchecked")
     public List<Iteration> getIterations() {
+        if (!iterations.isEmpty()) {
+            return iterations;
+        }
         try {
             JSONObject json = getPagedJSonResponse(buildGetRequest(url + String.format(ITERATIONS_URL, id)));
 
-            List<Iteration> iterations = new ArrayList<>();
+            iterations = new ArrayList<>();
             if (json.has(FIELD_EMBEDDED)) {
                 for (JSONObject iterationJson : (List<JSONObject>) json.getJSONObject(FIELD_EMBEDDED).getJSONArray("iterations").toList()) {
                     iterations.add(Iteration.fromJson(iterationJson));
@@ -64,7 +89,9 @@ public class Campaign extends Entity {
 
     public static Campaign fromJson(JSONObject json) {
         try {
-            return new Campaign(json.getJSONObject("_links").getJSONObject("self").getString("href"),
+            return new Campaign(
+                    json.getJSONObject("_links").getJSONObject("self").getString("href"),
+                    json.getString(FIELD_TYPE),
                     json.getInt(FIELD_ID),
                     json.getString(FIELD_NAME));
         } catch (JSONException e) {
@@ -72,9 +99,37 @@ public class Campaign extends Entity {
         }
     }
 
-    public static Campaign create(Project project, String campaignName, CampaignFolder parentFolder) {
-        try {
+    /**
+     * Creates a campaign if it does not exist
+     * Folder tree will also be created if necessary
+     *
+     * @param campaignName name of the campaign to create
+     * @param folderPath   folder path to which campaign will be created. e.g: foo/bar
+     */
+    public static Campaign create(Project project, String campaignName, String folderPath) {
 
+        CampaignFolder parentFolder = CampaignFolder.createCampaignFolderTree(project, folderPath);
+
+        // do not create campaign if it exists
+        for (Campaign campaign : project.getCampaigns()) {
+            if (campaign.getName().equals(campaignName)) {
+                return campaign;
+            }
+        }
+        return Campaign.create(project, campaignName, parentFolder);
+    }
+
+    /**
+     * CReates the campaign
+     *
+     * @param project
+     * @param campaignName
+     * @param parentFolder
+     * @return
+     */
+    public static Campaign create(Project project, String campaignName, CampaignFolder parentFolder) {
+
+        try {
 
             JSONObject body = new JSONObject();
             body.put(FIELD_TYPE, TYPE_CAMPAIGN);
@@ -98,6 +153,60 @@ public class Campaign extends Entity {
         } catch (UnirestException e) {
             throw new SquashTmException(String.format("Cannot create campaign %s", campaignName), e);
         }
-
     }
+
+    @Override
+    public void completeDetails() {
+        JSONObject json = getJSonResponse(Unirest.get(url));
+
+        projectId = json.getJSONObject("project").getInt(FIELD_ID);
+        projectName = json.getJSONObject("project").getString(FIELD_NAME);
+        scheduleStartDate = json.optString(FIELD_SCHEDULE_START_DATE, "");
+        scheduleEndDate = json.optString(FIELD_SCHEDULE_END_DATE, "");
+        actualStartDate = json.optString(FIELD_ACTUAL_START_DATE, "");
+        actualEndDate = json.optString(FIELD_ACTUAL_END_DATE, "");
+        path = json.getString(FIELD_PATH);
+
+        for (JSONObject jsonIteration : (List<JSONObject>) json.getJSONArray(FIELD_ITERATIONS).toList()) {
+            iterations.add(Iteration.fromJson(jsonIteration));
+        }
+        readCustomFields(json.getJSONArray(FIELD_CUSTOM_FIELDS));
+    }
+
+    public static Campaign get(int id) {
+        try {
+            return fromJson(getJSonResponse(buildGetRequest(apiRootUrl + String.format(CAMPAIGN_URL, id))));
+        } catch (UnirestException e) {
+            throw new SquashTmException(String.format("Campaign %d does not exist", id));
+        }
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public int getProjectId() {
+        return projectId;
+    }
+
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public String getScheduleStartDate() {
+        return scheduleStartDate;
+    }
+
+    public String getScheduleEndDate() {
+        return scheduleEndDate;
+    }
+
+    public String getActualStartDate() {
+        return actualStartDate;
+    }
+
+    public String getActualEndDate() {
+        return actualEndDate;
+    }
+
 }

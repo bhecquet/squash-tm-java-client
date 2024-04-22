@@ -4,11 +4,13 @@ package fr.bhecquet.entities;
 import fr.bhecquet.exceptions.SquashTmException;
 import kong.unirest.core.Unirest;
 import kong.unirest.core.UnirestException;
+import kong.unirest.core.json.JSONArray;
 import kong.unirest.core.json.JSONException;
 import kong.unirest.core.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Object representing a test case in Squash TM
@@ -48,20 +50,18 @@ public class TestCase extends Entity {
     private int requirementNumber = -1;
     private List<TestStep> testSteps;
 
-    public TestCase(int id) {
-        super("", id, null);
-    }
-
-    public TestCase(int id, String url) {
-        super(url, id, null);
+    public TestCase(String url, String type, int id, String name) {
+        super(url, type, id, null);
     }
 
 
     public static TestCase fromJson(JSONObject json) {
         try {
             return new TestCase(
+                    json.getJSONObject("_links").getJSONObject("self").getString("href"),
+                    json.getString(FIELD_TYPE),
                     json.getInt(FIELD_ID),
-                    json.getJSONObject("_links").getJSONObject("self").getString("href")
+                    json.optString(FIELD_NAME, "")
             );
         } catch (JSONException e) {
             throw new SquashTmException(String.format("Cannot create TestCase from JSON [%s] data: %s", json.toString(), e.getMessage()));
@@ -76,6 +76,7 @@ public class TestCase extends Entity {
         }
     }
 
+    @Override
     public void completeDetails() {
         testSteps = new ArrayList<>();
 
@@ -110,6 +111,24 @@ public class TestCase extends Entity {
 
         readCustomFields(json.getJSONArray(FIELD_CUSTOM_FIELDS));
 
+    }
+
+
+    /**
+     * Update custom file
+     *
+     * @param customFieldName  technical name of the field (called "code" in API)
+     * @param customFieldValue
+     */
+    public void updateCustomField(String customFieldName, String customFieldValue) {
+
+        JSONObject json = new JSONObject();
+        json.put(FIELD_TYPE, type);
+        JSONArray customFields = new JSONArray();
+        customFields.put(Map.of("code", customFieldName, "value", customFieldValue));
+        json.put(FIELD_CUSTOM_FIELDS, customFields);
+
+        getJSonResponse(buildPatchRequest(url).body(json));
     }
 
 

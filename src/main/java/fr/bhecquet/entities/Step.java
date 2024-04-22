@@ -1,5 +1,7 @@
 package fr.bhecquet.entities;
 
+import fr.bhecquet.exceptions.NotImplementedException;
+
 public abstract class Step extends Entity {
 
     protected String expectedResult;
@@ -20,5 +22,10 @@ public abstract class Step extends Entity {
 
     public String getAction() {
         return action;
+    }
+
+    @Override
+    public void completeDetails() {
+        throw new NotImplementedException();
     }
 }

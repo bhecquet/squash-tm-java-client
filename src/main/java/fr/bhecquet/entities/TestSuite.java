@@ -16,24 +16,25 @@ public class TestSuite extends Entity {
 
     private List<IterationTestPlanItem> iterationTestPlanItems;
 
-    public TestSuite(int id, String type, String url, String name) {
+    public TestSuite(String url, String type, int id, String name) {
         super(url, type, id, name);
     }
 
     public static TestSuite fromJson(JSONObject json) {
         try {
             return new TestSuite(
-                    json.getInt(FIELD_ID),
-                    json.getString(FIELD_TYPE),
                     json.getJSONObject("_links").getJSONObject("self").getString("href"),
+                    json.getString(FIELD_TYPE),
+                    json.getInt(FIELD_ID),
                     json.getString(FIELD_NAME)
             );
 
         } catch (JSONException e) {
-            throw new SquashTmException(String.format("Impossible de créer la suite de test depuis le JSON [%s] data: %s", json.toString(), e.getMessage()));
+            throw new SquashTmException(String.format("Cannot create test suite from JSON [%s] data: %s", json.toString(), e.getMessage()));
         }
     }
 
+    @Override
     public void completeDetails() {
         iterationTestPlanItems = new ArrayList<>();
         JSONObject json = getJSonResponse(Unirest.get(String.format("%s", url)));
@@ -50,7 +51,7 @@ public class TestSuite extends Entity {
         try {
             return fromJson(getJSonResponse(buildGetRequest(apiRootUrl + String.format(ITERATION_URL, id))));
         } catch (UnirestException e) {
-            throw new SquashTmException(String.format("L'iteration %d n'existe pas", id));
+            throw new SquashTmException(String.format("Iteration %d does not exist", id));
         }
     }
 
