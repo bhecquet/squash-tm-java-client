@@ -1,6 +1,7 @@
 package fr.bhecquet.entities;
 
 
+import fr.bhecquet.exceptions.NotImplementedException;
 import fr.bhecquet.exceptions.SquashTmException;
 import kong.unirest.core.UnirestException;
 import kong.unirest.core.json.JSONArray;
@@ -25,7 +26,7 @@ public class CampaignFolder extends Entity {
     }
 
     /**
-     * Get all campaign folders (should not be used on large instances
+     * Get all campaign folders (should not be used on large instances)
      *
      * @return
      */
@@ -80,11 +81,61 @@ public class CampaignFolder extends Entity {
         return campaignFolders;
     }
 
+    /**
+     * Creates all the campaign folders from the provided path
+     *
+     * @param project    the project to which this folder belongs
+     * @param folderPath path of folders. e.g: foo/bar/myFolder will create (or check existence) of 3 folders
+     * @return the final campaign folder
+     */
+    public static CampaignFolder createCampaignFolderTree(Project project, String folderPath) {
+        if (folderPath == null) {
+            folderPath = "";
+        }
+
+        // create folder where campaign will be located
+        CampaignFolder parentFolder = null;
+        for (String folderName : folderPath.split("/")) {
+
+            if (folderName.isEmpty()) {
+                continue;
+            }
+
+            parentFolder = createCampaignFolders(project, folderName, parentFolder);
+        }
+
+        return parentFolder;
+    }
+
+    private static CampaignFolder createCampaignFolders(Project project, String folderName, CampaignFolder parentFolder) {
+
+        List<CampaignFolder> campaignFolders = getAll(project);
+
+        boolean folderExists = false;
+        for (CampaignFolder existingFolder : campaignFolders) {
+            if (existingFolder.getName().equals(folderName)
+                    && (existingFolder.getProject() == null || existingFolder.getProject() != null && existingFolder.getProject().getId() == project.getId())
+                    && (existingFolder.getParent() == null
+                    || parentFolder == null && existingFolder.getParent() != null && existingFolder.getParent() instanceof Project
+                    || (parentFolder != null && existingFolder.getParent() != null && existingFolder.getParent() instanceof CampaignFolder && existingFolder.getParent().getId() == parentFolder.getId()))) {
+                folderExists = true;
+                parentFolder = existingFolder;
+                break;
+            }
+        }
+
+        if (!folderExists) {
+            parentFolder = CampaignFolder.create(project, parentFolder, folderName);
+        }
+
+        return parentFolder;
+    }
+
     public static CampaignFolder get(int id) {
         try {
             return fromJson(getJSonResponse(buildGetRequest(apiRootUrl + String.format("%s/%d", CAMPAIGN_FOLDER_URL, id))));
         } catch (UnirestException e) {
-            throw new SquashTmException(String.format("campaign %d does not exist", id));
+            throw new SquashTmException(String.format("Campaign folder %d does not exist", id));
         }
     }
 
@@ -152,6 +203,11 @@ public class CampaignFolder extends Entity {
 
     }
 
+    @Override
+    public void completeDetails() {
+        throw new NotImplementedException();
+    }
+
     public static String getCampaignFolderUrl() {
         return CAMPAIGN_FOLDER_URL;
     }
@@ -163,4 +219,5 @@ public class CampaignFolder extends Entity {
     public Entity getParent() {
         return parent;
     }
+
 }

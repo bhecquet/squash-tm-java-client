@@ -2,6 +2,7 @@ package fr.bhecquet.entities;
 
 
 import fr.bhecquet.exceptions.ConfigurationException;
+import fr.bhecquet.exceptions.NotImplementedException;
 import fr.bhecquet.exceptions.SquashTmException;
 import kong.unirest.core.UnirestException;
 import kong.unirest.core.json.JSONException;
@@ -15,8 +16,14 @@ public class Project extends Entity {
     public static final String PROJECTS_URL = "projects";
     public static final String CAMPAIGNS_URL = "/campaigns";
 
-    public Project(String url, int id, String name) {
-        super(url, id, name);
+    public Project(String url, String type, int id, String name) {
+        super(url, type, id, name);
+    }
+
+
+    @Override
+    public void completeDetails() {
+        throw new NotImplementedException();
     }
 
     public static Project get(String projectName) {
@@ -60,6 +67,7 @@ public class Project extends Entity {
         try {
             return new Project(
                     json.getJSONObject("_links").getJSONObject("self").getString("href"),
+                    json.getString(FIELD_TYPE),
                     json.getInt(FIELD_ID),
                     json.getString(FIELD_NAME));
         } catch (JSONException e) {
@@ -69,7 +77,7 @@ public class Project extends Entity {
 
     public List<Campaign> getCampaigns() {
         try {
-            JSONObject json = getPagedJSonResponse(buildGetRequest(url + CAMPAIGNS_URL));
+            JSONObject json = getPagedJSonResponse(buildGetRequest(url + CAMPAIGNS_URL + "?sort=id"));
 
             List<Campaign> campaigns = new ArrayList<>();
             if (json.has(FIELD_EMBEDDED)) {

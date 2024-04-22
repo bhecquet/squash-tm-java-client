@@ -1,5 +1,6 @@
 package fr.bhecquet.entities;
 
+import fr.bhecquet.exceptions.NotImplementedException;
 import fr.bhecquet.exceptions.SquashTmException;
 import kong.unirest.core.json.JSONException;
 import kong.unirest.core.json.JSONObject;
@@ -15,11 +16,17 @@ public class TestStep extends Step {
     private static final String FIELD_CALLED_TEST_CASE = "called_test_case";
 
 
-    public TestStep(int id, String type, String url, int order, String expectedResult, String action) {
-        super(url, type, id, null);
+    public TestStep(String url, String type, int id, int order, String expectedResult, String action) {
+        super(url, type, id, action);
         this.order = order;
         this.expectedResult = expectedResult;
         this.action = action;
+    }
+
+
+    @Override
+    public void completeDetails() {
+        throw new NotImplementedException();
     }
 
     public static List<TestStep> fromJson(JSONObject json) {
@@ -27,9 +34,10 @@ public class TestStep extends Step {
             String stepType = json.getString(FIELD_TYPE);
             if ("action-step".equals(stepType)) {
                 TestStep testStep = new TestStep(
-                        json.getInt(FIELD_ID),
-                        json.getString(FIELD_TYPE),
+
                         json.getJSONObject("_links").getJSONObject("self").getString("href"),
+                        json.getString(FIELD_TYPE),
+                        json.getInt(FIELD_ID),
                         json.getInt(FIELD_INDEX),
                         json.optString(FIELD_EXPECTED_RESULT, ""),
                         json.optString(FIELD_ACTION, "")

@@ -30,8 +30,8 @@ public class IterationTestPlanItem extends Entity {
 
     private Dataset dataset;
 
-    public IterationTestPlanItem(String url, int id, TestCase testCase, Dataset dataset) {
-        super(url, id, null);
+    public IterationTestPlanItem(String url, String type, int id, TestCase testCase, Dataset dataset) {
+        super(url, type, id, null);
         this.testCase = testCase;
         this.dataset = dataset;
     }
@@ -56,6 +56,18 @@ public class IterationTestPlanItem extends Entity {
         }
     }
 
+    /**
+     * Create an execution for this item, providing a result
+     *
+     * @return
+     */
+    public TestPlanItemExecution createExecutionWithResult(TestPlanItemExecution.ExecutionStatus result, String comment) {
+
+        TestPlanItemExecution execution = createExecution();
+        execution.setResult(result, comment);
+        return execution;
+    }
+
     public static IterationTestPlanItem fromJson(JSONObject json) {
 
         try {
@@ -64,6 +76,7 @@ public class IterationTestPlanItem extends Entity {
 
             return new IterationTestPlanItem(
                     json.getJSONObject("_links").getJSONObject("self").getString("href"),
+                    json.getString(FIELD_TYPE),
                     json.getInt(FIELD_ID),
                     referencedTestCase == null ? null : TestCase.fromJson(referencedTestCase),
                     referencedDataset == null ? null : Dataset.fromJson(referencedDataset)
@@ -73,7 +86,7 @@ public class IterationTestPlanItem extends Entity {
         }
     }
 
-
+    @Override
     public void completeDetails() {
         JSONObject json = getJSonResponse(Unirest.get(String.format("%s", url)));
         executions = new ArrayList<>();

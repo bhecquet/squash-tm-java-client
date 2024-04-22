@@ -25,23 +25,24 @@ public class Execution extends Entity {
     private String lastExecutedBy;
     private String lastExecutedOn;
 
-    public Execution(int id, String type, String url) {
+    public Execution(String url, String type, int id) {
         super(url, type, id, null);
     }
 
     public static Execution fromJson(JSONObject json) {
         try {
             return new Execution(
-                    json.getInt(FIELD_ID),
+                    json.getJSONObject("_links").getJSONObject("self").getString("href"),
                     json.getString(FIELD_TYPE),
-                    json.getJSONObject("_links").getJSONObject("self").getString("href")
+                    json.getInt(FIELD_ID)
             );
 
         } catch (JSONException e) {
-            throw new SquashTmException(String.format("Impossible de créer l'exécution depuis le JSON [%s] data: %s", json.toString(), e.getMessage()));
+            throw new SquashTmException(String.format("Cannot create execution from JSON [%s] data: %s", json.toString(), e.getMessage()));
         }
     }
 
+    @Override
     public void completeDetails() {
         JSONObject json = getJSonResponse(Unirest.get(String.format("%s", url)));
         executionSteps = new ArrayList<>();
@@ -62,7 +63,7 @@ public class Execution extends Entity {
         try {
             return fromJson(getJSonResponse(buildGetRequest(apiRootUrl + String.format(EXECUTION_URL, id))));
         } catch (UnirestException e) {
-            throw new SquashTmException(String.format("L'exécution %d n'existe pas", id));
+            throw new SquashTmException(String.format("Execution %d does not exist", id));
         }
     }
 

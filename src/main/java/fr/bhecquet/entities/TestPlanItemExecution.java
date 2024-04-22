@@ -1,5 +1,6 @@
 package fr.bhecquet.entities;
 
+import fr.bhecquet.exceptions.NotImplementedException;
 import fr.bhecquet.exceptions.SquashTmException;
 import kong.unirest.core.UnirestException;
 import kong.unirest.core.json.JSONArray;
@@ -27,17 +28,22 @@ public class TestPlanItemExecution extends Entity {
 
     List<ExecutionStep> steps;
 
-    public TestPlanItemExecution(String url, int id, String name) {
-        super(url, id, name);
+    public TestPlanItemExecution(String url, String type, int id, String name) {
+        super(url, type, id, name);
         steps = new ArrayList<>();
     }
 
+    @Override
+    public void completeDetails() {
+        throw new NotImplementedException();
+    }
 
     public static TestPlanItemExecution fromJson(JSONObject json) {
 
         try {
             TestPlanItemExecution testPlanItemExecution = new TestPlanItemExecution(
                     json.getJSONObject("_links").getJSONObject("self").getString("href"),
+                    json.getString(FIELD_TYPE),
                     json.getInt(FIELD_ID),
                     json.getString(FIELD_NAME)
             );
