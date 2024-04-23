@@ -42,9 +42,14 @@ public class Execution extends Entity {
         }
     }
 
+
     @Override
     public void completeDetails() {
-        JSONObject json = getJSonResponse(Unirest.get(String.format("%s", url)));
+        JSONObject json = getJSonResponse(Unirest.get(url));
+        completeDetails(json);
+    }
+
+    private void completeDetails(JSONObject json) {
         executionSteps = new ArrayList<>();
 
         status = json.getString(FIELD_EXECUTION_STATUS);
@@ -61,7 +66,10 @@ public class Execution extends Entity {
 
     public static Execution get(int id) {
         try {
-            return fromJson(getJSonResponse(buildGetRequest(apiRootUrl + String.format(EXECUTION_URL, id))));
+            JSONObject json = getJSonResponse(buildGetRequest(apiRootUrl + String.format(EXECUTION_URL, id)));
+            Execution execution = fromJson(json);
+            execution.completeDetails(json);
+            return execution;
         } catch (UnirestException e) {
             throw new SquashTmException(String.format("Execution %d does not exist", id));
         }
