@@ -158,7 +158,10 @@ public class Campaign extends Entity {
     @Override
     public void completeDetails() {
         JSONObject json = getJSonResponse(Unirest.get(url));
+        completeDetails(json);
+    }
 
+    private void completeDetails(JSONObject json) {
         projectId = json.getJSONObject("project").getInt(FIELD_ID);
         projectName = json.getJSONObject("project").getString(FIELD_NAME);
         scheduleStartDate = json.optString(FIELD_SCHEDULE_START_DATE, "");
@@ -175,7 +178,10 @@ public class Campaign extends Entity {
 
     public static Campaign get(int id) {
         try {
-            return fromJson(getJSonResponse(buildGetRequest(apiRootUrl + String.format(CAMPAIGN_URL, id))));
+            JSONObject json = getJSonResponse(buildGetRequest(apiRootUrl + String.format(CAMPAIGN_URL, id)));
+            Campaign campaign = fromJson(json);
+            campaign.completeDetails(json);
+            return campaign;
         } catch (UnirestException e) {
             throw new SquashTmException(String.format("Campaign %d does not exist", id));
         }

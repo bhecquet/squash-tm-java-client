@@ -777,6 +777,7 @@ public class TestCampaign extends SquashTMTest {
 
         Assert.assertEquals(campaign.getId(), 1);
         Assert.assertEquals(campaign.getName(), "TNR");
+        Assert.assertEquals(campaign.getPath(), "/project1/Selenium Grid/TNR");
     }
 
 
