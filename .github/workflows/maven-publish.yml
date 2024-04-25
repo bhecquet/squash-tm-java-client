@@ -28,7 +28,7 @@ jobs:
         gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
         gpg-passphrase: MAVEN_GPG_PASSPHRASE 
     - name: settings
-      run: gpg --list-secret-keys --keyid-format=long
+      run: echo ${{ secrets.MAVEN_USERNAME }}
     - name: Build with Maven
       run: mvn -B package --file pom.xml
     - name: Publish to the Maven Central Repository
