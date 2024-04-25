@@ -38,6 +38,7 @@ public class Iteration extends Entity {
 
     /**
      * Add a test case/dataset in this iteration, given their id
+     * If test case is already in the iteration, do not add it a second time
      *
      * @param testCaseId
      * @param datasetId
@@ -47,7 +48,7 @@ public class Iteration extends Entity {
 
         for (IterationTestPlanItem testPlanItem : getAllTestCases()) {
             if (testPlanItem.getTestCase() != null && testCaseId == testPlanItem.getTestCase().getId()
-                    && (testPlanItem.getDataset() == null || testPlanItem.getDataset() != null && datasetId == testPlanItem.getDataset().getId())) {
+                    && (testPlanItem.getDataset() == null || datasetId == null || testPlanItem.getDataset() != null && datasetId == testPlanItem.getDataset().getId())) {
                 return testPlanItem;
             }
         }
@@ -146,13 +147,14 @@ public class Iteration extends Entity {
     }
 
     public void completeDetails() {
-        JSONObject json = getJSonResponse(Unirest.get(String.format("%s", url)));
+        JSONObject json = getJSonResponse(Unirest.get(url));
 
         scheduleStartDate = json.optString(FIELD_SCHEDULE_START_DATE, "");
         scheduleEndDate = json.optString(FIELD_SCHEDULE_END_DATE, "");
         actualStartDate = json.optString(FIELD_ACTUAL_START_DATE, "");
         actualEndDate = json.optString(FIELD_ACTUAL_END_DATE, "");
         reference = json.getString(FIELD_REFERENCE);
+        testSuites = new ArrayList<>();
 
         for (JSONObject jsonTestSuite : (List<JSONObject>) json.getJSONArray(FIELD_TEST_SUITE).toList()) {
             testSuites.add(TestSuite.fromJson(jsonTestSuite));
@@ -166,7 +168,7 @@ public class Iteration extends Entity {
         try {
             return fromJson(getJSonResponse(buildGetRequest(apiRootUrl + String.format(ITERATION_URL, id))));
         } catch (UnirestException e) {
-            throw new SquashTmException(String.format("L'iteration %d n'existe pas", id));
+            throw new SquashTmException(String.format("Iteration %d does not exist", id));
         }
     }
 
