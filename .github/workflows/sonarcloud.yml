@@ -31,5 +31,5 @@ jobs:
     - name: Build with Maven
       run: mvn -B package --file pom.xml
     - name: Publish to Sonarcloud
-      run: mvn sonar:sonar -Pcoverage -Dsonar.log.level=DEBUG -Dsonar.projectKey=bhecquet_squash-tm-java-client -Dsonar.login=${{ secrets.SONARCLOUD_KEY }}
+      run: mvn sonar:sonar -Pcoverage -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=bhecquet -Dsonar.log.level=DEBUG -Dsonar.projectKey=bhecquet_squash-tm-java-client -Dsonar.login=${{ secrets.SONARCLOUD_KEY }}
 
