@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.github.bhecquet</groupId>
     <artifactId>squash-tm-java-client</artifactId>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>1.0.3-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>Squash TM Java client</name>
     <description>A Java client for connecting to Squash TM Test Manager API</description>
@@ -150,6 +150,19 @@
                                 <arg>loopback</arg>
                             </gpgArguments>
                         </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>  <!-- phase: package -->
+                <version>3.3.0</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>
