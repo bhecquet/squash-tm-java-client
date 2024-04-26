@@ -16,6 +16,8 @@ public class Project extends Entity {
     public static final String PROJECTS_URL = "projects";
     public static final String CAMPAIGNS_URL = "/campaigns";
 
+    public static final String TYPE_PROJECT = "project";
+
     public Project(String url, String type, int id, String name) {
         super(url, type, id, name);
     }

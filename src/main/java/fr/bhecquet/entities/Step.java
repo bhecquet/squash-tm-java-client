@@ -8,8 +8,8 @@ public abstract class Step extends Entity {
     protected int order;
     protected String action;
 
-    public Step(String url, String type, int id, Object o) {
-        super(url, type, id, null);
+    protected Step(String url, String type, int id, Object o) {
+        super(url, type, id, o != null ? o.toString() : null);
     }
 
     public String getExpectedResult() {

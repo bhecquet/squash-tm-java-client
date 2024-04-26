@@ -77,7 +77,7 @@ public class Campaign extends Entity {
 
             iterations = new ArrayList<>();
             if (json.has(FIELD_EMBEDDED)) {
-                for (JSONObject iterationJson : (List<JSONObject>) json.getJSONObject(FIELD_EMBEDDED).getJSONArray("iterations").toList()) {
+                for (JSONObject iterationJson : (List<JSONObject>) json.getJSONObject(FIELD_EMBEDDED).getJSONArray(FIELD_ITERATIONS).toList()) {
                     iterations.add(Iteration.fromJson(iterationJson));
                 }
             }
@@ -139,7 +139,7 @@ public class Campaign extends Entity {
             JSONObject parent = new JSONObject();
             if (parentFolder == null) {
                 parent.put(FIELD_ID, project.id);
-                parent.put(FIELD_TYPE, "project");
+                parent.put(FIELD_TYPE, TYPE_PROJECT);
             } else {
                 parent.put(FIELD_ID, parentFolder.id);
                 parent.put(FIELD_TYPE, "campaign-folder");
@@ -162,8 +162,8 @@ public class Campaign extends Entity {
     }
 
     private void completeDetails(JSONObject json) {
-        projectId = json.getJSONObject("project").getInt(FIELD_ID);
-        projectName = json.getJSONObject("project").getString(FIELD_NAME);
+        projectId = json.getJSONObject(TYPE_PROJECT).getInt(FIELD_ID);
+        projectName = json.getJSONObject(TYPE_PROJECT).getString(FIELD_NAME);
         scheduleStartDate = json.optString(FIELD_SCHEDULE_START_DATE, "");
         scheduleEndDate = json.optString(FIELD_SCHEDULE_END_DATE, "");
         actualStartDate = json.optString(FIELD_ACTUAL_START_DATE, "");

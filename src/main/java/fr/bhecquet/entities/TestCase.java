@@ -36,9 +36,6 @@ public class TestCase extends Entity {
     private String path;
     private String description;
     private String reference;
-    private String marque = "";
-    private String produit = "";
-    private String application = "";
     private String projectName = "";
     private int projectId = -1;
     private String author = "";
@@ -84,8 +81,8 @@ public class TestCase extends Entity {
         automatedTestReference = json.optString(FIELD_AUTOMATED_TEST_REFERENCE, "");
         path = json.getString(FIELD_PATH);
         description = json.getString(FIELD_DESCRIPTION);
-        projectId = json.getJSONObject("project").getInt(FIELD_ID);
-        projectName = json.getJSONObject("project").getString(FIELD_NAME);
+        projectId = json.getJSONObject(FIELD_PROJECT).getInt(FIELD_ID);
+        projectName = json.getJSONObject(FIELD_PROJECT).getString(FIELD_NAME);
         author = json.getString(FIELD_AUTHOR);
         nature = json.getJSONObject(FIELD_NATURE).getString("code");
         tctype = json.getJSONObject(FIELD_TCTYPE).getString("code");
@@ -94,16 +91,6 @@ public class TestCase extends Entity {
         importance = json.getString(FIELD_IMPORTANCE);
         prerequisite = json.getString(FIELD_PREREQUISITE);
         requirementNumber = json.getJSONArray(FIELD_REQUIREMENTS).length();
-
-        for (JSONObject customField : (List<JSONObject>) json.getJSONArray(FIELD_CUSTOM_FIELDS).toList()) {
-            if ("MarqueTNR".equalsIgnoreCase(customField.getString("code"))) {
-                marque = customField.optString("value", "");
-            } else if ("ApplicationTNR".equalsIgnoreCase(customField.getString("code"))) {
-                application = customField.optString("value", "");
-            } else if ("produit".equalsIgnoreCase(customField.getString("code"))) {
-                produit = customField.optString("value", "");
-            }
-        }
 
         for (JSONObject step : (List<JSONObject>) json.getJSONArray(FIELD_STEPS).toList()) {
             testSteps.addAll(TestStep.fromJson(step));
@@ -150,18 +137,6 @@ public class TestCase extends Entity {
 
     public String getDescription() {
         return description;
-    }
-
-    public String getProduit() {
-        return produit;
-    }
-
-    public String getApplication() {
-        return application;
-    }
-
-    public String getMarque() {
-        return marque;
     }
 
     public String getProjectName() {
