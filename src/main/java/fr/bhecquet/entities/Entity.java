@@ -44,11 +44,11 @@ public abstract class Entity {
         Entity.apiRootUrl = apiRootUrl;
     }
 
-    public Entity(String url, int id, String name) {
+    protected Entity(String url, int id, String name) {
         this(url, null, id, name);
     }
 
-    public Entity(String url, String type, int id, String name) {
+    protected Entity(String url, String type, int id, String name) {
         this.url = url.replace("http://", "https://");
         this.id = id;
         this.name = name;

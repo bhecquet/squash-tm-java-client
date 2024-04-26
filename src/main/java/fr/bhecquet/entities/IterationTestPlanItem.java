@@ -19,6 +19,7 @@ public class IterationTestPlanItem extends Entity {
     private static final String FIELD_EXECUTIONS = "executions";
     public static final String TEST_PLAN_ITEM_URL = "iterations/%d/test-plan";
     public static final String TEST_PLAN_ITEM_EXECUTION_URL = "iteration-test-plan-items/%d/executions";
+    public static final String FIELD_REFERENCED_DATASET = "referenced_dataset";
 
     private TestCase testCase;
     private TestCase referencedTestCase;
@@ -71,8 +72,8 @@ public class IterationTestPlanItem extends Entity {
     public static IterationTestPlanItem fromJson(JSONObject json) {
 
         try {
-            JSONObject referencedTestCase = json.optJSONObject("referenced_test_case");
-            JSONObject referencedDataset = json.optJSONObject("referenced_dataset");
+            JSONObject referencedTestCase = json.optJSONObject(FIELD_REFERENCED_TEST_CASE);
+            JSONObject referencedDataset = json.optJSONObject(FIELD_REFERENCED_DATASET);
 
             return new IterationTestPlanItem(
                     json.getJSONObject("_links").getJSONObject("self").getString("href"),
