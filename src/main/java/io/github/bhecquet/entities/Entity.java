@@ -70,7 +70,7 @@ public abstract class Entity {
     }
 
     protected static GetRequest buildGetRequest(String url) {
-        return Unirest.get(url).basicAuth(user, password).headerReplace(HEADER_CONTENT_TYPE, MIMETYPE_APPLICATION_JSON);
+        return Unirest.get(updateUrl(url)).basicAuth(user, password).headerReplace(HEADER_CONTENT_TYPE, MIMETYPE_APPLICATION_JSON);
     }
 
     protected static HttpRequestWithBody buildPostRequest(String url) {

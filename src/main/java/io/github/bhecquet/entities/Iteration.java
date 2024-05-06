@@ -28,6 +28,7 @@ public class Iteration extends Entity {
     private String actualStartDate;
     private String actualEndDate;
     private String reference;
+    private Project project; // may be null
 
     private List<TestSuite> testSuites;
     private List<IterationTestPlanItem> iterationTestPlanItems;
@@ -147,7 +148,12 @@ public class Iteration extends Entity {
     }
 
     public void completeDetails() {
+
         JSONObject json = getJSonResponse(Unirest.get(url));
+        completeDetails(json);
+    }
+
+    private void completeDetails(JSONObject json) {
 
         scheduleStartDate = json.optString(FIELD_SCHEDULE_START_DATE, "");
         scheduleEndDate = json.optString(FIELD_SCHEDULE_END_DATE, "");
@@ -159,6 +165,7 @@ public class Iteration extends Entity {
         for (JSONObject jsonTestSuite : (List<JSONObject>) json.getJSONArray(FIELD_TEST_SUITE).toList()) {
             testSuites.add(TestSuite.fromJson(jsonTestSuite));
         }
+        project = Project.getFromUrl(json.getJSONObject("_links").getJSONObject("project").getString("href"));
 
         iterationTestPlanItems = getAllTestCases();
         readCustomFields(json.getJSONArray(FIELD_CUSTOM_FIELDS));
@@ -166,7 +173,11 @@ public class Iteration extends Entity {
 
     public static Iteration get(int id) {
         try {
-            return fromJson(getJSonResponse(buildGetRequest(apiRootUrl + String.format(ITERATION_URL, id))));
+            JSONObject json = getJSonResponse(buildGetRequest(apiRootUrl + String.format(ITERATION_URL, id)));
+            Iteration iteration = fromJson(json);
+            iteration.project = Project.getFromUrl(json.getJSONObject("_links").getJSONObject("project").getString("href"));
+
+            return iteration;
         } catch (UnirestException e) {
             throw new SquashTmException(String.format("Iteration %d does not exist", id));
         }
@@ -205,5 +216,7 @@ public class Iteration extends Entity {
         return iterationTestPlanItems;
     }
 
-
+    public Project getProject() {
+        return project;
+    }
 }

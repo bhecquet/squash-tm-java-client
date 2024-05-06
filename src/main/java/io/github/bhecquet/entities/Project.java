@@ -29,10 +29,14 @@ public class Project extends Entity {
     }
 
     public static Project get(String projectName) {
+        return getFromUrl(apiRootUrl + String.format("%s?projectName=%s", PROJECTS_URL, projectName));
+    }
+
+    public static Project getFromUrl(String url) {
         try {
-            return fromJson(getJSonResponse(buildGetRequest(apiRootUrl + String.format("%s?projectName=%s", PROJECTS_URL, projectName))));
+            return fromJson(getJSonResponse(buildGetRequest(url)));
         } catch (UnirestException e) {
-            throw new ConfigurationException(String.format("Projet %s does not exist or can't be accessed", projectName));
+            throw new ConfigurationException(String.format("Projet at url %s does not exist or can't be accessed", url));
         }
     }
 

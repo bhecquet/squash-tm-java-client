@@ -1,10 +1,7 @@
 package io.github.bhecquet;
 
 
-import io.github.bhecquet.entities.Entity;
-import io.github.bhecquet.entities.IterationTestPlanItem;
-import io.github.bhecquet.entities.Project;
-import io.github.bhecquet.entities.TestPlanItemExecution;
+import io.github.bhecquet.entities.*;
 import io.github.bhecquet.exceptions.ConfigurationException;
 import kong.unirest.core.HttpResponse;
 import kong.unirest.core.JsonNode;
@@ -19,7 +16,7 @@ public class SquashTMApi {
     private Project currentProject;
 
 
-    public SquashTMApi(String url, String user, String password, String projectName) {
+    private void initConnection(String url, String user, String password) {
         this.url = url + "/api/rest/latest/";
         this.url = this.url.replace("//", "/").replace(":/", "://"); // in case of double '/' in URL
         this.user = user;
@@ -27,8 +24,19 @@ public class SquashTMApi {
 
         Entity.configureEntity(user, password, this.url);
         testConnection();
+    }
+
+    public SquashTMApi(String url, String user, String password, String projectName) {
+        initConnection(url, user, password);
 
         currentProject = Project.get(projectName);
+    }
+
+    public SquashTMApi(String url, String user, String password, int iterationId) {
+        initConnection(url, user, password);
+        Iteration iteration = Iteration.get(iterationId);
+
+        currentProject = iteration.getProject();
     }
 
     /**
