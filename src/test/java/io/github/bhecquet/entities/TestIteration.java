@@ -185,7 +185,7 @@ public class TestIteration extends SquashTMTest {
             "    \"name\" : \"sample campaign\"," +
             "    \"_links\" : {" +
             "      \"self\" : {" +
-            "        \"href\" : \"http://localhost:8080/api/rest/latest/campaigns/2\"" +
+            "        \"href\" : \"https://localhost:4321/campaigns/2\"" +
             "      }" +
             "    }" +
             "  }," +
@@ -210,7 +210,7 @@ public class TestIteration extends SquashTMTest {
             "    \"name\" : \"Suite_1\"," +
             "    \"_links\" : {" +
             "      \"self\" : {" +
-            "        \"href\" : \"http://localhost:8080/api/rest/latest/test-suites/1\"" +
+            "        \"href\" : \"https://localhost:4321/test-suites/1\"" +
             "      }" +
             "    }" +
             "  }, {" +
@@ -219,32 +219,62 @@ public class TestIteration extends SquashTMTest {
             "    \"name\" : \"Suite_2\"," +
             "    \"_links\" : {" +
             "      \"self\" : {" +
-            "        \"href\" : \"http://localhost:8080/api/rest/latest/test-suites/2\"" +
+            "        \"href\" : \"https://localhost:4321/test-suites/2\"" +
             "      }" +
             "    }" +
             "  } ]," +
             "  \"attachments\" : [ ]," +
             "  \"_links\" : {" +
             "    \"self\" : {" +
-            "      \"href\" : \"http://localhost:8080/api/rest/latest/iterations/22\"" +
+            "      \"href\" : \"https://localhost:4321/iterations/22\"" +
             "    }," +
             "    \"project\" : {" +
-            "      \"href\" : \"http://localhost:8080/api/rest/latest/projects/4\"" +
+            "      \"href\" : \"https://localhost:4321/projects/4\"" +
             "    }," +
             "    \"campaign\" : {" +
-            "      \"href\" : \"http://localhost:8080/api/rest/latest/campaigns/2\"" +
+            "      \"href\" : \"https://localhost:4321/campaigns/2\"" +
             "    }," +
             "    \"test-suites\" : {" +
-            "      \"href\" : \"http://localhost:8080/api/rest/latest/iterations/22/test-suites\"" +
+            "      \"href\" : \"https://localhost:4321/iterations/22/test-suites\"" +
             "    }," +
             "    \"test-plan\" : {" +
-            "      \"href\" : \"http://localhost:8080/api/rest/latest/iterations/22/test-plan\"" +
+            "      \"href\" : \"https://localhost:4321/iterations/22/test-plan\"" +
             "    }," +
             "    \"attachments\" : {" +
-            "      \"href\" : \"http://localhost:8080/api/rest/latest/iterations/22/attachments\"" +
+            "      \"href\" : \"https://localhost:4321/iterations/22/attachments\"" +
             "    }," +
             "    \"issues\" : {" +
-            "      \"href\" : \"http://localhost:8080/api/rest/latest/iterations/22/issues\"" +
+            "      \"href\" : \"https://localhost:4321/iterations/22/issues\"" +
+            "    }" +
+            "  }" +
+            "}";
+
+    private static String PROJECT_REPLY_DATA = "{" +
+            "  \"_type\" : \"project\"," +
+            "  \"id\" : 4," +
+            "  \"description\" : \"<p>This project is the main sample project</p>\"," +
+            "  \"label\" : \"Main Sample Project\"," +
+            "  \"name\" : \"sample project\"," +
+            "  \"active\" : true," +
+            "  \"attachments\" : [ ]," +
+            "  \"_links\" : {" +
+            "    \"self\" : {" +
+            "      \"href\" : \"https://localhost:4321/projects/4\"" +
+            "    }," +
+            "    \"requirements\" : {" +
+            "      \"href\" : \"https://localhost:4321/projects/4/requirements-library/content\"" +
+            "    }," +
+            "    \"test-cases\" : {" +
+            "      \"href\" : \"https://localhost:4321/projects/4/test-cases-library/content\"" +
+            "    }," +
+            "    \"campaigns\" : {" +
+            "      \"href\" : \"https://localhost:4321/projects/4/campaigns-library/content\"" +
+            "    }," +
+            "    \"permissions\" : {" +
+            "      \"href\" : \"https://localhost:4321/projects/4/permissions\"" +
+            "    }," +
+            "    \"attachments\" : {" +
+            "      \"href\" : \"https://localhost:4321/projects/4/attachments\"" +
             "    }" +
             "  }" +
             "}";
@@ -833,6 +863,7 @@ public class TestIteration extends SquashTMTest {
     @Test
     public void testCompleteDetails() {
         createServerMock("GET", "/iterations/1", 200, ITERATION_REPLY_DATA);
+        createServerMock("GET", "/projects/4", 200, PROJECT_REPLY_DATA);
         createServerMock("GET", "/iterations/1/test-plan?sort=id", 200, TEST_PLAN_ITEMS_REPLY_DATA);
         Iteration iteration = new Iteration("https://localhost:4321/iterations/1", "iteration", 1, "my_iteration");
         iteration.completeDetails();
@@ -845,6 +876,7 @@ public class TestIteration extends SquashTMTest {
         Assert.assertEquals(iteration.getTestSuites().size(), 2);
         Assert.assertEquals(iteration.getIterationTestPlanItems().size(), 2);
         Assert.assertEquals(iteration.getCustomFields().size(), 1);
+        Assert.assertEquals(iteration.getProject().getId(), 4);
     }
 
     @Test
@@ -854,6 +886,8 @@ public class TestIteration extends SquashTMTest {
                 .replace("\"scheduled_end_date\" : \"2017-04-14T10:00:00.000+00:00\",", "")
                 .replace("\"actual_start_date\" : \"2017-04-10T10:00:00.000+00:00\",", "")
                 .replace("\"actual_end_date\" : \"2017-04-15T10:00:00.000+00:00\",", ""));
+
+        createServerMock("GET", "/projects/4", 200, PROJECT_REPLY_DATA);
         createServerMock("GET", "/iterations/1/test-plan?sort=id", 200, TEST_PLAN_ITEMS_REPLY_DATA);
         Iteration iteration = new Iteration("https://localhost:4321/iterations/1", "iteration", 1, "my_iteration");
         iteration.completeDetails();
@@ -870,11 +904,14 @@ public class TestIteration extends SquashTMTest {
 
     @Test
     public void testGet() {
+
+        createServerMock("GET", "/projects/4", 200, PROJECT_REPLY_DATA);
         createServerMock("GET", "/iterations/22", 200, ITERATION_REPLY_DATA);
         Iteration iteration = Iteration.get(22);
         Assert.assertEquals(iteration.getName(), "sample iteration");
         Assert.assertEquals(iteration.getId(), 22);
-        Assert.assertEquals(iteration.getUrl(), "https://localhost:8080/api/rest/latest/iterations/22");
+        Assert.assertEquals(iteration.getUrl(), "https://localhost:4321/iterations/22");
+        Assert.assertEquals(iteration.getProject().getId(), 4);
     }
 
     @Test(expectedExceptions = SquashTmException.class, expectedExceptionsMessageRegExp = "request to https://localhost:4321 failed\\[404\\]: null")
