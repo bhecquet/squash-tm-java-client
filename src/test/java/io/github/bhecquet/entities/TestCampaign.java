@@ -485,11 +485,33 @@ public class TestCampaign extends SquashTMTest {
         try (MockedStatic mockedCampaignFolder = mockStatic(CampaignFolder.class);) {
 
             mockedCampaignFolder.when(() -> CampaignFolder.createCampaignFolderTree(project, "folder1/folder2")).thenReturn(campaignFolder);
-            doReturn(List.of(new Campaign("https://localhost:4321/campaigns/1", "campaign", 1, "myCampaign"))).when(project).getCampaigns();
+            doReturn(List.of(new Campaign("https://localhost:4321/campaigns/1", "campaign", 1, "myCampaign", "/project/myCampaign"),
+                    new Campaign("https://localhost:4321/campaigns/1", "campaign", 2, "myCampaign", "/project/folder1/folder2/myCampaign"))).when(project).getCampaigns();
 
-            Campaign.create(project, "myCampaign", "folder1/folder2");
+            Campaign campaign = Campaign.create(project, "myCampaign", "folder1/folder2");
+            Assert.assertEquals(campaign.getId(), 2); // check this is the campaign within the requested folder which is choosen
             verify(postRequest, never()).body(any(JSONObject.class));
             mockedCampaignFolder.verify(() -> CampaignFolder.createCampaignFolderTree(eq(project), eq("folder1/folder2")));
+        }
+    }
+
+    /**
+     * If campaign exists do not recreate it
+     */
+    @Test
+    public void testDoNotCreateCampaign2() {
+        HttpRequestWithBody postRequest = (HttpRequestWithBody) createServerMock("POST", "/campaigns", 200, "{}", "request");
+
+        try (MockedStatic mockedCampaignFolder = mockStatic(CampaignFolder.class);) {
+
+            mockedCampaignFolder.when(() -> CampaignFolder.createCampaignFolderTree(project, "folder1/folder2")).thenReturn(campaignFolder);
+            doReturn(List.of(new Campaign("https://localhost:4321/campaigns/1", "campaign", 1, "myCampaign", "/project/myCampaign"),
+                    new Campaign("https://localhost:4321/campaigns/1", "campaign", 2, "myCampaign", "/project/folder1/folder2/myCampaign"))).when(project).getCampaigns();
+
+            Campaign campaign = Campaign.create(project, "myCampaign", (String) null);
+            Assert.assertEquals(campaign.getId(), 1); // check this is the campaign within the requested folder which is choosen
+            verify(postRequest, never()).body(any(JSONObject.class));
+            mockedCampaignFolder.verify(() -> CampaignFolder.createCampaignFolderTree(eq(project), isNull()));
         }
     }
 

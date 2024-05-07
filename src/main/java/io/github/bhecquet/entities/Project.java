@@ -83,12 +83,14 @@ public class Project extends Entity {
 
     public List<Campaign> getCampaigns() {
         try {
-            JSONObject json = getPagedJSonResponse(buildGetRequest(url + CAMPAIGNS_URL + "?sort=id"));
+            JSONObject json = getPagedJSonResponse(buildGetRequest(url + CAMPAIGNS_URL + "?sort=id&fields=path,name,reference"));
 
             List<Campaign> campaigns = new ArrayList<>();
             if (json.has(FIELD_EMBEDDED)) {
                 for (JSONObject folderJson : (List<JSONObject>) json.getJSONObject(FIELD_EMBEDDED).getJSONArray(FIELD_CAMPAIGNS).toList()) {
-                    campaigns.add(Campaign.fromJson(folderJson));
+                    Campaign newCampaign = Campaign.fromJson(folderJson);
+                    newCampaign.setPath(folderJson.getString("path"));
+                    campaigns.add(newCampaign);
                 }
             }
             return campaigns;
