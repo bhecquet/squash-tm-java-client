@@ -173,12 +173,13 @@ public class TestProject extends SquashTMTest {
 
     @Test
     public void testGetCampaignsInProject() {
-        createServerMock("GET", "/projects/44/campaigns?sort=id", 200, "{" +
+        createServerMock("GET", "/projects/44/campaigns?sort=id&fields=path,name,reference", 200, "{" +
                 "  \"_embedded\" : {" +
                 "    \"campaigns\" : [ {" +
                 "      \"_type\" : \"campaign\"," +
                 "      \"id\" : 255," +
                 "      \"name\" : \"campaign 1\"," +
+                "      \"path\" : \"/project/campaign 1\"," +
                 "      \"reference\" : \"C-1\"," +
                 "      \"_links\" : {" +
                 "        \"self\" : {" +
@@ -189,6 +190,7 @@ public class TestProject extends SquashTMTest {
                 "      \"_type\" : \"campaign\"," +
                 "      \"id\" : 122," +
                 "      \"name\" : \"campaign 2\"," +
+                "      \"path\" : \"/project/campaign 2\"," +
                 "      \"reference\" : \"C-2\"," +
                 "      \"_links\" : {" +
                 "        \"self\" : {" +
@@ -199,6 +201,7 @@ public class TestProject extends SquashTMTest {
                 "      \"_type\" : \"campaign\"," +
                 "      \"id\" : 147," +
                 "      \"name\" : \"campaign 3\"," +
+                "      \"path\" : \"/project/campaign 3\"," +
                 "      \"reference\" : \"C-3\"," +
                 "      \"_links\" : {" +
                 "        \"self\" : {" +
@@ -242,7 +245,7 @@ public class TestProject extends SquashTMTest {
 
     @Test(expectedExceptions = SquashTmException.class)
     public void testGetCampaignsInProjectWithError() {
-        GetRequest getRequest = (GetRequest) createServerMock("GET", "/projects/44/campaigns?sort=id", 200, "{}", "request");
+        GetRequest getRequest = (GetRequest) createServerMock("GET", "/projects/44/campaigns?sort=id&fields=path,name,reference", 200, "{}", "request");
         when(getRequest.asPaged(any(), (Function<HttpResponse<JsonNode>, String>) any(Function.class))).thenThrow(UnirestException.class);
 
         Project project = new Project("https://localhost:4321/projects/44", "project", 44, "project");

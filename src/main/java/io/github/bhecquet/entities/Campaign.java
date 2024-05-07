@@ -41,6 +41,12 @@ public class Campaign extends Entity {
         iterations = new ArrayList<>();
     }
 
+    public Campaign(String url, String type, int id, String name, String path) {
+        super(url, type, id, name);
+        iterations = new ArrayList<>();
+        this.path = path;
+    }
+
 
     /**
      * Get list of all campaigns
@@ -110,9 +116,13 @@ public class Campaign extends Entity {
 
         CampaignFolder parentFolder = CampaignFolder.createCampaignFolderTree(project, folderPath);
 
+        if (folderPath == null) {
+            folderPath = "";
+        }
+
         // do not create campaign if it exists
         for (Campaign campaign : project.getCampaigns()) {
-            if (campaign.getName().equals(campaignName)) {
+            if (campaign.getName().equals(campaignName) && campaign.getPath().equals(String.format("/%s/%s/%s", project.getName(), folderPath, campaignName).replace("//", "/"))) {
                 return campaign;
             }
         }
@@ -189,6 +199,10 @@ public class Campaign extends Entity {
 
     public String getPath() {
         return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
     }
 
     public int getProjectId() {

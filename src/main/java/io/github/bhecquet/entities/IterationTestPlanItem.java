@@ -11,7 +11,7 @@ import java.util.List;
 
 public class IterationTestPlanItem extends Entity {
 
-    private static final String ITERATION_URL = "iterations/%d";
+    private static final String ITERATION_TEST_PLAN_ITEM_URL = "iteration-test-plan-items/%d";
     private static final String FIELD_EXECUTION_STATUS = "execution_status";
     private static final String FIELD_REFERENCED_TEST_CASE = "referenced_test_case";
     private static final String FIELD_LAST_EXECUTED_BY = "last_executed_by";
@@ -102,7 +102,7 @@ public class IterationTestPlanItem extends Entity {
 
     public static IterationTestPlanItem get(int id) {
         try {
-            return fromJson(getJSonResponse(buildGetRequest(apiRootUrl + String.format(ITERATION_URL, id))));
+            return fromJson(getJSonResponse(buildGetRequest(apiRootUrl + String.format(ITERATION_TEST_PLAN_ITEM_URL, id))));
         } catch (UnirestException e) {
             throw new SquashTmException(String.format("L'iteration %d n'existe pas", id));
         }

@@ -15,6 +15,84 @@ import static org.mockito.Mockito.when;
 
 public class TestIterationTestPlanItem extends SquashTMTest {
 
+    public static final String EXECUTION_REPLY_DATA = "{\n" +
+            "  \"_type\" : \"execution\",\n" +
+            "  \"id\" : 25,\n" +
+            "  \"name\" : \"Christmas turkey test flight\",\n" +
+            "  \"execution_order\" : 0,\n" +
+            "  \"execution_status\" : \"READY\",\n" +
+            "  \"last_executed_by\" : null,\n" +
+            "  \"last_executed_on\" : null,\n" +
+            "  \"execution_mode\" : \"MANUAL\",\n" +
+            "  \"reference\" : \"CHR-T024\",\n" +
+            "  \"dataset_label\" : \"\",\n" +
+            "  \"execution_steps\" : [ {\n" +
+            "    \"_type\" : \"execution-step\",\n" +
+            "    \"id\" : 50,\n" +
+            "    \"execution_status\" : \"READY\",\n" +
+            "    \"action\" : \"<p>arm the slingshot</p>\",\n" +
+            "    \"expected_result\" : \"<p>slingshot is armed</p>\",\n" +
+            "    \"_links\" : {\n" +
+            "      \"self\" : {\n" +
+            "        \"href\" : \"https://localhost:4321/execution-steps/50\"\n" +
+            "      }\n" +
+            "    }\n" +
+            "  }, {\n" +
+            "    \"_type\" : \"execution-step\",\n" +
+            "    \"id\" : 51,\n" +
+            "    \"execution_status\" : \"READY\",\n" +
+            "    \"action\" : \"<p>install the turkey</p>\",\n" +
+            "    \"expected_result\" : \"<p>the turkey groans and is in place</p>\",\n" +
+            "    \"_links\" : {\n" +
+            "      \"self\" : {\n" +
+            "        \"href\" : \"https://localhost:4321/execution-steps/51\"\n" +
+            "      }\n" +
+            "    }\n" +
+            "  }, {\n" +
+            "    \"_type\" : \"execution-step\",\n" +
+            "    \"id\" : 52,\n" +
+            "    \"execution_status\" : \"READY\",\n" +
+            "    \"action\" : \"<p>release the slingshot</p>\",\n" +
+            "    \"expected_result\" : \"<p>the turkey groans, at a distance though</p>\",\n" +
+            "    \"_links\" : {\n" +
+            "      \"self\" : {\n" +
+            "        \"href\" : \"https://localhost:4321/execution-steps/52\"\n" +
+            "      }\n" +
+            "    }\n" +
+            "  } ],\n" +
+            "  \"comment\" : null,\n" +
+            "  \"prerequisite\" : \"\",\n" +
+            "  \"description\" : \"<p>Will test the aerodynamic profile of a sample turkey</p>\",\n" +
+            "  \"importance\" : \"LOW\",\n" +
+            "  \"nature\" : {\n" +
+            "    \"code\" : \"NAT_PERFORMANCE_TESTING\"\n" +
+            "  },\n" +
+            "  \"type\" : {\n" +
+            "    \"code\" : \"TYP_COMPLIANCE_TESTING\"\n" +
+            "  },\n" +
+            "  \"test_case_status\" : \"WORK_IN_PROGRESS\",\n" +
+            "  \"custom_fields\" : [ ],\n" +
+            "  \"test_case_custom_fields\" : [ ],\n" +
+            "  \"attachments\" : [ ],\n" +
+            "  \"_links\" : {\n" +
+            "    \"self\" : {\n" +
+            "      \"href\" : \"https://localhost:4321/executions/25\"\n" +
+            "    },\n" +
+            "    \"project\" : {\n" +
+            "      \"href\" : \"https://localhost:4321/projects/15\"\n" +
+            "    },\n" +
+            "    \"test_plan_item\" : {\n" +
+            "      \"href\" : \"https://localhost:4321/iteration-test-plan-items/1\"\n" +
+            "    },\n" +
+            "    \"execution-steps\" : {\n" +
+            "      \"href\" : \"https://localhost:4321/executions/25/execution-steps\"\n" +
+            "    },\n" +
+            "    \"attachments\" : {\n" +
+            "      \"href\" : \"https://localhost:4321/executions/25/attachments\"\n" +
+            "    }\n" +
+            "  }\n" +
+            "}";
+
     @BeforeMethod
     public void init() {
         new Project("https://localhost:4321/projects/1", "project", 1, "project");
@@ -35,66 +113,13 @@ public class TestIterationTestPlanItem extends SquashTMTest {
 
     @Test
     public void testCreateExecution() {
-        createServerMock("POST", "/iteration-test-plan-items/1/executions", 200, "{" +
-                "  \"_type\" : \"iteration\"," +
-                "  \"id\" : 22," +
-                "  \"name\" : \"new iteration\"," +
-                "  \"reference\" : \"NEW_IT\"," +
-                "  \"description\" : \"<p>A new iteration</p>\"," +
-                "  \"parent\" : {" +
-                "    \"_type\" : \"campaign\"," +
-                "    \"id\" : 2," +
-                "    \"name\" : \"parent campaign\"," +
-                "    \"_links\" : {" +
-                "      \"self\" : {" +
-                "        \"href\" : \"https://localhost:4321/campaigns/2\"" +
-                "      }" +
-                "    }" +
-                "  }," +
-                "  \"created_by\" : \"User-A\"," +
-                "  \"created_on\" : \"2017-04-07T10:00:00.000+0000\"," +
-                "  \"last_modified_by\" : \"User-B\"," +
-                "  \"last_modified_on\" : \"2017-04-15T10:00:00.000+0000\"," +
-                "  \"scheduled_start_date\" : \"2017-04-09T10:00:00.000+0000\"," +
-                "  \"scheduled_end_date\" : \"2017-04-14T10:00:00.000+0000\"," +
-                "  \"actual_start_date\" : \"2017-04-10T10:00:00.000+0000\"," +
-                "  \"actual_end_date\" : \"2017-04-15T10:00:00.000+0000\"," +
-                "  \"actual_start_auto\" : false," +
-                "  \"actual_end_auto\" : true," +
-                "  \"custom_fields\" : [ {" +
-                "    \"code\" : \"CUF\"," +
-                "    \"label\" : \"cuf\"," +
-                "    \"value\" : \"value\"" +
-                "  } ]," +
-                "  \"test_suites\" : [ ]," +
-                "  \"attachments\" : [ ]," +
-                "  \"_links\" : {" +
-                "    \"self\" : {" +
-                "      \"href\" : \"https://localhost:4321/iterations/22\"" +
-                "    }," +
-                "    \"project\" : {" +
-                "      \"href\" : \"https://localhost:4321/projects/4\"" +
-                "    }," +
-                "    \"campaign\" : {" +
-                "      \"href\" : \"https://localhost:4321/campaigns/2\"" +
-                "    }," +
-                "    \"test-suites\" : {" +
-                "      \"href\" : \"https://localhost:4321/iterations/22/test-suites\"" +
-                "    }," +
-                "    \"test-plan\" : {" +
-                "      \"href\" : \"https://localhost:4321/iterations/22/test-plan\"" +
-                "    }," +
-                "    \"attachments\" : {" +
-                "      \"href\" : \"https://localhost:4321/iterations/22/attachments\"" +
-                "    }" +
-                "  }" +
-                "}", "request");
+        createServerMock("POST", "/iteration-test-plan-items/1/executions", 200, EXECUTION_REPLY_DATA, "request");
 
         TestCase testCase = new TestCase("https://localhost:4321/test-cases/3", "test-case", 3, "my_test");
         IterationTestPlanItem itpi = new IterationTestPlanItem("https://localhost:4321/iteration-test-plan-items/1", "test-plan-item", 1, testCase, null);
 
         TestPlanItemExecution execution = itpi.createExecution();
-        Assert.assertEquals(execution.getId(), 22);
+        Assert.assertEquals(execution.getId(), 25);
     }
 
     @Test(expectedExceptions = SquashTmException.class)
@@ -345,4 +370,55 @@ public class TestIterationTestPlanItem extends SquashTMTest {
         IterationTestPlanItem.create(iteration, new TestCase("https://localhost:4321/test-cases/25", "test-case", 25, "test_case"), null);
 
     }
+//
+//    @Test
+//    public void testCreateExecutionWithResult() {
+//        createServerMock("POST", "/iteration-test-plan-items/4/executions", 200, EXECUTION_REPLY_DATA, "request");
+//        HttpRequestWithBody patchRequest = (HttpRequestWithBody) createServerMock("PATCH", "/executions/25?fields=execution_status", 200, "{" +
+//                "  \"_type\" : \"execution\"," +
+//                "  \"id\" : 25," +
+//                "  \"execution_status\" : \"SUCCESS\"," +
+//                "  \"comment\" : \"<p>the comment was modified...</p>\"," +
+//                "  \"prerequisite\" : \"<p>... but the prerequisite was not</p>\"," +
+//                "  \"custom_fields\" : [ {" +
+//                "    \"code\" : \"TXT_STATUS\"," +
+//                "    \"label\" : \"text\"," +
+//                "    \"value\" : \"allright\"" +
+//                "  }, {" +
+//                "    \"code\" : \"TAGS_RELATED\"," +
+//                "    \"label\" : \"see also\"," +
+//                "    \"value\" : [ \"see this\", \"also that\" ]" +
+//                "  } ]," +
+//                "  \"test_case_custom_fields\" : [ {" +
+//                "    \"code\" : \"TC_TEXT\"," +
+//                "    \"label\" : \"test case cuf\"," +
+//                "    \"value\" : \"I'm from the test case\"" +
+//                "  }, {" +
+//                "    \"code\" : \"TC_LABELS\"," +
+//                "    \"label\" : \"labels\"," +
+//                "    \"value\" : [ \"was\", \"not\", \"updated\" ]" +
+//                "  } ]," +
+//                "  \"_links\" : {" +
+//                "    \"self\" : {" +
+//                "      \"href\" : \"https://localhost:4321/executions/83\"" +
+//                "    }," +
+//                "    \"project\" : {" +
+//                "      \"href\" : \"https://localhost:4321/projects/14\"" +
+//                "    }," +
+//                "    \"test_plan_item\" : {" +
+//                "      \"href\" : \"https://localhost:4321/iteration-test-plan-items/1\"" +
+//                "    }," +
+//                "    \"execution-steps\" : {" +
+//                "      \"href\" : \"https://localhost:4321/executions/83/execution-steps\"" +
+//                "    }," +
+//                "    \"attachments\" : {" +
+//                "      \"href\" : \"https://localhost:4321/executions/83/attachments\"" +
+//                "    }" +
+//                "  }" +
+//                "}", "request");
+//
+//        TestCase testCase = new TestCase("https://localhost:4321/test-cases/25", "test-case", 25, "test_case");
+//        IterationTestPlanItem iterationTestPlanItem = new IterationTestPlanItem("https://localhost:4321/iteration-test-plan-items/4/", "iteration-test-plan-items", 4, testCase, null);
+//        iterationTestPlanItem.createExecutionWithResult(TestPlanItemExecution.ExecutionStatus.SUCCESS, "ok");
+//    }
 }
