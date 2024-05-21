@@ -22,7 +22,6 @@ public class IterationTestPlanItem extends Entity {
     public static final String FIELD_REFERENCED_DATASET = "referenced_dataset";
 
     private TestCase testCase;
-    private TestCase referencedTestCase;
     private String status;
     private TestSuite testSuite;
     private String lastExecutedBy;
@@ -89,7 +88,10 @@ public class IterationTestPlanItem extends Entity {
 
     @Override
     public void completeDetails() {
-        JSONObject json = getJSonResponse(Unirest.get(String.format("%s", url)));
+        completeDetails(getJSonResponse(Unirest.get(url)));
+    }
+
+    private void completeDetails(JSONObject json) {
         executions = new ArrayList<>();
 
         lastExecutedBy = json.optString(FIELD_LAST_EXECUTED_BY, "");
@@ -102,7 +104,10 @@ public class IterationTestPlanItem extends Entity {
 
     public static IterationTestPlanItem get(int id) {
         try {
-            return fromJson(getJSonResponse(buildGetRequest(apiRootUrl + String.format(ITERATION_TEST_PLAN_ITEM_URL, id))));
+            JSONObject json = getJSonResponse(buildGetRequest(apiRootUrl + String.format(ITERATION_TEST_PLAN_ITEM_URL, id)));
+            IterationTestPlanItem iterationTestPlanItem = fromJson(json);
+            iterationTestPlanItem.completeDetails(json);
+            return iterationTestPlanItem;
         } catch (UnirestException e) {
             throw new SquashTmException(String.format("L'iteration %d n'existe pas", id));
         }
@@ -152,10 +157,6 @@ public class IterationTestPlanItem extends Entity {
 
     public void setTestSuite(TestSuite testSuite) {
         this.testSuite = testSuite;
-    }
-
-    public TestCase getReferencedTestCase() {
-        return referencedTestCase;
     }
 
     public String getStatus() {

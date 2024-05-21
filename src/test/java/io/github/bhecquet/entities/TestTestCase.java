@@ -3,15 +3,387 @@ package io.github.bhecquet.entities;
 import io.github.bhecquet.SquashTMTest;
 import io.github.bhecquet.exceptions.SquashTmException;
 import kong.unirest.core.GetRequest;
+import kong.unirest.core.HttpRequestWithBody;
 import kong.unirest.core.UnirestException;
 import kong.unirest.core.json.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class TestTestCase extends SquashTMTest {
+
+    public static final String TEST_CASE_REPLY_DATA = "{" +
+            "  \"_type\" : \"test-case\"," +
+            "  \"id\" : 12," +
+            "  \"name\" : \"walking test\"," +
+            "  \"reference\" : \"TC1\"," +
+            "  \"kind\" : \"STANDARD\"," +
+            "  \"project\" : {" +
+            "    \"_type\" : \"project\"," +
+            "    \"id\" : 14," +
+            "    \"name\" : \"sample project\"," +
+            "    \"_links\" : {" +
+            "      \"self\" : {" +
+            "        \"href\" : \"https://localhost:4321/projects/14\"" +
+            "      }" +
+            "    }" +
+            "  }," +
+            "  \"path\" : \"/sample project/sample folder/walking test\"," +
+            "  \"parent\" : {" +
+            "    \"_type\" : \"test-case-folder\"," +
+            "    \"id\" : 237," +
+            "    \"name\" : \"sample folder\"," +
+            "    \"_links\" : {" +
+            "      \"self\" : {" +
+            "        \"href\" : \"https://localhost:4321/test-case-folders/237\"" +
+            "      }" +
+            "    }" +
+            "  }," +
+            "  \"created_by\" : \"User-1\"," +
+            "  \"created_on\" : \"2017-06-15T10:00:00.000+0000\"," +
+            "  \"last_modified_by\" : \"User-1\"," +
+            "  \"last_modified_on\" : \"2017-06-15T10:00:00.000+0000\"," +
+            "  \"importance\" : \"LOW\"," +
+            "  \"status\" : \"WORK_IN_PROGRESS\"," +
+            "  \"nature\" : {" +
+            "    \"code\" : \"NAT_USER_TESTING\"" +
+            "  }," +
+            "  \"type\" : {" +
+            "    \"code\" : \"TYP_EVOLUTION_TESTING\"" +
+            "  }," +
+            "  \"prerequisite\" : \"prereq\"," +
+            "  \"description\" : \"some description\"," +
+            "  \"automated_test\" : {" +
+            "    \"_type\" : \"automated-test\"," +
+            "    \"id\" : 2," +
+            "    \"name\" : \"script_custom_field_params_all.ta\"," +
+            "    \"_links\" : {" +
+            "      \"self\" : {" +
+            "        \"href\" : \"https://localhost:4321/automated-tests/2\"" +
+            "      }" +
+            "    }" +
+            "  }," +
+            "  \"custom_fields\" : [ {" +
+            "    \"code\" : \"CF_TXT\"," +
+            "    \"label\" : \"test level\"," +
+            "    \"value\" : \"mandatory\"" +
+            "  }, {" +
+            "    \"code\" : \"CF_TAGS\"," +
+            "    \"label\" : \"see also\"," +
+            "    \"value\" : [ \"walking\", \"bipedal\" ]" +
+            "  } ]," +
+            "  \"steps\" : [ {" +
+            "    \"_type\" : \"action-step\"," +
+            "    \"id\" : 165," +
+            "    \"action\" : \"<p>move ${first_foot} forward</p>\\n\"," +
+            "    \"expected_result\" : \"<p>I just advanced by one step</p>\\n\"," +
+            "    \"index\" : 0," +
+            "    \"custom_fields\" : [ {" +
+            "      \"code\" : \"CF_TXT\"," +
+            "      \"label\" : \"test level\"," +
+            "      \"value\" : \"mandatory\"" +
+            "    }, {" +
+            "      \"code\" : \"CF_TAGS\"," +
+            "      \"label\" : \"see also\"," +
+            "      \"value\" : [ \"basic\", \"walking\" ]" +
+            "    } ]," +
+            "    \"attachments\" : [ ]," +
+            "    \"_links\" : {" +
+            "      \"self\" : {" +
+            "        \"href\" : \"https://localhost:4321/test-steps/165\"" +
+            "      }" +
+            "    }" +
+            "  }, {" +
+            "    \"_type\" : \"action-step\"," +
+            "    \"id\" : 166," +
+            "    \"action\" : \"<p>move ${second_foot}&nbsp;forward</p>\\n\"," +
+            "    \"expected_result\" : \"<p>and another step !</p>\\n\"," +
+            "    \"index\" : 1," +
+            "    \"custom_fields\" : [ {" +
+            "      \"code\" : \"CF_TXT\"," +
+            "      \"label\" : \"test level\"," +
+            "      \"value\" : \"mandatory\"" +
+            "    }, {" +
+            "      \"code\" : \"CF_TAGS\"," +
+            "      \"label\" : \"see also\"," +
+            "      \"value\" : [ \"basic\", \"walking\" ]" +
+            "    } ]," +
+            "    \"attachments\" : [ ]," +
+            "    \"_links\" : {" +
+            "      \"self\" : {" +
+            "        \"href\" : \"https://localhost:4321/test-steps/166\"" +
+            "      }" +
+            "    }" +
+            "  }, {" +
+            "    \"_type\" : \"call-step\"," +
+            "    \"id\" : 167," +
+            "    \"delegate_parameter_values\" : false," +
+            "    \"called_test_case\" : {" +
+            "      \"_type\" : \"test-case\"," +
+            "      \"id\" : 239," +
+            "      \"name\" : \"victory dance\"," +
+            "      \"_links\" : {" +
+            "        \"self\" : {" +
+            "          \"href\" : \"https://localhost:4321/test-cases/239\"" +
+            "        }" +
+            "      }" +
+            "    }," +
+            "    \"called_dataset\" : null," +
+            "    \"index\" : 2," +
+            "    \"_links\" : {" +
+            "      \"self\" : {" +
+            "        \"href\" : \"https://localhost:4321/test-steps/167\"" +
+            "      }" +
+            "    }" +
+            "  }]," +
+            "  \"parameters\" : [ {" +
+            "    \"_type\" : \"parameter\"," +
+            "    \"id\" : 1," +
+            "    \"name\" : \"first_foot\"," +
+            "    \"_links\" : {" +
+            "      \"self\" : {" +
+            "        \"href\" : \"https://localhost:4321/parameters/1\"" +
+            "      }" +
+            "    }" +
+            "  }, {" +
+            "    \"_type\" : \"parameter\"," +
+            "    \"id\" : 2," +
+            "    \"name\" : \"second_foot\"," +
+            "    \"_links\" : {" +
+            "      \"self\" : {" +
+            "        \"href\" : \"https://localhost:4321/parameters/2\"" +
+            "      }" +
+            "    }" +
+            "  } ]," +
+            "  \"datasets\" : [ {" +
+            "    \"_type\" : \"dataset\"," +
+            "    \"id\" : 1," +
+            "    \"name\" : \"right handed people\"," +
+            "    \"_links\" : {" +
+            "      \"self\" : {" +
+            "        \"href\" : \"https://localhost:4321/datasets/1\"" +
+            "      }" +
+            "    }" +
+            "  }, {" +
+            "    \"_type\" : \"dataset\"," +
+            "    \"id\" : 2," +
+            "    \"name\" : \"left handed people\"," +
+            "    \"_links\" : {" +
+            "      \"self\" : {" +
+            "        \"href\" : \"https://localhost:4321/datasets/2\"" +
+            "      }" +
+            "    }" +
+            "  } ]," +
+            "  \"language\" : \"\"," +
+            "  \"script\" : \"\"," +
+            "  \"verified_requirements\" : [ {" +
+            "    \"_type\" : \"requirement-version\"," +
+            "    \"id\" : 255," +
+            "    \"name\" : \"Must have legs\"," +
+            "    \"_links\" : {" +
+            "      \"self\" : {" +
+            "        \"href\" : \"https://localhost:4321/requirement-versions/255\"" +
+            "      }" +
+            "    }" +
+            "  }, {" +
+            "    \"_type\" : \"unauthorized-resource\"," +
+            "    \"resource_type\" : \"requirement-version\"," +
+            "    \"resource_id\" : 256," +
+            "    \"_links\" : {" +
+            "      \"self\" : {" +
+            "        \"href\" : \"https://localhost:4321/requirement-versions/256\"" +
+            "      }" +
+            "    }" +
+            "  } ]," +
+            "  \"attachments\" : [ ]," +
+            "  \"_links\" : {" +
+            "    \"self\" : {" +
+            "      \"href\" : \"https://localhost:4321/test-cases/12\"" +
+            "    }," +
+            "    \"project\" : {" +
+            "      \"href\" : \"https://localhost:4321/projects/14\"" +
+            "    }," +
+            "    \"steps\" : {" +
+            "      \"href\" : \"https://localhost:4321/test-cases/12/steps\"" +
+            "    }," +
+            "    \"parameters\" : {" +
+            "      \"href\" : \"https://localhost:4321/test-cases/12/parameters\"" +
+            "    }," +
+            "    \"datasets\" : {" +
+            "      \"href\" : \"https://localhost:4321/test-cases/12/datasets\"" +
+            "    }," +
+            "    \"attachments\" : {" +
+            "      \"href\" : \"https://localhost:4321/test-cases/12/attachments\"" +
+            "    }" +
+            "  }" +
+            "}";
+
+    public static final String TEST_CASE_REPLY_DATA2 = "{" +
+            "  \"_type\" : \"test-case\"," +
+            "  \"id\" : 239," +
+            "  \"name\" : \"walking testé\"," +
+            "  \"reference\" : \"TC2\"," +
+            "  \"kind\" : \"STANDARD\"," +
+            "  \"project\" : {" +
+            "    \"_type\" : \"project\"," +
+            "    \"id\" : 14," +
+            "    \"name\" : \"sample project\"," +
+            "    \"_links\" : {" +
+            "      \"self\" : {" +
+            "        \"href\" : \"https://localhost:4321/projects/14\"" +
+            "      }" +
+            "    }" +
+            "  }," +
+            "  \"path\" : \"/sample project/sample folder/walking test2\"," +
+            "  \"parent\" : {" +
+            "    \"_type\" : \"test-case-folder\"," +
+            "    \"id\" : 237," +
+            "    \"name\" : \"sample folder\"," +
+            "    \"_links\" : {" +
+            "      \"self\" : {" +
+            "        \"href\" : \"https://localhost:4321/test-case-folders/237\"" +
+            "      }" +
+            "    }" +
+            "  }," +
+            "  \"created_by\" : \"User-1\"," +
+            "  \"created_on\" : \"2017-06-15T10:00:00.000+0000\"," +
+            "  \"last_modified_by\" : \"User-1\"," +
+            "  \"last_modified_on\" : \"2017-06-15T10:00:00.000+0000\"," +
+            "  \"importance\" : \"LOW\"," +
+            "  \"status\" : \"WORK_IN_PROGRESS\"," +
+            "  \"nature\" : {" +
+            "    \"code\" : \"NAT_USER_TESTING\"" +
+            "  }," +
+            "  \"type\" : {" +
+            "    \"code\" : \"TYP_EVOLUTION_TESTING\"" +
+            "  }," +
+            "  \"prerequisite\" : \"prereq\"," +
+            "  \"description\" : \"some description\"," +
+            "  \"automated_test\" : {" +
+            "    \"_type\" : \"automated-test\"," +
+            "    \"id\" : 2," +
+            "    \"name\" : \"script_custom_field_params_all.ta\"," +
+            "    \"_links\" : {" +
+            "      \"self\" : {" +
+            "        \"href\" : \"https://localhost:4321/automated-tests/2\"" +
+            "      }" +
+            "    }" +
+            "  }," +
+            "  \"custom_fields\" : [ {" +
+            "    \"code\" : \"CF_TXT\"," +
+            "    \"label\" : \"test level\"," +
+            "    \"value\" : \"mandatory\"" +
+            "  }, {" +
+            "    \"code\" : \"CF_TAGS\"," +
+            "    \"label\" : \"see also\"," +
+            "    \"value\" : [ \"walking\", \"bipedal\" ]" +
+            "  } ]," +
+            "  \"steps\" : [ {" +
+            "    \"_type\" : \"action-step\"," +
+            "    \"id\" : 165," +
+            "    \"action\" : \"<p>move ${first_foot} forward</p>\\n\"," +
+            "    \"expected_result\" : \"<p>I just advanced by one step</p>\\n\"," +
+            "    \"index\" : 0," +
+            "    \"custom_fields\" : [ {" +
+            "      \"code\" : \"CF_TXT\"," +
+            "      \"label\" : \"test level\"," +
+            "      \"value\" : \"mandatory\"" +
+            "    }, {" +
+            "      \"code\" : \"CF_TAGS\"," +
+            "      \"label\" : \"see also\"," +
+            "      \"value\" : [ \"basic\", \"walking\" ]" +
+            "    } ]," +
+            "    \"attachments\" : [ ]," +
+            "    \"_links\" : {" +
+            "      \"self\" : {" +
+            "        \"href\" : \"https://localhost:4321/test-steps/165\"" +
+            "      }" +
+            "    }" +
+            "  } ]," +
+            "  \"parameters\" : [ {" +
+            "    \"_type\" : \"parameter\"," +
+            "    \"id\" : 1," +
+            "    \"name\" : \"first_foot\"," +
+            "    \"_links\" : {" +
+            "      \"self\" : {" +
+            "        \"href\" : \"https://localhost:4321/parameters/1\"" +
+            "      }" +
+            "    }" +
+            "  }, {" +
+            "    \"_type\" : \"parameter\"," +
+            "    \"id\" : 2," +
+            "    \"name\" : \"second_foot\"," +
+            "    \"_links\" : {" +
+            "      \"self\" : {" +
+            "        \"href\" : \"https://localhost:4321/parameters/2\"" +
+            "      }" +
+            "    }" +
+            "  } ]," +
+            "  \"datasets\" : [ {" +
+            "    \"_type\" : \"dataset\"," +
+            "    \"id\" : 1," +
+            "    \"name\" : \"right handed people\"," +
+            "    \"_links\" : {" +
+            "      \"self\" : {" +
+            "        \"href\" : \"https://localhost:4321/datasets/1\"" +
+            "      }" +
+            "    }" +
+            "  }, {" +
+            "    \"_type\" : \"dataset\"," +
+            "    \"id\" : 2," +
+            "    \"name\" : \"left handed people\"," +
+            "    \"_links\" : {" +
+            "      \"self\" : {" +
+            "        \"href\" : \"https://localhost:4321/datasets/2\"" +
+            "      }" +
+            "    }" +
+            "  } ]," +
+            "  \"language\" : \"\"," +
+            "  \"script\" : \"\"," +
+            "  \"verified_requirements\" : [ {" +
+            "    \"_type\" : \"requirement-version\"," +
+            "    \"id\" : 255," +
+            "    \"name\" : \"Must have legs\"," +
+            "    \"_links\" : {" +
+            "      \"self\" : {" +
+            "        \"href\" : \"https://localhost:4321/requirement-versions/255\"" +
+            "      }" +
+            "    }" +
+            "  }, {" +
+            "    \"_type\" : \"unauthorized-resource\"," +
+            "    \"resource_type\" : \"requirement-version\"," +
+            "    \"resource_id\" : 256," +
+            "    \"_links\" : {" +
+            "      \"self\" : {" +
+            "        \"href\" : \"https://localhost:4321/requirement-versions/256\"" +
+            "      }" +
+            "    }" +
+            "  } ]," +
+            "  \"attachments\" : [ ]," +
+            "  \"_links\" : {" +
+            "    \"self\" : {" +
+            "      \"href\" : \"https://localhost:4321/test-cases/239\"" +
+            "    }," +
+            "    \"project\" : {" +
+            "      \"href\" : \"https://localhost:4321/projects/14\"" +
+            "    }," +
+            "    \"steps\" : {" +
+            "      \"href\" : \"https://localhost:4321/test-cases/239/steps\"" +
+            "    }," +
+            "    \"parameters\" : {" +
+            "      \"href\" : \"https://localhost:4321/test-cases/239/parameters\"" +
+            "    }," +
+            "    \"datasets\" : {" +
+            "      \"href\" : \"https://localhost:4321/test-cases/239/datasets\"" +
+            "    }," +
+            "    \"attachments\" : {" +
+            "      \"href\" : \"https://localhost:4321/test-cases/239/attachments\"" +
+            "    }" +
+            "  }" +
+            "}";
 
     @BeforeMethod
     public void init() {
@@ -20,232 +392,7 @@ public class TestTestCase extends SquashTMTest {
 
     @Test
     public void testExists() {
-        createServerMock("GET", "/test-cases/12", 200, "{\r\n" +
-                "  \"_type\" : \"test-case\",\r\n" +
-                "  \"id\" : 12,\r\n" +
-                "  \"name\" : \"walking test\",\r\n" +
-                "  \"reference\" : \"TC1\",\r\n" +
-                "  \"kind\" : \"STANDARD\",\r\n" +
-                "  \"project\" : {\r\n" +
-                "    \"_type\" : \"project\",\r\n" +
-                "    \"id\" : 14,\r\n" +
-                "    \"name\" : \"sample project\",\r\n" +
-                "    \"_links\" : {\r\n" +
-                "      \"self\" : {\r\n" +
-                "        \"href\" : \"https://localhost:4321/projects/14\"\r\n" +
-                "      }\r\n" +
-                "    }\r\n" +
-                "  },\r\n" +
-                "  \"path\" : \"/sample project/sample folder/walking test\",\r\n" +
-                "  \"parent\" : {\r\n" +
-                "    \"_type\" : \"test-case-folder\",\r\n" +
-                "    \"id\" : 237,\r\n" +
-                "    \"name\" : \"sample folder\",\r\n" +
-                "    \"_links\" : {\r\n" +
-                "      \"self\" : {\r\n" +
-                "        \"href\" : \"https://localhost:4321/test-case-folders/237\"\r\n" +
-                "      }\r\n" +
-                "    }\r\n" +
-                "  },\r\n" +
-                "  \"created_by\" : \"User-1\",\r\n" +
-                "  \"created_on\" : \"2017-06-15T10:00:00.000+0000\",\r\n" +
-                "  \"last_modified_by\" : \"User-1\",\r\n" +
-                "  \"last_modified_on\" : \"2017-06-15T10:00:00.000+0000\",\r\n" +
-                "  \"importance\" : \"LOW\",\r\n" +
-                "  \"status\" : \"WORK_IN_PROGRESS\",\r\n" +
-                "  \"nature\" : {\r\n" +
-                "    \"code\" : \"NAT_USER_TESTING\"\r\n" +
-                "  },\r\n" +
-                "  \"type\" : {\r\n" +
-                "    \"code\" : \"TYP_EVOLUTION_TESTING\"\r\n" +
-                "  },\r\n" +
-                "  \"prerequisite\" : \"<p>You must have legs with feet attached to them (one per leg)</p>\\n\",\r\n" +
-                "  \"description\" : \"<p>check that you can walk through the API (literally)</p>\\n\",\r\n" +
-                "  \"automated_test\" : {\r\n" +
-                "    \"_type\" : \"automated-test\",\r\n" +
-                "    \"id\" : 2,\r\n" +
-                "    \"name\" : \"script_custom_field_params_all.ta\",\r\n" +
-                "    \"_links\" : {\r\n" +
-                "      \"self\" : {\r\n" +
-                "        \"href\" : \"https://localhost:4321/automated-tests/2\"\r\n" +
-                "      }\r\n" +
-                "    }\r\n" +
-                "  },\r\n" +
-                "  \"custom_fields\" : [ {\r\n" +
-                "    \"code\" : \"CF_TXT\",\r\n" +
-                "    \"label\" : \"test level\",\r\n" +
-                "    \"value\" : \"mandatory\"\r\n" +
-                "  }, {\r\n" +
-                "    \"code\" : \"CF_TAGS\",\r\n" +
-                "    \"label\" : \"see also\",\r\n" +
-                "    \"value\" : [ \"walking\", \"bipedal\" ]\r\n" +
-                "  } ],\r\n" +
-                "  \"steps\" : [ {\r\n" +
-                "    \"_type\" : \"action-step\",\r\n" +
-                "    \"id\" : 165,\r\n" +
-                "    \"action\" : \"<p>move ${first_foot} forward</p>\\n\",\r\n" +
-                "    \"expected_result\" : \"<p>I just advanced by one step</p>\\n\",\r\n" +
-                "    \"index\" : 0,\r\n" +
-                "    \"custom_fields\" : [ {\r\n" +
-                "      \"code\" : \"CF_TXT\",\r\n" +
-                "      \"label\" : \"test level\",\r\n" +
-                "      \"value\" : \"mandatory\"\r\n" +
-                "    }, {\r\n" +
-                "      \"code\" : \"CF_TAGS\",\r\n" +
-                "      \"label\" : \"see also\",\r\n" +
-                "      \"value\" : [ \"basic\", \"walking\" ]\r\n" +
-                "    } ],\r\n" +
-                "    \"attachments\" : [ ],\r\n" +
-                "    \"_links\" : {\r\n" +
-                "      \"self\" : {\r\n" +
-                "        \"href\" : \"https://localhost:4321/test-steps/165\"\r\n" +
-                "      }\r\n" +
-                "    }\r\n" +
-                "  }, {\r\n" +
-                "    \"_type\" : \"action-step\",\r\n" +
-                "    \"id\" : 166,\r\n" +
-                "    \"action\" : \"<p>move ${second_foot}&nbsp;forward</p>\\n\",\r\n" +
-                "    \"expected_result\" : \"<p>and another step !</p>\\n\",\r\n" +
-                "    \"index\" : 1,\r\n" +
-                "    \"custom_fields\" : [ {\r\n" +
-                "      \"code\" : \"CF_TXT\",\r\n" +
-                "      \"label\" : \"test level\",\r\n" +
-                "      \"value\" : \"mandatory\"\r\n" +
-                "    }, {\r\n" +
-                "      \"code\" : \"CF_TAGS\",\r\n" +
-                "      \"label\" : \"see also\",\r\n" +
-                "      \"value\" : [ \"basic\", \"walking\" ]\r\n" +
-                "    } ],\r\n" +
-                "    \"attachments\" : [ ],\r\n" +
-                "    \"_links\" : {\r\n" +
-                "      \"self\" : {\r\n" +
-                "        \"href\" : \"https://localhost:4321/test-steps/166\"\r\n" +
-                "      }\r\n" +
-                "    }\r\n" +
-                "  }, {\r\n" +
-                "    \"_type\" : \"call-step\",\r\n" +
-                "    \"id\" : 167,\r\n" +
-                "    \"delegate_parameter_values\" : false,\r\n" +
-                "    \"called_test_case\" : {\r\n" +
-                "      \"_type\" : \"test-case\",\r\n" +
-                "      \"id\" : 239,\r\n" +
-                "      \"name\" : \"victory dance\",\r\n" +
-                "      \"_links\" : {\r\n" +
-                "        \"self\" : {\r\n" +
-                "          \"href\" : \"https://localhost:4321/test-cases/239\"\r\n" +
-                "        }\r\n" +
-                "      }\r\n" +
-                "    },\r\n" +
-                "    \"called_dataset\" : null,\r\n" +
-                "    \"index\" : 2,\r\n" +
-                "    \"_links\" : {\r\n" +
-                "      \"self\" : {\r\n" +
-                "        \"href\" : \"https://localhost:4321/test-steps/167\"\r\n" +
-                "      }\r\n" +
-                "    }\r\n" +
-                "  }, {\r\n" +
-                "    \"_type\" : \"call-step\",\r\n" +
-                "    \"id\" : 168,\r\n" +
-                "    \"delegate_parameter_values\" : false,\r\n" +
-                "    \"called_test_case\" : {\r\n" +
-                "      \"_type\" : \"unauthorized-resource\",\r\n" +
-                "      \"resource_type\" : \"test-case\",\r\n" +
-                "      \"resource_id\" : 240,\r\n" +
-                "      \"_links\" : {\r\n" +
-                "        \"self\" : {\r\n" +
-                "          \"href\" : \"https://localhost:4321/test-cases/240\"\r\n" +
-                "        }\r\n" +
-                "      }\r\n" +
-                "    },\r\n" +
-                "    \"called_dataset\" : null,\r\n" +
-                "    \"index\" : 3,\r\n" +
-                "    \"_links\" : {\r\n" +
-                "      \"self\" : {\r\n" +
-                "        \"href\" : \"https://localhost:4321/test-steps/168\"\r\n" +
-                "      }\r\n" +
-                "    }\r\n" +
-                "  } ],\r\n" +
-                "  \"parameters\" : [ {\r\n" +
-                "    \"_type\" : \"parameter\",\r\n" +
-                "    \"id\" : 1,\r\n" +
-                "    \"name\" : \"first_foot\",\r\n" +
-                "    \"_links\" : {\r\n" +
-                "      \"self\" : {\r\n" +
-                "        \"href\" : \"https://localhost:4321/parameters/1\"\r\n" +
-                "      }\r\n" +
-                "    }\r\n" +
-                "  }, {\r\n" +
-                "    \"_type\" : \"parameter\",\r\n" +
-                "    \"id\" : 2,\r\n" +
-                "    \"name\" : \"second_foot\",\r\n" +
-                "    \"_links\" : {\r\n" +
-                "      \"self\" : {\r\n" +
-                "        \"href\" : \"https://localhost:4321/parameters/2\"\r\n" +
-                "      }\r\n" +
-                "    }\r\n" +
-                "  } ],\r\n" +
-                "  \"datasets\" : [ {\r\n" +
-                "    \"_type\" : \"dataset\",\r\n" +
-                "    \"id\" : 1,\r\n" +
-                "    \"name\" : \"right handed people\",\r\n" +
-                "    \"_links\" : {\r\n" +
-                "      \"self\" : {\r\n" +
-                "        \"href\" : \"https://localhost:4321/datasets/1\"\r\n" +
-                "      }\r\n" +
-                "    }\r\n" +
-                "  }, {\r\n" +
-                "    \"_type\" : \"dataset\",\r\n" +
-                "    \"id\" : 2,\r\n" +
-                "    \"name\" : \"left handed people\",\r\n" +
-                "    \"_links\" : {\r\n" +
-                "      \"self\" : {\r\n" +
-                "        \"href\" : \"https://localhost:4321/datasets/2\"\r\n" +
-                "      }\r\n" +
-                "    }\r\n" +
-                "  } ],\r\n" +
-                "  \"language\" : \"\",\r\n" +
-                "  \"script\" : \"\",\r\n" +
-                "  \"verified_requirements\" : [ {\r\n" +
-                "    \"_type\" : \"requirement-version\",\r\n" +
-                "    \"id\" : 255,\r\n" +
-                "    \"name\" : \"Must have legs\",\r\n" +
-                "    \"_links\" : {\r\n" +
-                "      \"self\" : {\r\n" +
-                "        \"href\" : \"https://localhost:4321/requirement-versions/255\"\r\n" +
-                "      }\r\n" +
-                "    }\r\n" +
-                "  }, {\r\n" +
-                "    \"_type\" : \"unauthorized-resource\",\r\n" +
-                "    \"resource_type\" : \"requirement-version\",\r\n" +
-                "    \"resource_id\" : 256,\r\n" +
-                "    \"_links\" : {\r\n" +
-                "      \"self\" : {\r\n" +
-                "        \"href\" : \"https://localhost:4321/requirement-versions/256\"\r\n" +
-                "      }\r\n" +
-                "    }\r\n" +
-                "  } ],\r\n" +
-                "  \"attachments\" : [ ],\r\n" +
-                "  \"_links\" : {\r\n" +
-                "    \"self\" : {\r\n" +
-                "      \"href\" : \"https://localhost:4321/test-cases/238\"\r\n" +
-                "    },\r\n" +
-                "    \"project\" : {\r\n" +
-                "      \"href\" : \"https://localhost:4321/projects/14\"\r\n" +
-                "    },\r\n" +
-                "    \"steps\" : {\r\n" +
-                "      \"href\" : \"https://localhost:4321/test-cases/238/steps\"\r\n" +
-                "    },\r\n" +
-                "    \"parameters\" : {\r\n" +
-                "      \"href\" : \"https://localhost:4321/test-cases/238/parameters\"\r\n" +
-                "    },\r\n" +
-                "    \"datasets\" : {\r\n" +
-                "      \"href\" : \"https://localhost:4321/test-cases/238/datasets\"\r\n" +
-                "    },\r\n" +
-                "    \"attachments\" : {\r\n" +
-                "      \"href\" : \"https://localhost:4321/test-cases/238/attachments\"\r\n" +
-                "    }\r\n" +
-                "  }\r\n" +
-                "}");
+        createServerMock("GET", "/test-cases/12", 200, TEST_CASE_REPLY_DATA);
         Assert.assertEquals(TestCase.get(12).getId(), 12);
     }
 
@@ -254,9 +401,9 @@ public class TestTestCase extends SquashTMTest {
      */
     @Test(expectedExceptions = SquashTmException.class)
     public void testNotExist() {
-        createServerMock("GET", "/test-cases/12", 404, "{\r\n" +
-                "    \"exception\": \"javax.persistence.EntityNotFoundException\",\r\n" +
-                "    \"message\": \"Unable to find org.squashtest.tm.domain.testcase.TestCase with id 23\"\r\n" +
+        createServerMock("GET", "/test-cases/12", 404, "{" +
+                "    \"exception\": \"javax.persistence.EntityNotFoundException\"," +
+                "    \"message\": \"Unable to find org.squashtest.tm.domain.testcase.TestCase with id 23\"" +
                 "}");
         TestCase.get(12);
     }
@@ -301,4 +448,69 @@ public class TestTestCase extends SquashTMTest {
         TestCase.fromJson(json);
     }
 
+    @Test
+    public void testCompleteDetails() {
+        createServerMock("GET", "/test-cases/12", 200, TEST_CASE_REPLY_DATA);
+        createServerMock("GET", "/test-cases/239", 200, TEST_CASE_REPLY_DATA2);
+        createServerMock("GET", "/test-cases/240", 200, TEST_CASE_REPLY_DATA2);
+
+        TestCase testCase = new TestCase("https://localhost:4321/test-cases/12", "test-case", 12, "walking test");
+        testCase.completeDetails();
+
+        Assert.assertEquals(testCase.getId(), 12);
+        Assert.assertEquals(testCase.getAutomatedTestReference(), "");
+        Assert.assertEquals(testCase.getPath(), "/sample project/sample folder/walking test");
+        Assert.assertEquals(testCase.getDescription(), "some description");
+        Assert.assertEquals(testCase.getProjectId(), 14);
+        Assert.assertEquals(testCase.getProjectName(), "sample project");
+        Assert.assertEquals(testCase.getAuthor(), "User-1");
+        Assert.assertEquals(testCase.getNature(), "NAT_USER_TESTING");
+        Assert.assertEquals(testCase.getTctype(), "TYP_EVOLUTION_TESTING");
+        Assert.assertEquals(testCase.getReference(), "TC1");
+        Assert.assertEquals(testCase.getStatus(), "WORK_IN_PROGRESS");
+        Assert.assertEquals(testCase.getImportance(), "LOW");
+        Assert.assertEquals(testCase.getPrerequisite(), "prereq");
+        Assert.assertEquals(testCase.getRequirementNumber(), 2);
+        Assert.assertEquals(testCase.getTestSteps().size(), 3);
+        Assert.assertEquals(testCase.getCustomFields().size(), 2);
+        Assert.assertEquals(testCase.getCustomFields().get(0).getCode(), "CF_TXT");
+    }
+
+    @Test
+    public void testCompleteDetails2() {
+        createServerMock("GET", "/test-cases/12", 200, TEST_CASE_REPLY_DATA.replace("\"id\" : 12,", "\"id\" : 12,\"automated_test_reference\" : \"repo01/src/resources/script_custom_field_params_all.ta#Test_case_238\","));
+        createServerMock("GET", "/test-cases/239", 200, TEST_CASE_REPLY_DATA2);
+        createServerMock("GET", "/test-cases/240", 200, TEST_CASE_REPLY_DATA2);
+
+        TestCase testCase = new TestCase("https://localhost:4321/test-cases/12", "test-case", 12, "walking test");
+        testCase.completeDetails();
+
+        Assert.assertEquals(testCase.getId(), 12);
+        Assert.assertEquals(testCase.getAutomatedTestReference(), "repo01/src/resources/script_custom_field_params_all.ta#Test_case_238");
+        Assert.assertEquals(testCase.getPath(), "/sample project/sample folder/walking test");
+        Assert.assertEquals(testCase.getDescription(), "some description");
+        Assert.assertEquals(testCase.getProjectId(), 14);
+        Assert.assertEquals(testCase.getProjectName(), "sample project");
+        Assert.assertEquals(testCase.getAuthor(), "User-1");
+        Assert.assertEquals(testCase.getNature(), "NAT_USER_TESTING");
+        Assert.assertEquals(testCase.getTctype(), "TYP_EVOLUTION_TESTING");
+        Assert.assertEquals(testCase.getReference(), "TC1");
+        Assert.assertEquals(testCase.getStatus(), "WORK_IN_PROGRESS");
+        Assert.assertEquals(testCase.getImportance(), "LOW");
+        Assert.assertEquals(testCase.getPrerequisite(), "prereq");
+        Assert.assertEquals(testCase.getRequirementNumber(), 2);
+        Assert.assertEquals(testCase.getTestSteps().size(), 3);
+        Assert.assertEquals(testCase.getCustomFields().size(), 2);
+        Assert.assertEquals(testCase.getCustomFields().get(0).getCode(), "CF_TXT");
+    }
+
+    @Test
+    public void testUpdateCustomFields() {
+        HttpRequestWithBody patchRequest = (HttpRequestWithBody) createServerMock("PATCH", "/test-cases/12", 200, TEST_CASE_REPLY_DATA);
+
+        TestCase testCase = new TestCase("https://localhost:4321/test-cases/12", "test-case", 12, "walking test");
+        testCase.updateCustomField("foo", "bar");
+
+        verify(patchRequest).body(new JSONObject("{\"_type\":\"test-case\",\"custom_fields\":[{\"value\":\"bar\",\"code\":\"foo\"}]}"));
+    }
 }
