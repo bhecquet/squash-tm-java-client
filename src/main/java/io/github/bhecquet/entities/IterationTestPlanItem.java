@@ -74,13 +74,15 @@ public class IterationTestPlanItem extends Entity {
             JSONObject referencedTestCase = json.optJSONObject(FIELD_REFERENCED_TEST_CASE);
             JSONObject referencedDataset = json.optJSONObject(FIELD_REFERENCED_DATASET);
 
-            return new IterationTestPlanItem(
+            IterationTestPlanItem iterationTestPlanItem = new IterationTestPlanItem(
                     json.getJSONObject("_links").getJSONObject("self").getString("href"),
                     json.getString(FIELD_TYPE),
                     json.getInt(FIELD_ID),
                     referencedTestCase == null ? null : TestCase.fromJson(referencedTestCase),
                     referencedDataset == null ? null : Dataset.fromJson(referencedDataset)
             );
+            iterationTestPlanItem.status = json.optString(FIELD_EXECUTION_STATUS, null);
+            return iterationTestPlanItem;
         } catch (JSONException e) {
             throw new SquashTmException(String.format("Cannot create IterationTestPlanItem from JSON [%s] data: %s", json.toString(), e.getMessage()));
         }

@@ -36,22 +36,27 @@ public class TestSuite extends Entity {
 
     @Override
     public void completeDetails() {
+        completeDetails(getJSonResponse(Unirest.get(url)));
+    }
+
+    private void completeDetails(JSONObject json) {
         iterationTestPlanItems = new ArrayList<>();
-        JSONObject json = getJSonResponse(Unirest.get(String.format("%s", url)));
 
         for (JSONObject jsonIterationTestPlanItem : (List<JSONObject>) json.getJSONArray(FIELD_TEST_PLAN).toList()) {
             IterationTestPlanItem item = IterationTestPlanItem.fromJson(jsonIterationTestPlanItem);
             item.setTestSuite(this);
             iterationTestPlanItems.add(item);
         }
-
     }
 
     public static TestSuite get(int id) {
         try {
-            return fromJson(getJSonResponse(buildGetRequest(apiRootUrl + String.format(ITERATION_URL, id))));
+            JSONObject json = getJSonResponse(buildGetRequest(apiRootUrl + String.format(ITERATION_URL, id)));
+            TestSuite testSuite = fromJson(json);
+            testSuite.completeDetails(json);
+            return testSuite;
         } catch (UnirestException e) {
-            throw new SquashTmException(String.format("Iteration %d does not exist", id));
+            throw new SquashTmException(String.format("Test suite %d does not exist", id));
         }
     }
 
