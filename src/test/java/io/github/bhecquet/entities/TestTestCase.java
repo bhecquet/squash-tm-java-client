@@ -6,9 +6,13 @@ import kong.unirest.core.GetRequest;
 import kong.unirest.core.HttpRequestWithBody;
 import kong.unirest.core.UnirestException;
 import kong.unirest.core.json.JSONObject;
+import org.mockito.ArgumentCaptor;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import java.util.List;
+import java.util.Map;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -505,12 +509,35 @@ public class TestTestCase extends SquashTMTest {
     }
 
     @Test
-    public void testUpdateCustomFields() {
+    public void testUpdateCustomField() {
         HttpRequestWithBody patchRequest = (HttpRequestWithBody) createServerMock("PATCH", "/test-cases/12", 200, TEST_CASE_REPLY_DATA);
 
         TestCase testCase = new TestCase("https://localhost:4321/test-cases/12", "test-case", 12, "walking test");
         testCase.updateCustomField("foo", "bar");
 
         verify(patchRequest).body(new JSONObject("{\"_type\":\"test-case\",\"custom_fields\":[{\"value\":\"bar\",\"code\":\"foo\"}]}"));
+    }
+
+    @Test
+    public void testUpdateCustomFields() {
+        HttpRequestWithBody patchRequest = (HttpRequestWithBody) createServerMock("PATCH", "/test-cases/12", 200, TEST_CASE_REPLY_DATA);
+
+        TestCase testCase = new TestCase("https://localhost:4321/test-cases/12", "test-case", 12, "walking test");
+        testCase.updateCustomFields(Map.of("foo", "bar", "foo2", "bar2"));
+        ArgumentCaptor<JSONObject> jsonArgument = ArgumentCaptor.forClass(JSONObject.class);
+        verify(patchRequest).body(jsonArgument.capture());
+
+        // check all custom fields have been sent
+        Assert.assertEquals(jsonArgument.getValue().getJSONArray("custom_fields").length(), 2);
+    }
+
+    @Test
+    public void testUpdateCustomFieldsWithTags() {
+        HttpRequestWithBody patchRequest = (HttpRequestWithBody) createServerMock("PATCH", "/test-cases/12", 200, TEST_CASE_REPLY_DATA);
+
+        TestCase testCase = new TestCase("https://localhost:4321/test-cases/12", "test-case", 12, "walking test");
+        testCase.updateCustomFields(Map.of("tags", List.of("tag1", "tag2")));
+
+        verify(patchRequest).body(new JSONObject("{\"_type\":\"test-case\",\"custom_fields\":[{\"code\":\"tags\",\"value\":[\"tag1\",\"tag2\"]}]}"));
     }
 }

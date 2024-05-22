@@ -1,6 +1,7 @@
 package io.github.bhecquet;
 
 import io.github.bhecquet.entities.Campaign;
+import io.github.bhecquet.entities.Project;
 import org.testng.SkipException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -25,6 +26,9 @@ public class TestRealSquashInstance {
 
     @Test
     public void testCreateCampaign() {
-        Campaign campaign = Campaign.create(api.getCurrentProject(), "testCampaign", (String) null);
+        Project project = api.getCurrentProject();
+        Campaign campaign = Campaign.create(project, "myCampaign", "foo/bar");
+        io.github.bhecquet.entities.Iteration iteration1 = io.github.bhecquet.entities.Iteration.create(campaign, "myIteration");
+        System.out.println(iteration1.getId());
     }
 }

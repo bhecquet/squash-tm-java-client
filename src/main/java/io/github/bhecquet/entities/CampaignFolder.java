@@ -59,7 +59,7 @@ public class CampaignFolder extends Entity {
             if (!json.isEmpty()) {
                 // we request for only one project, so take the first element
                 for (JSONObject folderJson : (List<JSONObject>) json.getJSONObject(0).getJSONArray("folders").toList()) {
-                    campaignFolders.addAll(readCampaignFolderFromTree(folderJson));
+                    campaignFolders.addAll(readCampaignFolderFromTree(folderJson, project, null));
                 }
             }
 
@@ -68,15 +68,20 @@ public class CampaignFolder extends Entity {
             throw new SquashTmException("Cannot get all campaign folders", e);
         }
     }
-
-    private static List<CampaignFolder> readCampaignFolderFromTree(JSONObject folderJson) {
+    
+    private static List<CampaignFolder> readCampaignFolderFromTree(JSONObject folderJson, Project project, Entity parent) {
         List<CampaignFolder> campaignFolders = new ArrayList<>();
-        CampaignFolder campaignFolder = CampaignFolder.get(folderJson.getInt("id"));
+        CampaignFolder campaignFolder = new CampaignFolder(folderJson.getString("url"),
+                folderJson.getInt(FIELD_ID),
+                folderJson.getString(FIELD_NAME),
+                project,
+                parent);
+
         campaignFolders.add(campaignFolder);
 
         // add children
         for (Object childJson : folderJson.getJSONArray("children")) {
-            campaignFolders.addAll(readCampaignFolderFromTree((JSONObject) childJson));
+            campaignFolders.addAll(readCampaignFolderFromTree((JSONObject) childJson, project, campaignFolder));
         }
         return campaignFolders;
     }
@@ -220,4 +225,11 @@ public class CampaignFolder extends Entity {
         return parent;
     }
 
+    public void setProject(Project project) {
+        this.project = project;
+    }
+
+    public void setParent(Entity parent) {
+        this.parent = parent;
+    }
 }
