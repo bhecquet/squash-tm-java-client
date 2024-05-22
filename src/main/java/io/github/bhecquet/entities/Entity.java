@@ -195,7 +195,7 @@ public abstract class Entity {
             customFields.add(CustomField.fromJson(field));
         }
     }
-    
+
     /**
      * Update custom field
      *
@@ -209,6 +209,24 @@ public abstract class Entity {
         JSONArray customFields = new JSONArray();
         customFields.put(Map.of("code", customFieldName, "value", customFieldValue));
         json.put(FIELD_CUSTOM_FIELDS, customFields);
+
+        getJSonResponse(buildPatchRequest(url).body(json));
+    }
+
+    /**
+     * Update custom field
+     *
+     * @param customFields map containing key: field code, value: field value
+     */
+    public void updateCustomFields(Map<String, Object> customFields) {
+
+        JSONObject json = new JSONObject();
+        json.put(FIELD_TYPE, type);
+        JSONArray customFieldList = new JSONArray();
+        customFields.forEach((key, value) ->
+                customFieldList.put(Map.of("code", key, "value", value))
+        );
+        json.put(FIELD_CUSTOM_FIELDS, customFieldList);
 
         getJSonResponse(buildPatchRequest(url).body(json));
     }

@@ -544,19 +544,16 @@ public class TestCampaignFolder extends SquashTMTest {
 
         createServerMock("GET", "/campaign-folders/tree/14", 200, GET_ALL_FOLDERS_BY_PROJECT_REPLY_DATA);
 
-        createServerMock("GET", "/campaign-folders/100", 200, CAMPAIGN_FOLDER_100_REPLY_DATA);
-        createServerMock("GET", "/campaign-folders/101", 200, CAMPAIGN_FOLDER_101_REPLY_DATA);
-        createServerMock("GET", "/campaign-folders/1000", 200, CAMPAIGN_FOLDER_1000_REPLY_DATA);
-        createServerMock("GET", "/campaign-folders/10000", 200, CAMPAIGN_FOLDER_10000_REPLY_DATA);
-        createServerMock("GET", "/campaign-folders/10001", 200, CAMPAIGN_FOLDER_10001_REPLY_DATA);
-
-
         List<CampaignFolder> campaignFolders = CampaignFolder.getAll(project);
         Assert.assertEquals(campaignFolders.size(), 5);
         Assert.assertEquals(campaignFolders.get(0).getName(), "folder1");
         Assert.assertEquals(campaignFolders.get(0).getId(), 100);
         Assert.assertEquals(campaignFolders.get(0).getUrl(), "https://localhost:4321/campaign-folders/100");
+        Assert.assertEquals(campaignFolders.get(0).getProject(), project);
+        Assert.assertNull(campaignFolders.get(0).getParent());
         Assert.assertEquals(campaignFolders.get(1).getId(), 1000);
+        Assert.assertEquals(campaignFolders.get(1).getParent(), campaignFolders.get(0));
+        Assert.assertEquals(campaignFolders.get(1).getProject(), project);
         Assert.assertEquals(campaignFolders.get(2).getId(), 10000);
         Assert.assertEquals(campaignFolders.get(3).getId(), 10001);
         Assert.assertEquals(campaignFolders.get(4).getId(), 101);
@@ -811,13 +808,6 @@ public class TestCampaignFolder extends SquashTMTest {
         // campaign folder tree
         createServerMock("GET", "/campaign-folders/tree/14", 200, GET_ALL_FOLDERS_BY_PROJECT_REPLY_DATA);
 
-        // campaign folder details
-        createServerMock("GET", "/campaign-folders/100", 200, CAMPAIGN_FOLDER_100_REPLY_DATA);
-        createServerMock("GET", "/campaign-folders/101", 200, CAMPAIGN_FOLDER_101_REPLY_DATA);
-        createServerMock("GET", "/campaign-folders/1000", 200, CAMPAIGN_FOLDER_1000_REPLY_DATA);
-        createServerMock("GET", "/campaign-folders/10000", 200, CAMPAIGN_FOLDER_10000_REPLY_DATA);
-        createServerMock("GET", "/campaign-folders/10001", 200, CAMPAIGN_FOLDER_10001_REPLY_DATA);
-
         CampaignFolder createdFolder = CampaignFolder.createCampaignFolderTree(project, "foo/bar");
         Assert.assertEquals(createdFolder.getId(), 33);
 
@@ -834,13 +824,6 @@ public class TestCampaignFolder extends SquashTMTest {
         // campaign folder tree
         createServerMock("GET", "/campaign-folders/tree/14", 200, GET_ALL_FOLDERS_BY_PROJECT_REPLY_DATA);
 
-        // campaign folder details
-        createServerMock("GET", "/campaign-folders/100", 200, CAMPAIGN_FOLDER_100_REPLY_DATA);
-        createServerMock("GET", "/campaign-folders/101", 200, CAMPAIGN_FOLDER_101_REPLY_DATA);
-        createServerMock("GET", "/campaign-folders/1000", 200, CAMPAIGN_FOLDER_1000_REPLY_DATA);
-        createServerMock("GET", "/campaign-folders/10000", 200, CAMPAIGN_FOLDER_10000_REPLY_DATA);
-        createServerMock("GET", "/campaign-folders/10001", 200, CAMPAIGN_FOLDER_10001_REPLY_DATA);
-
         CampaignFolder createdFolder = CampaignFolder.createCampaignFolderTree(project, null);
         Assert.assertNull(createdFolder);
     }
@@ -855,13 +838,6 @@ public class TestCampaignFolder extends SquashTMTest {
 
         // campaign folder tree
         createServerMock("GET", "/campaign-folders/tree/14", 200, GET_ALL_FOLDERS_BY_PROJECT_REPLY_DATA);
-
-        // campaign folder details
-        createServerMock("GET", "/campaign-folders/100", 200, CAMPAIGN_FOLDER_100_REPLY_DATA);
-        createServerMock("GET", "/campaign-folders/101", 200, CAMPAIGN_FOLDER_101_REPLY_DATA);
-        createServerMock("GET", "/campaign-folders/1000", 200, CAMPAIGN_FOLDER_1000_REPLY_DATA);
-        createServerMock("GET", "/campaign-folders/10000", 200, CAMPAIGN_FOLDER_10000_REPLY_DATA);
-        createServerMock("GET", "/campaign-folders/10001", 200, CAMPAIGN_FOLDER_10001_REPLY_DATA);
 
         createServerMock("GET", "/campaign-folders/33", 200, CAMPAIGN_FOLDER_100_REPLY_DATA);
 
@@ -880,13 +856,6 @@ public class TestCampaignFolder extends SquashTMTest {
 
         // campaign folder tree
         createServerMock("GET", "/campaign-folders/tree/14", 200, GET_ALL_FOLDERS_BY_PROJECT_REPLY_DATA);
-
-        // campaign folder details
-        createServerMock("GET", "/campaign-folders/100", 200, CAMPAIGN_FOLDER_100_REPLY_DATA);
-        createServerMock("GET", "/campaign-folders/101", 200, CAMPAIGN_FOLDER_101_REPLY_DATA);
-        createServerMock("GET", "/campaign-folders/1000", 200, CAMPAIGN_FOLDER_1000_REPLY_DATA);
-        createServerMock("GET", "/campaign-folders/10000", 200, CAMPAIGN_FOLDER_10000_REPLY_DATA);
-        createServerMock("GET", "/campaign-folders/10001", 200, CAMPAIGN_FOLDER_10001_REPLY_DATA);
 
         createServerMock("GET", "/campaign-folders/33", 200, CAMPAIGN_FOLDER_100_REPLY_DATA);
 
