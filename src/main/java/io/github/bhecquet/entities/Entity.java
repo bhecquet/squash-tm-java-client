@@ -7,6 +7,7 @@ import kong.unirest.core.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public abstract class Entity {
 
@@ -193,6 +194,23 @@ public abstract class Entity {
         for (JSONObject field : (List<JSONObject>) customFieldsJson.toList()) {
             customFields.add(CustomField.fromJson(field));
         }
+    }
+    
+    /**
+     * Update custom field
+     *
+     * @param customFieldName  technical name of the field (called "code" in API)
+     * @param customFieldValue
+     */
+    public void updateCustomField(String customFieldName, String customFieldValue) {
+
+        JSONObject json = new JSONObject();
+        json.put(FIELD_TYPE, type);
+        JSONArray customFields = new JSONArray();
+        customFields.put(Map.of("code", customFieldName, "value", customFieldValue));
+        json.put(FIELD_CUSTOM_FIELDS, customFields);
+
+        getJSonResponse(buildPatchRequest(url).body(json));
     }
 
     public List<CustomField> getCustomFields() {

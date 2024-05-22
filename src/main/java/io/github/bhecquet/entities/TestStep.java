@@ -5,6 +5,7 @@ import io.github.bhecquet.exceptions.SquashTmException;
 import kong.unirest.core.json.JSONException;
 import kong.unirest.core.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -45,9 +46,13 @@ public class TestStep extends Step {
                 testStep.readCustomFields(json.getJSONArray(FIELD_CUSTOM_FIELDS));
                 return Arrays.asList(testStep);
             } else if ("call-step".equals(stepType)) {
-                TestCase calledTestCase = TestCase.get(json.getJSONObject(FIELD_CALLED_TEST_CASE).getInt(FIELD_ID));
-                calledTestCase.completeDetails();
-                return calledTestCase.getTestSteps();
+                if ("unauthorized-resource".equals(json.getJSONObject(FIELD_CALLED_TEST_CASE).getString(FIELD_TYPE))) {
+                    return new ArrayList<>();
+                } else {
+                    TestCase calledTestCase = TestCase.get(json.getJSONObject(FIELD_CALLED_TEST_CASE).getInt(FIELD_ID));
+                    calledTestCase.completeDetails();
+                    return calledTestCase.getTestSteps();
+                }
             } else {
                 throw new SquashTmException(String.format("Type %s inconnu pour un TestStep", stepType));
             }
