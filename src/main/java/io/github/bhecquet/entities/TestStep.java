@@ -58,7 +58,7 @@ public class TestStep extends Step {
             }
 
         } catch (JSONException e) {
-            throw new SquashTmException(String.format("Cannot create execution %s from JSON [%s] data: %s", json.toString(), e.getMessage()));
+            throw new SquashTmException(String.format("Cannot create test step from JSON [%s] data: %s", json.toString(), e.getMessage()));
         }
     }
 
