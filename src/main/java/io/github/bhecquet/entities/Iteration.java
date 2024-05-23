@@ -9,6 +9,7 @@ import kong.unirest.core.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class Iteration extends Entity {
 
@@ -65,13 +66,10 @@ public class Iteration extends Entity {
         // check that Dataset is valid
         Dataset dataset = null;
         if (datasetId != null) {
-            try {
-                dataset = Dataset.get(datasetId);
-            } catch (SquashTmException e) {
-                throw new SquashTmException(String.format("Dataset with id %d does not exist in Squash", datasetId));
-            }
-
-            if (dataset.getTestCase() == null || dataset.getTestCase().getId() != testCaseId) {
+            Optional<Dataset> datasetOpt = testCase.getDatasets().stream().filter(dataset1 -> dataset1.getId() == datasetId).findFirst();
+            if (datasetOpt.isPresent()) {
+                dataset = datasetOpt.get();
+            } else {
                 throw new ConfigurationException(String.format("Dataset with id %d does not belong to Test case with id %d", datasetId, testCaseId));
             }
         }
