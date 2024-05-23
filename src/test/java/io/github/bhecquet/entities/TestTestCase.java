@@ -478,6 +478,9 @@ public class TestTestCase extends SquashTMTest {
         Assert.assertEquals(testCase.getTestSteps().size(), 3);
         Assert.assertEquals(testCase.getCustomFields().size(), 2);
         Assert.assertEquals(testCase.getCustomFields().get(0).getCode(), "CF_TXT");
+        Assert.assertEquals(testCase.getDatasets().size(), 2);
+        Assert.assertEquals(testCase.getDatasets().get(0).getName(), "right handed people");
+        Assert.assertEquals(testCase.getDatasets().get(0).getTestCase(), testCase);
     }
 
     @Test

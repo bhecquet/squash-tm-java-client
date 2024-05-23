@@ -25,6 +25,7 @@ public class TestCase extends Entity {
     private static final String FIELD_TCTYPE = "type";
     private static final String FIELD_STATUS = "status";
     private static final String FIELD_STEPS = "steps";
+    private static final String FIELD_DATASETS = "datasets";
     private static final String FIELD_IMPORTANCE = "importance";
     private static final String FIELD_PREREQUISITE = "prerequisite";
     private static final String FIELD_REQUIREMENTS = "verified_requirements";
@@ -43,7 +44,9 @@ public class TestCase extends Entity {
     private String importance = "";
     private String prerequisite = "";
     private int requirementNumber = -1;
-    private List<TestStep> testSteps;
+    private List<TestStep> testSteps = new ArrayList<>();
+
+    private List<Dataset> datasets = new ArrayList<>();
 
     public TestCase(String url, String type, int id, String name) {
         super(url, type, id, null);
@@ -73,9 +76,15 @@ public class TestCase extends Entity {
 
     @Override
     public void completeDetails() {
-        testSteps = new ArrayList<>();
 
         JSONObject json = getJSonResponse(Unirest.get(url));
+        completeDetails(json);
+    }
+
+    private void completeDetails(JSONObject json) {
+
+        testSteps = new ArrayList<>();
+
         automatedTestReference = json.optString(FIELD_AUTOMATED_TEST_REFERENCE, "");
         path = json.getString(FIELD_PATH);
         description = json.getString(FIELD_DESCRIPTION);
@@ -93,6 +102,11 @@ public class TestCase extends Entity {
         for (JSONObject step : (List<JSONObject>) json.getJSONArray(FIELD_STEPS).toList()) {
             testSteps.addAll(TestStep.fromJson(step));
         }
+        for (JSONObject datasetJson : (List<JSONObject>) json.getJSONArray(FIELD_DATASETS).toList()) {
+            Dataset dataset = Dataset.fromJson(datasetJson);
+            dataset.setTestCase(this);
+            datasets.add(dataset);
+        }
 
         readCustomFields(json.getJSONArray(FIELD_CUSTOM_FIELDS));
 
@@ -100,6 +114,14 @@ public class TestCase extends Entity {
 
     public List<TestStep> getTestSteps() {
         return testSteps;
+    }
+
+    public List<Dataset> getDatasets() {
+        return datasets;
+    }
+
+    public void setDatasets(List<Dataset> datasets) {
+        this.datasets = datasets;
     }
 
     public String getReference() {

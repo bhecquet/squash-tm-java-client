@@ -57,5 +57,7 @@ public class Dataset extends Entity {
         return testCase;
     }
 
-
+    public void setTestCase(TestCase testCase) {
+        this.testCase = testCase;
+    }
 }
