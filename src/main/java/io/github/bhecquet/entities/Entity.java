@@ -5,6 +5,7 @@ import kong.unirest.core.*;
 import kong.unirest.core.json.JSONArray;
 import kong.unirest.core.json.JSONObject;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,7 @@ public abstract class Entity {
     private static String password;
 
     protected static String apiRootUrl;
-    protected List<CustomField> customFields;
+    protected List<CustomField> customFields = new ArrayList<>();
     protected String url;
     protected int id;
     protected String name;
@@ -106,6 +107,7 @@ public abstract class Entity {
      * @return
      */
     protected static JSONObject getPagedJSonResponse(HttpRequest<?> request) {
+        //long start = Instant.now().toEpochMilli();
         JSONObject finalJson = null;
 
         PagedList<JsonNode> result = request
@@ -135,6 +137,7 @@ public abstract class Entity {
             }
         }
 
+        //System.out.println(" - " + request.getUrl() + ": " + (Instant.now().toEpochMilli() - start));
         return finalJson;
     }
 
@@ -172,8 +175,10 @@ public abstract class Entity {
 
     private static JsonNode getJSonNodeResponse(HttpRequest<?> request) {
 
+        long start = Instant.now().toEpochMilli();
         HttpResponse<JsonNode> response = request.asJson();
 
+        //System.out.println(" - " + request.getHttpMethod().name() + " " + request.getUrl() + ": " + (Instant.now().toEpochMilli() - start));
         if (response.getStatus() >= 400) {
             if (response.getBody() != null) {
                 throw new SquashTmException(String.format("request to %s failed[%d]: %s", request.getUrl(), response.getStatus(), response.getBody().toPrettyString()));

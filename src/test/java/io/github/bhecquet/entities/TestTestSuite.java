@@ -176,7 +176,10 @@ public class TestTestSuite extends SquashTMTest {
         Assert.assertEquals(testSuite.getUrl(), "https://localhost:4321/test-suites/1");
     }
 
-    @Test(expectedExceptions = SquashTmException.class, expectedExceptionsMessageRegExp = "Cannot create test suite from JSON.*")
+    /**
+     * No problem if name is missing
+     */
+    @Test
     public void testFromJsonWrongFormat() {
         TestSuite testSuite = TestSuite.fromJson(new JSONObject("{" +
                 "    \"_type\" : \"test-suite\"," +
@@ -187,6 +190,7 @@ public class TestTestSuite extends SquashTMTest {
                 "      }" +
                 "    }" +
                 "  }"));
+        Assert.assertEquals(testSuite.getName(), "");
 
     }
 

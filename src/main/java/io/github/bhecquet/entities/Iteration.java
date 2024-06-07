@@ -151,7 +151,7 @@ public class Iteration extends Entity {
         completeDetails(json);
     }
 
-    private void completeDetails(JSONObject json) {
+    public void completeDetails(JSONObject json) {
 
         scheduleStartDate = json.optString(FIELD_SCHEDULE_START_DATE, "");
         scheduleEndDate = json.optString(FIELD_SCHEDULE_END_DATE, "");
@@ -163,9 +163,15 @@ public class Iteration extends Entity {
         for (JSONObject jsonTestSuite : (List<JSONObject>) json.getJSONArray(FIELD_TEST_SUITE).toList()) {
             testSuites.add(TestSuite.fromJson(jsonTestSuite));
         }
-        project = Project.getFromUrl(json.getJSONObject("_links").getJSONObject("project").getString("href"));
 
-        iterationTestPlanItems = getAllTestCases();
+        // in case project is not present, it means we get Iteration JSON from campaign list
+        // in this case, we won't look at test plan
+        if (json.getJSONObject("_links").has("project")) {
+            project = Project.getFromUrl(json.getJSONObject("_links").getJSONObject("project").getString("href"));
+            iterationTestPlanItems = getAllTestCases();
+        }
+
+
         readCustomFields(json.getJSONArray(FIELD_CUSTOM_FIELDS));
     }
 
@@ -173,7 +179,6 @@ public class Iteration extends Entity {
         try {
             JSONObject json = getJSonResponse(buildGetRequest(apiRootUrl + String.format(ITERATION_URL, id)));
             Iteration iteration = fromJson(json);
-            iteration.project = Project.getFromUrl(json.getJSONObject("_links").getJSONObject("project").getString("href"));
 
             return iteration;
         } catch (UnirestException e) {
