@@ -82,14 +82,26 @@ public class Project extends Entity {
     }
 
     public List<Campaign> getCampaigns() {
+        return getCampaigns("path,name,reference");
+    }
+
+    public List<Campaign> getCampaigns(String fields) {
+
         try {
-            JSONObject json = getPagedJSonResponse(buildGetRequest(url + CAMPAIGNS_URL + "?sort=id&fields=path,name,reference"));
+            JSONObject json = getPagedJSonResponse(buildGetRequest(url + CAMPAIGNS_URL + "?sort=id&fields=" + fields));
 
             List<Campaign> campaigns = new ArrayList<>();
             if (json.has(FIELD_EMBEDDED)) {
                 for (JSONObject folderJson : (List<JSONObject>) json.getJSONObject(FIELD_EMBEDDED).getJSONArray(FIELD_CAMPAIGNS).toList()) {
                     Campaign newCampaign = Campaign.fromJson(folderJson);
-                    newCampaign.setPath(folderJson.getString("path"));
+                    try {
+                        newCampaign.setPath(folderJson.getString("path"));
+                    } catch (JSONException e) {
+                    }
+                    try {
+                        newCampaign.readCustomFields(folderJson.getJSONArray(FIELD_CUSTOM_FIELDS));
+                    } catch (JSONException e) {
+                    }
                     campaigns.add(newCampaign);
                 }
             }

@@ -4,11 +4,13 @@ package io.github.bhecquet.entities;
 import io.github.bhecquet.exceptions.SquashTmException;
 import kong.unirest.core.Unirest;
 import kong.unirest.core.UnirestException;
+import kong.unirest.core.json.JSONArray;
 import kong.unirest.core.json.JSONException;
 import kong.unirest.core.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class Campaign extends Entity {
 
@@ -84,7 +86,10 @@ public class Campaign extends Entity {
             iterations = new ArrayList<>();
             if (json.has(FIELD_EMBEDDED)) {
                 for (JSONObject iterationJson : (List<JSONObject>) json.getJSONObject(FIELD_EMBEDDED).getJSONArray(FIELD_ITERATIONS).toList()) {
-                    iterations.add(Iteration.fromJson(iterationJson));
+                    Iteration iteration = Iteration.fromJson(iterationJson);
+                    iterations.add(iteration);
+                    iteration.completeDetails(iterationJson);
+
                 }
             }
             return iterations;
@@ -112,7 +117,7 @@ public class Campaign extends Entity {
      * @param campaignName name of the campaign to create
      * @param folderPath   folder path to which campaign will be created. e.g: foo/bar
      */
-    public static Campaign create(Project project, String campaignName, String folderPath) {
+    public static Campaign create(Project project, String campaignName, String folderPath, Map<String, Object> customFields) {
 
         CampaignFolder parentFolder = CampaignFolder.createCampaignFolderTree(project, folderPath);
 
@@ -126,7 +131,7 @@ public class Campaign extends Entity {
                 return campaign;
             }
         }
-        return Campaign.create(project, campaignName, parentFolder);
+        return Campaign.create(project, campaignName, parentFolder, customFields);
     }
 
     /**
@@ -137,7 +142,7 @@ public class Campaign extends Entity {
      * @param parentFolder
      * @return
      */
-    public static Campaign create(Project project, String campaignName, CampaignFolder parentFolder) {
+    public static Campaign create(Project project, String campaignName, CampaignFolder parentFolder, Map<String, Object> customFields) {
 
         try {
 
@@ -155,6 +160,14 @@ public class Campaign extends Entity {
                 parent.put(FIELD_TYPE, "campaign-folder");
             }
             body.put("parent", parent);
+
+            if (customFields != null && !customFields.isEmpty()) {
+                JSONArray cFields = new JSONArray();
+                for (Map.Entry<String, Object> customField : customFields.entrySet()) {
+                    cFields.put(Map.of("code", customField.getKey(), "value", customField.getValue()));
+                }
+                body.put(FIELD_CUSTOM_FIELDS, cFields);
+            }
 
             JSONObject json = getJSonResponse(buildPostRequest(apiRootUrl + CAMPAIGNS_URL).body(body));
 

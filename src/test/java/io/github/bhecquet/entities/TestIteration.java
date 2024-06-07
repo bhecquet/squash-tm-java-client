@@ -880,7 +880,7 @@ public class TestIteration extends SquashTMTest {
         Assert.assertEquals(iteration.getName(), "sample iteration");
         Assert.assertEquals(iteration.getId(), 22);
         Assert.assertEquals(iteration.getUrl(), "https://localhost:4321/iterations/22");
-        Assert.assertEquals(iteration.getProject().getId(), 4);
+        Assert.assertNull(iteration.getProject());
     }
 
     @Test(expectedExceptions = SquashTmException.class, expectedExceptionsMessageRegExp = "request to https://localhost:4321 failed\\[404\\]: null")

@@ -26,7 +26,7 @@ public class TestSuite extends Entity {
                     json.getJSONObject("_links").getJSONObject("self").getString("href"),
                     json.getString(FIELD_TYPE),
                     json.getInt(FIELD_ID),
-                    json.getString(FIELD_NAME)
+                    json.optString(FIELD_NAME, "")
             );
 
         } catch (JSONException e) {

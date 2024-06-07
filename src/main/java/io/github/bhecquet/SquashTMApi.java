@@ -1,7 +1,10 @@
 package io.github.bhecquet;
 
 
-import io.github.bhecquet.entities.*;
+import io.github.bhecquet.entities.Entity;
+import io.github.bhecquet.entities.IterationTestPlanItem;
+import io.github.bhecquet.entities.Project;
+import io.github.bhecquet.entities.TestPlanItemExecution;
 import io.github.bhecquet.exceptions.ConfigurationException;
 import kong.unirest.core.HttpResponse;
 import kong.unirest.core.JsonNode;
@@ -23,20 +26,15 @@ public class SquashTMApi {
         this.password = password;
 
         Entity.configureEntity(user, password, this.url);
-        testConnection();
+
     }
 
-    public SquashTMApi(String url, String user, String password, String projectName) {
+    public SquashTMApi(String url, String user, String password, boolean checkConnexion) {
         initConnection(url, user, password);
+        if (checkConnexion) {
+            testConnection();
+        }
 
-        currentProject = Project.get(projectName);
-    }
-
-    public SquashTMApi(String url, String user, String password, int iterationId) {
-        initConnection(url, user, password);
-        Iteration iteration = Iteration.get(iterationId);
-
-        currentProject = iteration.getProject();
     }
 
     /**
@@ -77,11 +75,6 @@ public class SquashTMApi {
      * @param comment      Comment to add to failed step
      */
     public void setExecutionResult(IterationTestPlanItem testPlanItem, TestPlanItemExecution.ExecutionStatus result, String comment) {
-        TestPlanItemExecution execution = testPlanItem.createExecution();
-        execution.setResult(result, comment);
-    }
-
-    public Project getCurrentProject() {
-        return currentProject;
+        testPlanItem.createExecutionWithResult(result, comment);
     }
 }
