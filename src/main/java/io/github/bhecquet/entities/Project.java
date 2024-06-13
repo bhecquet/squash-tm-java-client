@@ -107,7 +107,7 @@ public class Project extends Entity {
             }
             return campaigns;
         } catch (UnirestException e) {
-            throw new SquashTmException(String.format("Cannot get list of campaigns for project %s", name));
+            throw new SquashTmException(String.format("Cannot get list of campaigns for project %s: %s", name, e.getMessage()));
         }
     }
 
