@@ -118,7 +118,7 @@ public abstract class Entity {
                         r -> {
                             JSONObject links = ((HttpResponse<JsonNode>) r).getBody().getObject().getJSONObject("_links");
                             if (links.has("next")) {
-                                return links.getJSONObject("next").getString("href");
+                                return updateUrl(links.getJSONObject("next").getString("href"));
                             } else {
                                 return null;
                             }
