@@ -393,7 +393,7 @@ public class TestProject extends SquashTMTest {
         createServerMock("POST", "/clearances/2/users/384", 200, "{\"content\": {\"automated_test_writer\": {\"_type\": \"profile\",\"id\": 2,\"name\": \"TestEditor\",\"type\": \"system\",\"users\": [{\"_type\": \"team\",\"id\": 384,\"name\": \"PARAM_EPARGNE_EQUIPE\",\"_links\": {\"self\": {\"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/teams/384\"}}},{\"_type\": \"user\",\"id\": 1434,\"login\": \"S047432\",\"_links\": {\"self\": {\"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/users/1434\"}}}]}},\"_links\": {\"self\": {\"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/projects/1281/clearances\"}}}", "request");
 
         Project project = new Project("https://localhost:4321", "project", 1281, "temp v8");
-        Clearance clear = project.setClearances("2", "S065250,PARAM_EPARGNE_EQUIPE");
+        Clearance clear = project.setClearances("2", "384");
 
         Assert.assertEquals(clear.id, 2);
         Assert.assertEquals(clear.name, "TestEditor");
