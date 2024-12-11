@@ -185,7 +185,7 @@ public class SquashTMTest {
      * @throws UnirestException
      */
     public HttpRequest<?> createServerMock(String serverUrl, String requestType, String apiPath, int statusCode, final List<Object> replyData, String responseType) throws UnirestException {
-
+        System.out.println(serverUrl + apiPath);
 
         if (replyData.isEmpty()) {
             throw new TestConfigurationException("No replyData specified");

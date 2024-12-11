@@ -14,6 +14,8 @@ public abstract class Entity {
 
     private static final String HEADER_CONTENT_TYPE = "Content-Type";
     private static final String MIMETYPE_APPLICATION_JSON = "application/json";
+    private static final String HEADER_AUTHORIZATION = "Authorization";
+    private static final String HEADER_AUTHORIZATION_BEARER = "Bearer ";
     protected static final String FIELD_NAME = "name";
     protected static final String FIELD_ID = "id";
     protected static final String FIELD_TYPE = "_type";
@@ -21,9 +23,11 @@ public abstract class Entity {
     protected static final String FIELD_CUSTOM_FIELDS = "custom_fields";
     protected static final String FIELD_PARENT = "parent";
     protected static final String FIELD_CAMPAIGNS = "campaigns";
+    protected static final String FIELD_TEAMS = "teams";
     protected static final String FIELD_CAMPAIGN_FOLDERS = "campaign-folders";
     protected static final String FIELD_PROJECTS = "projects";
     protected static final String FIELD_PATH = "path";
+    protected static final String FIELD_TEST_CASES = "test-cases";
 
     protected static final String TYPE_PROJECT = "project";
     protected static final String TYPE_CAMPAIGN_FOLDER = "campaign-folder";
@@ -32,6 +36,7 @@ public abstract class Entity {
 
     private static String user;
     private static String password;
+    private static String apiToken;
 
     protected static String apiRootUrl;
     protected List<CustomField> customFields = new ArrayList<>();
@@ -44,6 +49,11 @@ public abstract class Entity {
         Entity.user = user;
         Entity.password = password;
         Entity.apiRootUrl = apiRootUrl;
+    }
+
+    public static void configureEntityByToken(String apiToken, String apiRootUrl) {
+        Entity.apiRootUrl = apiRootUrl;
+        Entity.apiToken = apiToken;
     }
 
     protected Entity(String url, int id, String name) {
@@ -72,15 +82,35 @@ public abstract class Entity {
     }
 
     protected static GetRequest buildGetRequest(String url) {
-        return Unirest.get(updateUrl(url)).basicAuth(user, password).headerReplace(HEADER_CONTENT_TYPE, MIMETYPE_APPLICATION_JSON);
+        if (apiToken == null) {
+            return Unirest.get(updateUrl(url)).basicAuth(user, password).headerReplace(HEADER_CONTENT_TYPE, MIMETYPE_APPLICATION_JSON);
+        } else {
+            return Unirest.get(updateUrl(url)).headerReplace(HEADER_CONTENT_TYPE, MIMETYPE_APPLICATION_JSON).headerReplace(HEADER_AUTHORIZATION, HEADER_AUTHORIZATION_BEARER + apiToken);
+        }
     }
 
     protected static HttpRequestWithBody buildPostRequest(String url) {
-        return Unirest.post(updateUrl(url)).basicAuth(user, password).headerReplace(HEADER_CONTENT_TYPE, MIMETYPE_APPLICATION_JSON);
+        if (apiToken == null) {
+            return Unirest.post(updateUrl(url)).basicAuth(user, password).headerReplace(HEADER_CONTENT_TYPE, MIMETYPE_APPLICATION_JSON);
+        } else {
+            return Unirest.post(updateUrl(url)).headerReplace(HEADER_CONTENT_TYPE, MIMETYPE_APPLICATION_JSON).headerReplace(HEADER_AUTHORIZATION, HEADER_AUTHORIZATION_BEARER + apiToken);
+        }
     }
 
     protected static HttpRequestWithBody buildPatchRequest(String url) {
-        return Unirest.patch(updateUrl(url)).basicAuth(user, password).headerReplace(HEADER_CONTENT_TYPE, MIMETYPE_APPLICATION_JSON);
+        if (apiToken == null) {
+            return Unirest.patch(updateUrl(url)).basicAuth(user, password).headerReplace(HEADER_CONTENT_TYPE, MIMETYPE_APPLICATION_JSON);
+        } else {
+            return Unirest.patch(updateUrl(url)).headerReplace(HEADER_CONTENT_TYPE, MIMETYPE_APPLICATION_JSON).headerReplace(HEADER_AUTHORIZATION, HEADER_AUTHORIZATION_BEARER + apiToken);
+        }
+    }
+
+    protected static HttpRequestWithBody buildDeleteRequest(String url) {
+        if (apiToken == null) {
+            return Unirest.delete(updateUrl(url)).basicAuth(user, password).headerReplace(HEADER_CONTENT_TYPE, MIMETYPE_APPLICATION_JSON);
+        } else {
+            return Unirest.delete(updateUrl(url)).headerReplace(HEADER_CONTENT_TYPE, MIMETYPE_APPLICATION_JSON).headerReplace(HEADER_AUTHORIZATION, HEADER_AUTHORIZATION_BEARER + apiToken);
+        }
     }
 
     /**
