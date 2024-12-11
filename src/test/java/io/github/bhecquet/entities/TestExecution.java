@@ -9,6 +9,8 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.Optional;
+
 import static org.mockito.Mockito.when;
 
 public class TestExecution extends SquashTMTest {
@@ -173,7 +175,7 @@ public class TestExecution extends SquashTMTest {
 
         Assert.assertEquals(execution.getExecutionSteps().size(), 3);
         Assert.assertEquals(execution.getStatus(), "BLOCKED");
-        Assert.assertEquals(execution.getOrder(), 4);
+        Assert.assertEquals(Optional.ofNullable(execution.getOrder()), Optional.of(4));
         Assert.assertEquals(execution.getLastExecutedBy(), "User-5");
         Assert.assertEquals(execution.getLastExecutedOn(), "2017-07-24T10:00:00.000+00:00");
         Assert.assertEquals(execution.getCustomFields().size(), 2);
@@ -192,7 +194,7 @@ public class TestExecution extends SquashTMTest {
 
         Assert.assertEquals(execution.getExecutionSteps().size(), 3);
         Assert.assertEquals(execution.getStatus(), "BLOCKED");
-        Assert.assertEquals(execution.getOrder(), 4);
+        Assert.assertEquals(Optional.ofNullable(execution.getOrder()), Optional.of(4));
         Assert.assertEquals(execution.getLastExecutedBy(), "");
         Assert.assertEquals(execution.getLastExecutedOn(), "");
         Assert.assertEquals(execution.getCustomFields().size(), 2);
@@ -205,7 +207,7 @@ public class TestExecution extends SquashTMTest {
 
         Assert.assertEquals(execution.getExecutionSteps().size(), 3);
         Assert.assertEquals(execution.getStatus(), "BLOCKED");
-        Assert.assertEquals(execution.getOrder(), 4);
+        Assert.assertEquals(Optional.ofNullable(execution.getOrder()), Optional.of(4));
         Assert.assertEquals(execution.getLastExecutedBy(), "User-5");
         Assert.assertEquals(execution.getLastExecutedOn(), "2017-07-24T10:00:00.000+00:00");
         Assert.assertEquals(execution.getCustomFields().size(), 2);

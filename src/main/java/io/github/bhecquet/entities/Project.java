@@ -15,6 +15,8 @@ public class Project extends Entity {
 
     public static final String PROJECTS_URL = "projects";
     public static final String CAMPAIGNS_URL = "/campaigns";
+    public final static String TEAMS_URL = "teams";
+    public static final String TEST_CASES_URL = "test-cases";
 
     public static final String TYPE_PROJECT = "project";
 
@@ -111,5 +113,48 @@ public class Project extends Entity {
         }
     }
 
+    //teamsNames au format XXX,YYY,ZZZ ou AAA si un seul Id
+    public Clearance setClearances(String profileId, String teamIds) {
+        try {
+            JSONObject json = getJSonResponse(buildPostRequest(url + String.format("/clearances/%s/users/%s", profileId, teamIds)));
+            return new Clearance(
+                    json.getJSONObject("_links").getJSONObject("self").getString("href"),
+                    json.getJSONObject("content").getJSONObject("automated_test_writer").getString(FIELD_TYPE),
+                    json.getJSONObject("content").getJSONObject("automated_test_writer").getInt(FIELD_ID),
+                    json.getJSONObject("content").getJSONObject("automated_test_writer").getString(FIELD_NAME));
+        } catch (UnirestException e) {
+            throw new SquashTmException(String.format("Cannot set clearances for project %s and profile %s", name, profileId), e);
+        }
+    }
+
+    //teamsIds au format XXX,YYY,ZZZ ou AAA si un seul Id
+    public JSONObject deleteClearances(String teamIds) {
+        try {
+            return getJSonResponse(buildDeleteRequest(url + String.format("/users/%s", teamIds)));
+        } catch (UnirestException e) {
+            throw new SquashTmException(String.format("Cannot set clearances for project %s and team %s", name, teamIds), e);
+        }
+    }
+
+    /**
+     * Renvoie la liste des cas de test associés à un projet
+     *
+     * @return
+     */
+    public List<TestCase> getTestCases() {
+        try {
+            JSONObject json = getPagedJSonResponse(buildGetRequest(String.format("%s%s/%d/%s?sort=id", apiRootUrl, PROJECTS_URL, id, TEST_CASES_URL)));
+
+            List<TestCase> testCases = new ArrayList<>();
+            if (json.has(FIELD_EMBEDDED)) {
+                for (JSONObject testCaseJson : (List<JSONObject>) json.getJSONObject(FIELD_EMBEDDED).getJSONArray(FIELD_TEST_CASES).toList()) {
+                    testCases.add(TestCase.fromJson(testCaseJson));
+                }
+            }
+            return testCases;
+        } catch (UnirestException e) {
+            throw new SquashTmException("Impossible de récupérer la liste des cas de test", e);
+        }
+    }
 
 }

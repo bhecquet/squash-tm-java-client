@@ -15,6 +15,7 @@ public class Iteration extends Entity {
 
     public static final String ITERATIONS_URL = "campaigns/%s/iterations";
     private static final String ITERATION_URL = "iterations/%d";
+    private static final String TEST_PLAN_URL = "test-plan";
     private static final String FIELD_SCHEDULE_START_DATE = "scheduled_start_date";
     private static final String FIELD_SCHEDULE_END_DATE = "scheduled_end_date";
     private static final String FIELD_ACTUAL_START_DATE = "actual_start_date";
@@ -222,4 +223,20 @@ public class Iteration extends Entity {
     public Project getProject() {
         return project;
     }
+
+    public List<IterationTestPlanItem> getTestPlan() {
+        try {
+            JSONObject json = getPagedJSonResponse(buildGetRequest(String.format("%s%s/%s?sort=id", apiRootUrl, String.format(ITERATION_URL, id), TEST_PLAN_URL)));
+            List<IterationTestPlanItem> iterationTestPlanItems = new ArrayList<>();
+            if (json.has(FIELD_EMBEDDED)) {
+                for (JSONObject jsonIterationTestPlanItem : (List<JSONObject>) json.getJSONObject(FIELD_EMBEDDED).getJSONArray(FIELD_TEST_PLAN).toList()) {
+                    iterationTestPlanItems.add(IterationTestPlanItem.fromJson(jsonIterationTestPlanItem));
+                }
+            }
+            return iterationTestPlanItems;
+        } catch (UnirestException e) {
+            throw new SquashTmException("Impossible de récupérer la liste des campagnes", e);
+        }
+    }
+
 }

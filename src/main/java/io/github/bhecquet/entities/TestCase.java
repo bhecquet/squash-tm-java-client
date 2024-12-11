@@ -35,6 +35,9 @@ public class TestCase extends Entity {
     private String path;
     private String description;
     private String reference;
+    private String marque = "";
+    private String produit = "";
+    private String application = "";
     private String projectName = "";
     private int projectId = -1;
     private String author = "";
@@ -174,5 +177,17 @@ public class TestCase extends Entity {
 
     public int getRequirementNumber() {
         return requirementNumber;
+    }
+
+    public String getProduit() {
+        return produit;
+    }
+
+    public String getApplication() {
+        return application;
+    }
+
+    public String getMarque() {
+        return marque;
     }
 }

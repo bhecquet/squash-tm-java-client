@@ -16,6 +16,7 @@ public class SquashTMApi {
     private String url;
     private String user;
     private String password;
+    private String apiToken;
     private Project currentProject;
 
 
@@ -29,22 +30,44 @@ public class SquashTMApi {
 
     }
 
+    private void initConnectionByToken(String url, String token) {
+        this.url = url + "/api/rest/latest/";
+        this.url = this.url.replace("//", "/").replace(":/", "://"); // in case of double '/' in URL
+        this.apiToken = token;
+
+        Entity.configureEntityByToken(token, this.url);
+    }
+
     public SquashTMApi(String url, String user, String password, boolean checkConnexion) {
         initConnection(url, user, password);
         if (checkConnexion) {
-            testConnection();
+            testConnection(false);
         }
 
+    }
+
+    public SquashTMApi(String url, String apiToken, boolean checkConnexion) {
+        initConnectionByToken(url, apiToken);
+        if (checkConnexion) {
+            testConnection(true);
+        }
     }
 
     /**
      * Test we can join Squash TM server
      */
-    public void testConnection() {
+    public void testConnection(boolean byToken) {
         try {
-            HttpResponse<JsonNode> json = Unirest.get(url + Project.PROJECTS_URL)
-                    .basicAuth(user, password)
-                    .asJson();
+            HttpResponse<JsonNode> json;
+            if (byToken) {
+                json = Unirest.get(url + Project.PROJECTS_URL)
+                        .basicAuth(user, password)
+                        .asJson();
+            } else {
+                json = Unirest.get(url + Project.PROJECTS_URL)
+                        .header("Authorization", "Bearer " + apiToken)
+                        .asJson();
+            }
 
             if (json.getStatus() != 200) {
                 throw new ConfigurationException(String.format("Error when contactin Squash TM server API %s: %s", url, json.getStatusText()));
