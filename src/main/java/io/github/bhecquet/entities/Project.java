@@ -119,9 +119,9 @@ public class Project extends Entity {
             JSONObject json = getJSonResponse(buildPostRequest(url + String.format("/clearances/%s/users/%s", profileId, teamIds)));
             return new Clearance(
                     json.getJSONObject("_links").getJSONObject("self").getString("href"),
-                    json.getJSONObject("content").getJSONObject("automated_test_writer").getString(FIELD_TYPE),
-                    json.getJSONObject("content").getJSONObject("automated_test_writer").getInt(FIELD_ID),
-                    json.getJSONObject("content").getJSONObject("automated_test_writer").getString(FIELD_NAME));
+                    json.getJSONObject("content").getJSONObject("project_viewer").getString(FIELD_TYPE),
+                    json.getJSONObject("content").getJSONObject("project_viewer").getInt(FIELD_ID),
+                    json.getJSONObject("content").getJSONObject("project_viewer").getString(FIELD_NAME));
         } catch (UnirestException e) {
             throw new SquashTmException(String.format("Cannot set clearances for project %s and profile %s", name, profileId), e);
         }

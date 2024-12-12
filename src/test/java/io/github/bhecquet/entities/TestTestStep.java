@@ -1,6 +1,7 @@
 package io.github.bhecquet.entities;
 
 import io.github.bhecquet.SquashTMTest;
+import io.github.bhecquet.exceptions.NotImplementedException;
 import io.github.bhecquet.exceptions.SquashTmException;
 import kong.unirest.core.json.JSONObject;
 import org.testng.Assert;
@@ -152,5 +153,11 @@ public class TestTestStep extends SquashTMTest {
                 "  }"));
 
         Assert.assertEquals(steps.size(), 0);
+    }
+
+    @Test(expectedExceptions = NotImplementedException.class)
+    public void testCompleteDetails() {
+        TestStep ts = new TestStep("osef", "ouais", 1, 1, "yolo", "cliquer");
+        ts.completeDetails();
     }
 }

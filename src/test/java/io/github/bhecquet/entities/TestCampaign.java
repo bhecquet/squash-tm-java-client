@@ -32,6 +32,14 @@ public class TestCampaign extends SquashTMTest {
         Campaign.configureEntity("user", "pwd", SERVER_URL + "/");
     }
 
+    //For code coverage only I don't get the meaning of this constructor
+    @Test
+    public void testConstructor() {
+        Campaign camp = new Campaign(12);
+        Assert.assertEquals(camp.getId(), 12);
+        Assert.assertNull(camp.getName());
+    }
+
     @Test
     public void testGetAll() {
 
