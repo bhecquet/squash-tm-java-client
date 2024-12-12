@@ -20,6 +20,14 @@ public class SquashTMApi {
     private Project currentProject;
 
 
+    public String getUser() {
+        return user;
+    }
+
+    public String getApiToken() {
+        return apiToken;
+    }
+
     private void initConnection(String url, String user, String password) {
         this.url = url + "/api/rest/latest/";
         this.url = this.url.replace("//", "/").replace(":/", "://"); // in case of double '/' in URL
@@ -70,7 +78,7 @@ public class SquashTMApi {
             }
 
             if (json.getStatus() != 200) {
-                throw new ConfigurationException(String.format("Error when contactin Squash TM server API %s: %s", url, json.getStatusText()));
+                throw new ConfigurationException(String.format("Error when contacting Squash TM server API %s: %s", url, json.getStatusText()));
             }
         } catch (UnirestException e) {
             throw new ConfigurationException(String.format("Cannot contact Squash TM server API %s: %s", url, e.getMessage()));
