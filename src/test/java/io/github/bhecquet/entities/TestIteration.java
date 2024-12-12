@@ -881,6 +881,7 @@ public class TestIteration extends SquashTMTest {
         Assert.assertEquals(iteration.getId(), 22);
         Assert.assertEquals(iteration.getUrl(), "https://localhost:4321/iterations/22");
         Assert.assertNull(iteration.getProject());
+        Assert.assertEquals(iteration.getIndex(), 0);
     }
 
     @Test(expectedExceptions = SquashTmException.class, expectedExceptionsMessageRegExp = "request to https://localhost:4321 failed\\[404\\]: null")
@@ -894,5 +895,14 @@ public class TestIteration extends SquashTMTest {
         GetRequest getRequest = (GetRequest) createServerMock("GET", "/iterations/22", 404, ITERATION_REPLY_DATA);
         when(getRequest.asJson()).thenThrow(new UnirestException("error"));
         Iteration iteration = Iteration.get(22);
+    }
+
+    @Test
+    public void testGetTestPlan() {
+        createServerMock("GET", "/iterations/22", 200, ITERATION_REPLY_DATA);
+        createServerMock("GET", "/iterations/22/test-plan?sort=id", 200, TEST_PLAN_ITEMS_REPLY_DATA);
+        Iteration iteration = Iteration.get(22);
+        List<IterationTestPlanItem> listITPI = iteration.getTestPlan();
+        Assert.assertEquals(listITPI.size(), 2);
     }
 }

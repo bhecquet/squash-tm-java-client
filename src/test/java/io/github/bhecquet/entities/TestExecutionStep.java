@@ -1,6 +1,7 @@
 package io.github.bhecquet.entities;
 
 import io.github.bhecquet.SquashTMTest;
+import io.github.bhecquet.exceptions.NotImplementedException;
 import io.github.bhecquet.exceptions.SquashTmException;
 import kong.unirest.core.HttpRequestWithBody;
 import kong.unirest.core.RequestBodyEntity;
@@ -148,6 +149,39 @@ public class TestExecutionStep extends SquashTMTest {
         Assert.assertEquals(campaign.getUrl(), "https://localhost:4321/squash/execution-steps/2403247");
     }
 
+    @Test
+    public void testFromJsonFull() {
+
+        JSONObject json = new JSONObject(" {"
+                + "    \"_type\" : \"execution-step\","
+                + "    \"id\" : 2403247,"
+                + "    \"execution_status\" : \"SUCCESS\","
+                + "    \"action\" : \"some action\","
+                + "    \"expected_result\" : \"\","
+                + "    \"comment\" : \"some comment\","
+                + "    \"custom_fields\" : [],"
+                + "    \"last_executed_by\" : \"some executor\","
+                + "    \"last_executed_on\" : \"2024-12-11T16:56:49.733+00:00\","
+                + "    \"referenced_test_step\" : 666,"
+                + "    \"_links\" : {"
+                + "      \"self\" : {"
+                + "        \"href\" : \"https://localhost:4321/squash/execution-steps/2403247\""
+                + "      }"
+                + "    }"
+                + "  }");
+
+        ExecutionStep campaign = ExecutionStep.fromJsonFull(json);
+        Assert.assertEquals(campaign.getId(), 2403247);
+        Assert.assertEquals(campaign.getName(), "some action");
+        Assert.assertEquals(campaign.getUrl(), "https://localhost:4321/squash/execution-steps/2403247");
+        Assert.assertEquals(campaign.getStatus(), "SUCCESS");
+        Assert.assertEquals(campaign.getComment(), "some comment");
+        Assert.assertEquals(campaign.getLastExecutedBy(), "some executor");
+        Assert.assertEquals(campaign.getLastExecutedOn(), "2024-12-11T16:56:49.733+00:00");
+        Assert.assertEquals(campaign.getTestStepCustomFields(), null);
+        Assert.assertEquals(campaign.getReferencedStepId(), 666);
+    }
+
     @Test(expectedExceptions = SquashTmException.class, expectedExceptionsMessageRegExp = ".*Cannot create execution step from JSON.*")
     public void testFromJsonInError() {
 
@@ -217,4 +251,11 @@ public class TestExecutionStep extends SquashTMTest {
         executionStatus.setComment("hello");
 
     }
+
+    @Test(expectedExceptions = NotImplementedException.class)
+    public void testCompleteDetails() {
+        ExecutionStep es = new ExecutionStep("osef", "ouais", 1, "yolo");
+        es.completeDetails();
+    }
+    
 }

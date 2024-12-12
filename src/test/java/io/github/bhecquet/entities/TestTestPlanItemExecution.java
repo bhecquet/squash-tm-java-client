@@ -1,6 +1,7 @@
 package io.github.bhecquet.entities;
 
 import io.github.bhecquet.SquashTMTest;
+import io.github.bhecquet.exceptions.NotImplementedException;
 import io.github.bhecquet.exceptions.SquashTmException;
 import kong.unirest.core.HttpRequestWithBody;
 import kong.unirest.core.RequestBodyEntity;
@@ -266,5 +267,11 @@ public class TestTestPlanItemExecution extends SquashTMTest {
 
         TestPlanItemExecution execution = new TestPlanItemExecution("https://localhost:4321/executions/83", "execution", 83, "execution");
         execution.setResult(TestPlanItemExecution.ExecutionStatus.SUCCESS, null);
+    }
+
+    @Test(expectedExceptions = NotImplementedException.class)
+    public void testCompleteDetails() {
+        TestPlanItemExecution tpie = new TestPlanItemExecution("osef", "ouais", 1, "yolo");
+        tpie.completeDetails();
     }
 }

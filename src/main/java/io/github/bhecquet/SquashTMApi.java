@@ -59,7 +59,7 @@ public class SquashTMApi {
     public void testConnection(boolean byToken) {
         try {
             HttpResponse<JsonNode> json;
-            if (byToken) {
+            if (!byToken) {
                 json = Unirest.get(url + Project.PROJECTS_URL)
                         .basicAuth(user, password)
                         .asJson();

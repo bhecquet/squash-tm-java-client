@@ -1,6 +1,7 @@
 package io.github.bhecquet.entities;
 
 import io.github.bhecquet.SquashTMTest;
+import io.github.bhecquet.exceptions.NotImplementedException;
 import io.github.bhecquet.exceptions.SquashTmException;
 import kong.unirest.core.GetRequest;
 import kong.unirest.core.UnirestException;
@@ -169,6 +170,12 @@ public class TestDataset extends SquashTMTest {
                 "        }}"));
 
         Dataset.fromJson(json);
+    }
+
+    @Test(expectedExceptions = NotImplementedException.class)
+    public void testCompleteDetails() {
+        Dataset ds = new Dataset("osef", "ouais", 1, "yolo");
+        ds.completeDetails();
     }
 
 }

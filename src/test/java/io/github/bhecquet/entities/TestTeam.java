@@ -1,6 +1,7 @@
 package io.github.bhecquet.entities;
 
 import io.github.bhecquet.SquashTMTest;
+import io.github.bhecquet.exceptions.NotImplementedException;
 import kong.unirest.core.json.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -46,4 +47,10 @@ public class TestTeam extends SquashTMTest {
         Assert.assertEquals(ts.get(0).getUrl(), "https://localhost:4321/teams/8");
     }
 
+    @Test(expectedExceptions = NotImplementedException.class)
+    public void testCompleteDetails() {
+        Team tm = new Team("osef", "ouais", 1, "yolo");
+        tm.completeDetails();
+    }
+    
 }

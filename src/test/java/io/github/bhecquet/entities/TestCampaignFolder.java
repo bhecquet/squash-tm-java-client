@@ -2,6 +2,7 @@ package io.github.bhecquet.entities;
 
 
 import io.github.bhecquet.SquashTMTest;
+import io.github.bhecquet.exceptions.NotImplementedException;
 import io.github.bhecquet.exceptions.SquashTmException;
 import kong.unirest.core.*;
 import kong.unirest.core.json.JSONObject;
@@ -886,4 +887,25 @@ public class TestCampaignFolder extends SquashTMTest {
         createServerMock("GET", "/campaign-folders/100", 500, "{}");
         CampaignFolder campaignFolder = CampaignFolder.get(100);
     }
+
+    @Test(expectedExceptions = NotImplementedException.class)
+    public void testCompleteDetails() {
+        createServerMock("GET", "/campaign-folders/100", 200, CAMPAIGN_FOLDER_100_REPLY_DATA);
+        CampaignFolder campaignFolder = CampaignFolder.get(100);
+        campaignFolder.completeDetails();
+    }
+
+    @Test
+    public void testSetters() {
+        createServerMock("GET", "/campaign-folders/100", 200, CAMPAIGN_FOLDER_100_REPLY_DATA);
+        createServerMock("GET", "/campaign-folders/101", 200, CAMPAIGN_FOLDER_101_REPLY_DATA);
+        CampaignFolder campaignFolder = CampaignFolder.get(100);
+        campaignFolder.setParent(CampaignFolder.get(101));
+        campaignFolder.setProject(new Project("url", "project", 1281, "project test"));
+        Assert.assertEquals(campaignFolder.getParent().getId(), 101);
+        Assert.assertEquals(campaignFolder.getParent().getName(), "folder2");
+        Assert.assertEquals(campaignFolder.getProject().getId(), 1281);
+        Assert.assertEquals(campaignFolder.getProject().getName(), "project test");
+    }
+
 }

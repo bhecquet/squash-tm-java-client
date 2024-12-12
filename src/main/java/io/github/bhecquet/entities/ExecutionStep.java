@@ -37,6 +37,15 @@ public class ExecutionStep extends Step {
         super(url, type, id, name);
     }
 
+    public ExecutionStep(String url, String type, int id, String name, String comment, String status, String lastExecutedBy, String lastExecutedOn, int referencedStepId) {
+        super(url, type, id, name);
+        this.comment = comment;
+        this.status = status;
+        this.lastExecutedBy = lastExecutedBy;
+        this.lastExecutedOn = lastExecutedOn;
+        this.referencedStepId = referencedStepId;
+    }
+
 
     public int getReferencedStepId() {
         return referencedStepId;
@@ -74,6 +83,25 @@ public class ExecutionStep extends Step {
                     json.getString(FIELD_TYPE),
                     json.getInt(FIELD_ID),
                     json.getString(FIELD_ACTION)
+            );
+
+        } catch (JSONException e) {
+            throw new SquashTmException(String.format("Cannot create execution step from JSON [%s] data: %s", json.toString(), e.getMessage()));
+        }
+    }
+
+    public static ExecutionStep fromJsonFull(JSONObject json) {
+        try {
+            return new ExecutionStep(
+                    json.getJSONObject("_links").getJSONObject("self").getString("href"),
+                    json.getString(FIELD_TYPE),
+                    json.getInt(FIELD_ID),
+                    json.getString(FIELD_ACTION),
+                    json.getString(FIELD_COMMENT),
+                    json.getString(FIELD_EXECUTION_STATUS),
+                    json.getString(FIELD_LAST_EXECUTED_BY),
+                    json.getString(FIELD_LAST_EXECUTED_ON),
+                    json.getInt(FIELD_REFERENCED_TEST_STEP)
             );
 
         } catch (JSONException e) {

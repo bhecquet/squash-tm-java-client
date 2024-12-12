@@ -2,6 +2,7 @@ package io.github.bhecquet.entities;
 
 import io.github.bhecquet.SquashTMTest;
 import io.github.bhecquet.exceptions.ConfigurationException;
+import io.github.bhecquet.exceptions.NotImplementedException;
 import io.github.bhecquet.exceptions.SquashTmException;
 import kong.unirest.core.GetRequest;
 import kong.unirest.core.HttpResponse;
@@ -390,7 +391,7 @@ public class TestProject extends SquashTMTest {
         //Simulate get Teams
         createServerMock("GET", "/teams?sort=id", 200, "{  \"_embedded\": {    \"teams\": [      {        \"_type\": \"team\",        \"id\": 8,        \"name\": \"CDSV_LeMans_Chartres\",        \"_links\": {          \"self\": {            \"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/teams/8\"          }        }      },      {        \"_type\": \"team\",        \"id\": 30,        \"name\": \"VMOA_IARD_EQUIPE\",        \"_links\": {          \"self\": {            \"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/teams/30\"          }        }      },      {        \"_type\": \"team\",        \"id\": 32,        \"name\": \"VNR\",        \"_links\": {          \"self\": {            \"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/teams/32\"          }        }      },      {        \"_type\": \"team\",        \"id\": 54,        \"name\": \"OBSOLETE - - - - - VMOE CHARTRES\",        \"_links\": {          \"self\": {            \"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/teams/54\"          }        }      },      {        \"_type\": \"team\",        \"id\": 130,        \"name\": \"VALIDATION PTR9\",        \"_links\": {          \"self\": {            \"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/teams/130\"          }        }      },      {        \"_type\": \"team\",        \"id\": 138,        \"name\": \"ETUDES_ AIA\",        \"_links\": {          \"self\": {            \"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/teams/138\"          }        }      },      {        \"_type\": \"team\",        \"id\": 146,        \"name\": \"ETUDES_SINISTRES\",        \"_links\": {          \"self\": {            \"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/teams/146\"          }        }      },      {        \"_type\": \"team\",        \"id\": 159,        \"name\": \"VMOA_EPARGNE_EQUIPE\",        \"_links\": {          \"self\": {            \"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/teams/159\"          }        }      },      {        \"_type\": \"team\",        \"id\": 183,        \"name\": \"VMOA AFFINITY\",        \"_links\": {          \"self\": {            \"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/teams/183\"          }        }      },      {        \"_type\": \"team\",        \"id\": 195,        \"name\": \"ETUDES IARD\",        \"_links\": {          \"self\": {            \"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/teams/195\"          }        }      },      {        \"_type\": \"team\",        \"id\": 205,        \"name\": \"VALIDATION PTR5\",        \"_links\": {          \"self\": {            \"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/teams/205\"          }        }      },      {        \"_type\": \"team\",        \"id\": 237,        \"name\": \"VMOA SISM\",        \"_links\": {          \"self\": {            \"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/teams/237\"          }        }      },      {        \"_type\": \"team\",        \"id\": 248,        \"name\": \"VMOE SISM invités\",        \"_links\": {          \"self\": {            \"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/teams/248\"          }        }      },      {        \"_type\": \"team\",        \"id\": 256,        \"name\": \"PTR5 invités\",        \"_links\": {          \"self\": {            \"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/teams/256\"          }        }      },      {        \"_type\": \"team\",        \"id\": 265,        \"name\": \"Pilotes de versions\",        \"_links\": {          \"self\": {            \"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/teams/265\"          }        }      },      {        \"_type\": \"team\",        \"id\": 307,        \"name\": \"Equipe DCM Chef de projet\",        \"_links\": {          \"self\": {            \"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/teams/307\"          }        }      },      {        \"_type\": \"team\",        \"id\": 311,        \"name\": \"Equipe DCM Invité\",        \"_links\": {          \"self\": {            \"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/teams/311\"          }        }      },      {        \"_type\": \"team\",        \"id\": 377,        \"name\": \"AM_EPARGNE_EQUIPE\",        \"_links\": {          \"self\": {            \"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/teams/377\"          }        }      },      {        \"_type\": \"team\",        \"id\": 384,        \"name\": \"PARAM_EPARGNE_EQUIPE\",        \"_links\": {          \"self\": {            \"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/teams/384\"          }        }      },      {        \"_type\": \"team\",        \"id\": 641,        \"name\": \"VMOA VMOE SISM invités\",        \"_links\": {          \"self\": {            \"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/teams/641\"          }        }      },      {        \"_type\": \"team\",        \"id\": 895,        \"name\": \"TS SIRH Paie invités\",        \"_links\": {          \"self\": {            \"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/teams/895\"          }        }      },      {        \"_type\": \"team\",        \"id\": 1080,        \"name\": \"GMF-TAU-VIE-Invites\",        \"_links\": {          \"self\": {            \"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/teams/1080\"          }        }      },      {        \"_type\": \"team\",        \"id\": 1127,        \"name\": \"AMOA  LMC INDEMNISATION\",        \"_links\": {          \"self\": {            \"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/teams/1127\"          }        }      },      {        \"_type\": \"team\",        \"id\": 1169,        \"name\": \"GMF-TAU-VIE-Testeurs-Avancés\",        \"_links\": {          \"self\": {            \"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/teams/1169\"          }        }      },      {        \"_type\": \"team\",        \"id\": 2054,        \"name\": \"CDV_NIORT\",        \"_links\": {          \"self\": {            \"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/teams/2054\"          }        }      },      {        \"_type\": \"team\",        \"id\": 2325,        \"name\": \"GMF-TAU-VIE-Chef de projet\",        \"_links\": {          \"self\": {            \"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/teams/2325\"          }        }      },      {        \"_type\": \"team\",        \"id\": 2706,        \"name\": \"Responsable des CDV\",        \"_links\": {          \"self\": {            \"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/teams/2706\"          }        }      },      {        \"_type\": \"team\",        \"id\": 2773,        \"name\": \"Recette_EPM\",        \"_links\": {          \"self\": {            \"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/teams/2773\"          }        }      },      {        \"_type\": \"team\",        \"id\": 3156,        \"name\": \"EQUIPE AMOA CMP MMA\",        \"_links\": {          \"self\": {            \"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/teams/3156\"          }        }      },      {        \"_type\": \"team\",        \"id\": 3335,        \"name\": \"SUIVI PRODUCTION DAV\",        \"_links\": {          \"self\": {            \"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/teams/3335\"          }        }      },      {        \"_type\": \"team\",        \"id\": 3844,        \"name\": \"Testeur_Archivistes\",        \"_links\": {          \"self\": {            \"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/teams/3844\"          }        }      },      {        \"_type\": \"team\",        \"id\": 3883,        \"name\": \"Val_SCS\",        \"_links\": {          \"self\": {            \"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/teams/3883\"          }        }      },      {        \"_type\": \"team\",        \"id\": 3924,        \"name\": \"P9\",        \"_links\": {          \"self\": {            \"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/teams/3924\"          }        }      },      {        \"_type\": \"team\",        \"id\": 3930,        \"name\": \"MMA_SINISTRES_TESTEUR_REFERENT\",        \"_links\": {          \"self\": {            \"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/teams/3930\"          }        }      }    ]  },  \"_links\": {    \"self\": {      \"href\": \"http://squash-tm-dev.covea.priv/squash/api/rest/latest/teams?page=0&size=50&sort=id,asc\"    }  },  \"page\": {    \"size\": 50,    \"totalElements\": 34,    \"totalPages\": 1,    \"number\": 0  }}", "request");
         //Simulate Post new clearance
-        createServerMock("POST", "/clearances/2/users/384", 200, "{\"content\": {\"automated_test_writer\": {\"_type\": \"profile\",\"id\": 2,\"name\": \"TestEditor\",\"type\": \"system\",\"users\": [{\"_type\": \"team\",\"id\": 384,\"name\": \"PARAM_EPARGNE_EQUIPE\",\"_links\": {\"self\": {\"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/teams/384\"}}},{\"_type\": \"user\",\"id\": 1434,\"login\": \"S047432\",\"_links\": {\"self\": {\"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/users/1434\"}}}]}},\"_links\": {\"self\": {\"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/projects/1281/clearances\"}}}", "request");
+        createServerMock("POST", "/clearances/2/users/384", 200, "{\"content\": {\"project_viewer\": {\"_type\": \"profile\",\"id\": 2,\"name\": \"TestEditor\",\"type\": \"system\",\"users\": [{\"_type\": \"team\",\"id\": 384,\"name\": \"PARAM_EPARGNE_EQUIPE\",\"_links\": {\"self\": {\"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/teams/384\"}}},{\"_type\": \"user\",\"id\": 1434,\"login\": \"S047432\",\"_links\": {\"self\": {\"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/users/1434\"}}}]}},\"_links\": {\"self\": {\"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/projects/1281/clearances\"}}}", "request");
 
         Project project = new Project("https://localhost:4321", "project", 1281, "temp v8");
         Clearance clear = project.setClearances("2", "384");
@@ -409,4 +410,56 @@ public class TestProject extends SquashTMTest {
         Assert.assertTrue(project.deleteClearances("384").isEmpty());
     }
 
+    @Test
+    public void testGetTestCases() {
+        createServerMock("GET", "/projects/1281/test-cases?sort=id", 200, "{\n" +
+                "  \"_embedded\": {\n" +
+                "    \"test-cases\": [\n" +
+                "      {\n" +
+                "        \"_type\": \"test-case\",\n" +
+                "        \"id\": 1062293,\n" +
+                "        \"name\": \"test crea exe test case\",\n" +
+                "        \"reference\": \"\",\n" +
+                "        \"_links\": {\n" +
+                "          \"self\": {\n" +
+                "            \"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/test-cases/1062293\"\n" +
+                "          }\n" +
+                "        }\n" +
+                "      },\n" +
+                "      {\n" +
+                "        \"_type\": \"test-case\",\n" +
+                "        \"id\": 1062294,\n" +
+                "        \"name\": \"yo\",\n" +
+                "        \"reference\": \"\",\n" +
+                "        \"_links\": {\n" +
+                "          \"self\": {\n" +
+                "            \"href\": \"https://squash-tm-dev.covea.priv/squash/api/rest/latest/test-cases/1062294\"\n" +
+                "          }\n" +
+                "        }\n" +
+                "      }\n" +
+                "    ]\n" +
+                "  },\n" +
+                "  \"_links\": {\n" +
+                "    \"self\": {\n" +
+                "      \"href\": \"http://squash-tm-dev.covea.priv/squash/api/rest/latest/projects/1281/test-cases?page=0&size=20&sort=id,asc\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"page\": {\n" +
+                "    \"size\": 20,\n" +
+                "    \"totalElements\": 2,\n" +
+                "    \"totalPages\": 1,\n" +
+                "    \"number\": 0\n" +
+                "  }\n" +
+                "}", "request");
+
+        List<TestCase> listTC = new Project("https://localhost:4321", "project", 1281, "project").getTestCases();
+        Assert.assertEquals(listTC.size(), 2);
+    }
+
+    @Test(expectedExceptions = NotImplementedException.class)
+    public void testCompleteDetails() {
+        Project pr = new Project("osef", "ouais", 1, "yolo");
+        pr.completeDetails();
+    }
+    
 }
