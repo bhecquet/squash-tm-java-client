@@ -154,7 +154,7 @@ public class Project extends Entity {
     }
 
     /**
-     * Renvoie la liste des cas de test associés à un projet
+     * Return list of testcases from project
      *
      * @return
      */
@@ -170,7 +170,7 @@ public class Project extends Entity {
             }
             return testCases;
         } catch (UnirestException e) {
-            throw new SquashTmException("Impossible de récupérer la liste des cas de test", e);
+            throw new SquashTmException("Cannot get list of test cases", e);
         }
     }
 

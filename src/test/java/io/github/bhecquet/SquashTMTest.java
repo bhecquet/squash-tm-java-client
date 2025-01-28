@@ -284,6 +284,7 @@ public class SquashTMTest {
                 pageList.add(jsonResponse);
 
             } catch (JSONException | NullPointerException e) {
+                System.out.println("Error on mock: " + e.getMessage());
             }
 
 
