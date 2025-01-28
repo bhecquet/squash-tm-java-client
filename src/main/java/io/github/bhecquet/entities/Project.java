@@ -14,6 +14,7 @@ import java.util.List;
 public class Project extends Entity {
 
     public static final String PROJECTS_URL = "projects";
+    public static final String PROJECT_URL = "projects/%d";
     public static final String CAMPAIGNS_URL = "/campaigns";
     public final static String TEAMS_URL = "teams";
     public static final String TEST_CASES_URL = "test-cases";
@@ -30,8 +31,24 @@ public class Project extends Entity {
         throw new NotImplementedException();
     }
 
+    /**
+     * Get project from its name
+     *
+     * @param projectName
+     * @return
+     */
     public static Project get(String projectName) {
         return getFromUrl(apiRootUrl + String.format("%s?projectName=%s", PROJECTS_URL, projectName));
+    }
+
+    /**
+     * Get projet from its ID
+     *
+     * @param id
+     * @return
+     */
+    public static Project get(int id) {
+        return getFromUrl((apiRootUrl + String.format(PROJECT_URL, id)));
     }
 
     public static Project getFromUrl(String url) {
