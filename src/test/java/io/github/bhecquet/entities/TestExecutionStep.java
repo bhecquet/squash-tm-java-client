@@ -1,7 +1,6 @@
 package io.github.bhecquet.entities;
 
 import io.github.bhecquet.SquashTMTest;
-import io.github.bhecquet.exceptions.NotImplementedException;
 import io.github.bhecquet.exceptions.SquashTmException;
 import kong.unirest.core.HttpRequestWithBody;
 import kong.unirest.core.RequestBodyEntity;
@@ -247,15 +246,27 @@ public class TestExecutionStep extends SquashTMTest {
         RequestBodyEntity patchRequest = (RequestBodyEntity) createServerMock("PATCH", "/execution-steps/6", 200, "{}", "requestBodyEntity");
         when(patchRequest.asJson()).thenThrow(UnirestException.class);
 
-        ExecutionStep executionStatus = new ExecutionStep("https://localhost:4321/execution-steps/6", 6, "Click the button");
-        executionStatus.setComment("hello");
+        ExecutionStep executionStep = new ExecutionStep("https://localhost:4321/execution-steps/6", 6, "Click the button");
+        executionStep.setComment("hello");
 
     }
 
-    @Test(expectedExceptions = NotImplementedException.class)
+    @Test
     public void testCompleteDetails() {
-        ExecutionStep es = new ExecutionStep("osef", "ouais", 1, "yolo");
-        es.completeDetails();
+        createServerMock("GET", "/execution-steps/6", 200, EXECUTION_STEP_REPLY_DATA);
+        ExecutionStep executionStep = new ExecutionStep("https://localhost:4321/execution-steps/6", 6, "Click the button");
+        executionStep.completeDetails();
+
+        Assert.assertEquals(executionStep.getStatus(), "SUCCESS");
+        Assert.assertEquals(executionStep.getOrder(), 1);
+        Assert.assertEquals(executionStep.getExpectedResult(), "<p>The page shows up</p>");
+        Assert.assertEquals(executionStep.getAction(), "Click the button");
+        Assert.assertEquals(executionStep.getComment(), "hello");
+        Assert.assertEquals(executionStep.getLastExecutedBy(), "User-J9");
+        Assert.assertEquals(executionStep.getLastExecutedOn(), "2015-04-26T10:00:00.000+00:00");
+        Assert.assertEquals(executionStep.getReferencedStepId(), 2);
+        Assert.assertEquals(executionStep.getCustomFields().size(), 1);
+        Assert.assertEquals(executionStep.getTestStepCustomFields().size(), 1);
     }
-    
+
 }

@@ -76,7 +76,7 @@ public class ExecutionStep extends Step {
 
     @Override
     public void completeDetails() {
-        JSONObject json = getJSonResponse(Unirest.get(String.format("%s", url)));
+        JSONObject json = getJSonResponse(Unirest.get(url));
 
         status = json.getString(FIELD_EXECUTION_STATUS);
         order = json.getInt(FIELD_EXECUTION_STEP_ORDER);
@@ -86,7 +86,7 @@ public class ExecutionStep extends Step {
         lastExecutedBy = json.optString(FIELD_LAST_EXECUTED_BY, "");
         lastExecutedOn = json.optString(FIELD_LAST_EXECUTED_ON, "");
         try {
-            // dans le cas où "referenced_test_step" est null, on exclue la ligne, c'est le comportement du plugin actuel
+            // when "referenced_test_step" is null, exclude line
             referencedStepId = json.getJSONObject(FIELD_REFERENCED_TEST_STEP).getInt(FIELD_ID);
         } catch (JSONException e) {
             throw new ExecutionStepToExcludeException();
