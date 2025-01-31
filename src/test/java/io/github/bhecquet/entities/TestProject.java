@@ -3,10 +3,7 @@ package io.github.bhecquet.entities;
 import io.github.bhecquet.SquashTMTest;
 import io.github.bhecquet.exceptions.ConfigurationException;
 import io.github.bhecquet.exceptions.SquashTmException;
-import kong.unirest.core.GetRequest;
-import kong.unirest.core.HttpResponse;
-import kong.unirest.core.JsonNode;
-import kong.unirest.core.UnirestException;
+import kong.unirest.core.*;
 import kong.unirest.core.json.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -376,5 +373,150 @@ public class TestProject extends SquashTMTest {
 
         Project project = new Project("https://localhost:4321/projects/14", "project", 14, "myProject");
         project.getCampaigns();
+    }
+
+    @Test
+    public void testSetClearance() {
+        Project project = new Project("https://localhost:4321/projects/367", "project", 367, "myProject");
+
+        createServerMock("POST", "/projects/367/clearances/7/users/486,521", 200, "{\n" +
+                "  \"content\" : {\n" +
+                "    \"test_designer\" : {\n" +
+                "      \"_type\" : \"profile\",\n" +
+                "      \"id\" : 7,\n" +
+                "      \"name\" : \"TestDesigner\",\n" +
+                "      \"type\" : \"system\",\n" +
+                "      \"users\" : [ {\n" +
+                "        \"_type\" : \"user\",\n" +
+                "        \"id\" : 486,\n" +
+                "        \"login\" : \"User-1\",\n" +
+                "        \"_links\" : {\n" +
+                "          \"self\" : {\n" +
+                "            \"href\" : \"https://localhost:4321/users/486\"\n" +
+                "          }\n" +
+                "        }\n" +
+                "      }, {\n" +
+                "        \"_type\" : \"user\",\n" +
+                "        \"id\" : 521,\n" +
+                "        \"login\" : \"User-2\",\n" +
+                "        \"_links\" : {\n" +
+                "          \"self\" : {\n" +
+                "            \"href\" : \"https://localhost:4321/users/521\"\n" +
+                "          }\n" +
+                "        }\n" +
+                "      } ]\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"_links\" : {\n" +
+                "    \"self\" : {\n" +
+                "      \"href\" : \"https://localhost:4321/projects/367/clearances\"\n" +
+                "    }\n" +
+                "  }\n" +
+                "}");
+
+        // no error
+        project.setClearances(7, List.of(486, 521));
+    }
+
+
+    @Test(expectedExceptions = SquashTmException.class)
+    public void testSetClearanceWithError() {
+        HttpRequestWithBody postRequest = (HttpRequestWithBody) createServerMock("POST", "/projects/367/clearances/7/users/486,521", 200, "{}", "request");
+        when(postRequest.asJson()).thenThrow(UnirestException.class);
+
+        Project project = new Project("https://localhost:4321/projects/367", "project", 367, "myProject");
+        project.setClearances(7, List.of(486, 521));
+    }
+
+    @Test
+    public void testDeleteClearance() {
+        Project project = new Project("https://localhost:4321/projects/367", "project", 367, "myProject");
+
+        createServerMock("DELETE", "/projects/367/users/486,521", 200, "");
+        project.deleteClearances(List.of(486, 521));
+    }
+
+    @Test(expectedExceptions = SquashTmException.class)
+    public void testDeleteClearanceWithError() {
+        HttpRequestWithBody postRequest = (HttpRequestWithBody) createServerMock("DELETE", "/projects/367/users/486,521", 200, "", "request");
+        when(postRequest.asJson()).thenThrow(UnirestException.class);
+
+        Project project = new Project("https://localhost:4321/projects/367", "project", 367, "myProject");
+        project.deleteClearances(List.of(486, 521));
+    }
+
+    @Test
+    public void testGetTestCases() {
+        createServerMock("GET", "/projects/14/test-cases?sort=id", 200, "{\n" +
+                "  \"_embedded\" : {\n" +
+                "    \"test-cases\" : [ {\n" +
+                "      \"_type\" : \"test-case\",\n" +
+                "      \"id\" : 122,\n" +
+                "      \"name\" : \"test case 1\",\n" +
+                "      \"reference\" : \"TC-1\",\n" +
+                "      \"_links\" : {\n" +
+                "        \"self\" : {\n" +
+                "          \"href\" : \"https://localhost:4321/test-cases/122\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }, {\n" +
+                "      \"_type\" : \"scripted-test-case\",\n" +
+                "      \"id\" : 222,\n" +
+                "      \"name\" : \"scripted test case 1\",\n" +
+                "      \"reference\" : \"STC-1\",\n" +
+                "      \"_links\" : {\n" +
+                "        \"self\" : {\n" +
+                "          \"href\" : \"https://localhost:4321/test-cases/222\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }, {\n" +
+                "      \"_type\" : \"keyword-test-case\",\n" +
+                "      \"id\" : 322,\n" +
+                "      \"name\" : \"keyword test case 1\",\n" +
+                "      \"reference\" : \"KTC-1\",\n" +
+                "      \"_links\" : {\n" +
+                "        \"self\" : {\n" +
+                "          \"href\" : \"https://localhost:4321/test-cases/322\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    } ]\n" +
+                "  },\n" +
+                "  \"_links\" : {\n" +
+                "    \"first\" : {\n" +
+                "      \"href\" : \"https://localhost:4321/projects/14/test-cases?page=0&size=3&sort=name,desc\"\n" +
+                "    },\n" +
+                "    \"prev\" : {\n" +
+                "      \"href\" : \"https://localhost:4321/projects/14/test-cases?page=1&size=3&sort=name,desc\"\n" +
+                "    },\n" +
+                "    \"self\" : {\n" +
+                "      \"href\" : \"https://localhost:4321/projects/14/test-cases?page=2&size=3&sort=name,desc\"\n" +
+                "    },\n" +
+                "    \"next\" : {\n" +
+                "      \"href\" : \"https://localhost:4321/projects/14/test-cases?page=3&size=3&sort=name,desc\"\n" +
+                "    },\n" +
+                "    \"last\" : {\n" +
+                "      \"href\" : \"https://localhost:4321/projects/14/test-cases?page=3&size=3&sort=name,desc\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"page\" : {\n" +
+                "    \"size\" : 3,\n" +
+                "    \"totalElements\" : 10,\n" +
+                "    \"totalPages\" : 4,\n" +
+                "    \"number\" : 2\n" +
+                "  }\n" +
+                "}");
+        Project project = new Project("https://localhost:4321/projects/14", "project", 14, "myProject");
+        List<TestCase> testCases = project.getTestCases();
+        Assert.assertEquals(testCases.size(), 3);
+        Assert.assertEquals(testCases.get(0).getName(), "test case 1");
+        Assert.assertEquals(testCases.get(0).getUrl(), "https://localhost:4321/test-cases/122");
+    }
+
+    @Test(expectedExceptions = SquashTmException.class)
+    public void testGetTestCasesWithError() {
+        GetRequest getRequest = (GetRequest) createServerMock("GET", "/projects/14/test-cases?sort=id", 200, "{}");
+        when(getRequest.asPaged(any(), (Function<HttpResponse<JsonNode>, String>) any(Function.class))).thenThrow(UnirestException.class);
+        Project project = new Project("https://localhost:4321/projects/14", "project", 14, "myProject");
+        List<TestCase> testCases = project.getTestCases();
     }
 }

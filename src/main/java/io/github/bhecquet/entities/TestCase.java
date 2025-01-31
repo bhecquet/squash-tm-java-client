@@ -52,7 +52,7 @@ public class TestCase extends Entity {
     private List<Dataset> datasets = new ArrayList<>();
 
     public TestCase(String url, String type, int id, String name) {
-        super(url, type, id, null);
+        super(url, type, id, name);
     }
 
 

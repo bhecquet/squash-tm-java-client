@@ -10,6 +10,7 @@ import kong.unirest.core.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Project extends Entity {
 
@@ -130,26 +131,36 @@ public class Project extends Entity {
         }
     }
 
-    //teamsNames au format XXX,YYY,ZZZ ou AAA si un seul Id
-    public Clearance setClearances(String profileId, String teamIds) {
+    /**
+     * Adds permissions to a project
+     *
+     * @param profileId   ID of the profile to affect users / teams
+     * @param userTeamIds List of user/team ids
+     */
+    public Clearance setClearances(int profileId, List<Integer> userTeamIds) {
         try {
-            JSONObject json = getJSonResponse(buildPostRequest(url + String.format("/clearances/%s/users/%s", profileId, teamIds)));
+            JSONObject json = getJSonResponse(buildPostRequest(url + String.format("/clearances/%d/users/%s", profileId, userTeamIds.stream().map(i -> Integer.toString(i)).collect(Collectors.joining(",")))));
             return new Clearance(
                     json.getJSONObject("_links").getJSONObject("self").getString("href"),
-                    json.getJSONObject("content").getJSONObject("project_viewer").getString(FIELD_TYPE),
-                    json.getJSONObject("content").getJSONObject("project_viewer").getInt(FIELD_ID),
-                    json.getJSONObject("content").getJSONObject("project_viewer").getString(FIELD_NAME));
+                    "clearance",
+                    0,
+                    "");
         } catch (UnirestException e) {
-            throw new SquashTmException(String.format("Cannot set clearances for project %s and profile %s", name, profileId), e);
+            throw new SquashTmException(String.format("Cannot set clearances for project %s and profile %d", name, profileId), e);
         }
     }
 
-    //teamsIds au format XXX,YYY,ZZZ ou AAA si un seul Id
-    public JSONObject deleteClearances(String teamIds) {
+    /**
+     * Remove permissions of given users to the project
+     *
+     * @param userTeamIds ID of the user/team for which we remove permission
+     * @return
+     */
+    public JSONObject deleteClearances(List<Integer> userTeamIds) {
         try {
-            return getJSonResponse(buildDeleteRequest(url + String.format("/users/%s", teamIds)));
+            return getJSonResponse(buildDeleteRequest(url + String.format("/users/%s", userTeamIds.stream().map(i -> Integer.toString(i)).collect(Collectors.joining(",")))));
         } catch (UnirestException e) {
-            throw new SquashTmException(String.format("Cannot set clearances for project %s and team %s", name, teamIds), e);
+            throw new SquashTmException(String.format("Cannot set clearances for project %s and team %s", name, userTeamIds.stream().map(i -> Integer.toString(i)).collect(Collectors.joining(","))), e);
         }
     }
 
