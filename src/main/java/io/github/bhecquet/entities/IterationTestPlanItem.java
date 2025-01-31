@@ -151,8 +151,7 @@ public class IterationTestPlanItem extends Entity {
     public Dataset getDataset() {
         return dataset;
     }
-
-
+    
     public TestSuite getTestSuite() {
         return testSuite;
     }

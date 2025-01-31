@@ -1,15 +1,18 @@
 package io.github.bhecquet.entities;
 
-import io.github.bhecquet.exceptions.NotImplementedException;
+import io.github.bhecquet.exceptions.ExecutionStepToExcludeException;
 import io.github.bhecquet.exceptions.SquashTmException;
+import kong.unirest.core.Unirest;
 import kong.unirest.core.UnirestException;
 import kong.unirest.core.json.JSONException;
 import kong.unirest.core.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ExecutionStep extends Step {
 
+    private static final String EXECUTION_URL = "executions/%d";
     public static final String EXECUTION_STATUS_URL = "/execution-steps/%d/execution-status";
     private static final String FIELD_TEST_STEP_CUSTOM_FIELDS = "test_step_custom_fields";
     private static final String FIELD_EXECUTION_STATUS = "execution_status";
@@ -73,7 +76,36 @@ public class ExecutionStep extends Step {
 
     @Override
     public void completeDetails() {
-        throw new NotImplementedException();
+        JSONObject json = getJSonResponse(Unirest.get(String.format("%s", url)));
+
+        status = json.getString(FIELD_EXECUTION_STATUS);
+        order = json.getInt(FIELD_EXECUTION_STEP_ORDER);
+        expectedResult = json.optString(FIELD_EXPECTED_RESULT, "");
+        action = json.optString(FIELD_ACTION, "");
+        comment = json.optString(FIELD_COMMENT, "");
+        lastExecutedBy = json.optString(FIELD_LAST_EXECUTED_BY, "");
+        lastExecutedOn = json.optString(FIELD_LAST_EXECUTED_ON, "");
+        try {
+            // dans le cas où "referenced_test_step" est null, on exclue la ligne, c'est le comportement du plugin actuel
+            referencedStepId = json.getJSONObject(FIELD_REFERENCED_TEST_STEP).getInt(FIELD_ID);
+        } catch (JSONException e) {
+            throw new ExecutionStepToExcludeException();
+        }
+
+        readCustomFields(json.getJSONArray(FIELD_CUSTOM_FIELDS));
+
+        testStepCustomFields = new ArrayList<>();
+        for (JSONObject field : (List<JSONObject>) json.getJSONArray(FIELD_TEST_STEP_CUSTOM_FIELDS).toList()) {
+            testStepCustomFields.add(CustomField.fromJson(field));
+        }
+    }
+
+    public static ExecutionStep get(int id) {
+        try {
+            return fromJson(getJSonResponse(buildGetRequest(apiRootUrl + String.format(EXECUTION_URL, id))));
+        } catch (UnirestException e) {
+            throw new SquashTmException(String.format("L'exécution step %d n'existe pas", id));
+        }
     }
 
     public static ExecutionStep fromJson(JSONObject json) {
