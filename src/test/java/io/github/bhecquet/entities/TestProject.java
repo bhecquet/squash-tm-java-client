@@ -5,6 +5,7 @@ import io.github.bhecquet.exceptions.ConfigurationException;
 import io.github.bhecquet.exceptions.SquashTmException;
 import kong.unirest.core.*;
 import kong.unirest.core.json.JSONObject;
+import org.mockito.MockedStatic;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -13,7 +14,7 @@ import java.util.List;
 import java.util.function.Function;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class TestProject extends SquashTMTest {
 
@@ -518,5 +519,36 @@ public class TestProject extends SquashTMTest {
         when(getRequest.asPaged(any(), (Function<HttpResponse<JsonNode>, String>) any(Function.class))).thenThrow(UnirestException.class);
         Project project = new Project("https://localhost:4321/projects/14", "project", 14, "myProject");
         List<TestCase> testCases = project.getTestCases();
+    }
+
+    @Test
+    public void testBindCustomField() {
+        HttpRequestWithBody postRequest = (HttpRequestWithBody) createServerMock("POST", "/projects/14/custom-fields/CAMPAIGN", 200, "{}", "request");
+        Project project = new Project("https://localhost:4321/projects/14", "project", 14, "myProject");
+        try (MockedStatic mockedCf = mockStatic(CustomField.class)) {
+            mockedCf.when(() -> CustomField.getByCode("FOO")).thenReturn(new CustomField("https://localhost:4321/custom-fields/12", "custom-field", 12, "foo", "Foo", "CODE"));
+            project.bindCustomField("FOO", "CAMPAIGN");
+            verify(postRequest).body("cufId=12");
+        }
+    }
+
+    @Test(expectedExceptions = SquashTmException.class, expectedExceptionsMessageRegExp = "No custom field with code FOO exist in this instance")
+    public void testBindCustomFieldNoMatchingCustomField() {
+        HttpRequestWithBody postRequest = (HttpRequestWithBody) createServerMock("POST", "/projects/14/custom-fields/CAMPAIGN", 200, "{}", "request");
+        Project project = new Project("https://localhost:4321/projects/14", "project", 14, "myProject");
+        try (MockedStatic mockedCf = mockStatic(CustomField.class)) {
+            mockedCf.when(() -> CustomField.getByCode("FOO")).thenReturn(null);
+            project.bindCustomField("FOO", "CAMPAIGN");
+            verify(postRequest).body("cufId=12");
+        }
+    }
+
+    @Test(expectedExceptions = SquashTmException.class, expectedExceptionsMessageRegExp = ".*Entity type CAMP is not allowed.*")
+    public void testBindCustomFieldBadEntityType() {
+        Project project = new Project("https://localhost:4321/projects/14", "project", 14, "myProject");
+        try (MockedStatic mockedCf = mockStatic(CustomField.class)) {
+            mockedCf.when(() -> CustomField.getByCode("FOO")).thenReturn(new CustomField("https://localhost:4321/custom-fields/12", "custom-field", 12, "foo", "Foo", "CODE"));
+            project.bindCustomField("FOO", "CAMP");
+        }
     }
 }

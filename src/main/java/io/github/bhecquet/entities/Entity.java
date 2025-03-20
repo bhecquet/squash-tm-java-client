@@ -39,7 +39,7 @@ public abstract class Entity {
     private static String apiToken;
 
     protected static String apiRootUrl;
-    protected List<CustomField> customFields = new ArrayList<>();
+    protected List<CustomFieldValue> customFields = new ArrayList<>();
     protected String url;
     protected int id;
     protected String name;
@@ -79,6 +79,10 @@ public abstract class Entity {
 
     public String getName() {
         return name;
+    }
+
+    public String getType() {
+        return type;
     }
 
     protected static GetRequest buildGetRequest(String url) {
@@ -227,7 +231,7 @@ public abstract class Entity {
     protected void readCustomFields(JSONArray customFieldsJson) {
         customFields = new ArrayList<>();
         for (JSONObject field : (List<JSONObject>) customFieldsJson.toList()) {
-            customFields.add(CustomField.fromJson(field));
+            customFields.add(CustomFieldValue.fromJson(field));
         }
     }
 
@@ -266,7 +270,7 @@ public abstract class Entity {
         getJSonResponse(buildPatchRequest(url).body(json));
     }
 
-    public List<CustomField> getCustomFields() {
+    public List<CustomFieldValue> getCustomFields() {
         return customFields;
     }
 }

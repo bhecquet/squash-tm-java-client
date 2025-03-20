@@ -16,14 +16,13 @@ public class TestRealSquashInstance {
     @BeforeMethod(alwaysRun = true)
     public void init() {
         String squashUrl = System.getProperty("squashUrl");
-        String squashUser = System.getProperty("squashUser");
         String squashPassword = System.getProperty("squashPassword");
 
-        if (squashUrl == null || squashUser == null || squashPassword == null) {
-            throw new SkipException("Squash not configured, provide 'squashUrl', 'squashUser', 'squashPassword' as properties");
+        if (squashUrl == null || squashPassword == null) {
+            throw new SkipException("Squash not configured, provide 'squashUrl', 'squashPassword' as properties");
         }
 
-        api = new SquashTMApi(squashUrl, squashUser, squashPassword, false);
+        api = new SquashTMApi(squashUrl, squashPassword, false);
     }
 
     @Test
@@ -32,5 +31,13 @@ public class TestRealSquashInstance {
         String squashProject = System.getProperty("squashProject");
         Project project = Project.get(squashProject);
         Campaign.create(project, "campaignCF", (String) null, Map.of("APP", List.of("comp1", "comp2")));
+    }
+
+    @Test
+    public void testBindCustomField() {
+        String squashProject = System.getProperty("squashProject");
+        Project project = Project.get(squashProject);
+        project.bindCustomField("TAGS", "CAMPAIGN");
+
     }
 }

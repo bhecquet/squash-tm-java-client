@@ -30,7 +30,7 @@ public class ExecutionStep extends Step {
     private String comment;
     private int referencedStepId;
 
-    protected List<CustomField> testStepCustomFields;
+    protected List<CustomFieldValue> testStepCustomFields;
 
     public ExecutionStep(String url, int id, String name) {
         this(url, "", id, name);
@@ -70,7 +70,7 @@ public class ExecutionStep extends Step {
         return comment;
     }
 
-    public List<CustomField> getTestStepCustomFields() {
+    public List<CustomFieldValue> getTestStepCustomFields() {
         return testStepCustomFields;
     }
 
@@ -96,7 +96,7 @@ public class ExecutionStep extends Step {
 
         testStepCustomFields = new ArrayList<>();
         for (JSONObject field : (List<JSONObject>) json.getJSONArray(FIELD_TEST_STEP_CUSTOM_FIELDS).toList()) {
-            testStepCustomFields.add(CustomField.fromJson(field));
+            testStepCustomFields.add(CustomFieldValue.fromJson(field));
         }
     }
 

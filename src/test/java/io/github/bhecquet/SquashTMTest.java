@@ -392,6 +392,7 @@ public class SquashTMTest {
         when(postRequest.getUrl()).thenReturn(serverUrl);
         when(postRequest.body(any(JSONObject.class))).thenReturn(requestBodyEntity);
         when(postRequest.body(any(byte[].class))).thenReturn(requestBodyEntity);
+        when(postRequest.body(anyString())).thenReturn(requestBodyEntity);
         when(postRequest.asJson()).thenReturn(jsonResponse);
         when(requestBodyEntity.asJson()).thenReturn(jsonResponse);
         when(requestBodyEntity.asString()).thenReturn(response);
