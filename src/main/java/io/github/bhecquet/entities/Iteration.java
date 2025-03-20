@@ -49,6 +49,7 @@ public class Iteration extends Entity {
      */
     public IterationTestPlanItem addTestCase(int testCaseId, Integer datasetId) {
 
+        // check if test case is already present with the same dataset as requested
         for (IterationTestPlanItem testPlanItem : getAllTestCases()) {
             if (testPlanItem.getTestCase() != null && testCaseId == testPlanItem.getTestCase().getId()
                     && (testPlanItem.getDataset() == null || datasetId == null || testPlanItem.getDataset() != null && datasetId == testPlanItem.getDataset().getId())) {
@@ -67,6 +68,7 @@ public class Iteration extends Entity {
         // check that Dataset is valid
         Dataset dataset = null;
         if (datasetId != null) {
+            testCase.completeDetails(); // add details to the test case
             Optional<Dataset> datasetOpt = testCase.getDatasets().stream().filter(dataset1 -> dataset1.getId() == datasetId).findFirst();
             if (datasetOpt.isPresent()) {
                 dataset = datasetOpt.get();

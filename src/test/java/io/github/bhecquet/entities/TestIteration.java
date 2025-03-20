@@ -5,6 +5,7 @@ import io.github.bhecquet.exceptions.ConfigurationException;
 import io.github.bhecquet.exceptions.SquashTmException;
 import kong.unirest.core.*;
 import kong.unirest.core.json.JSONObject;
+import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -661,6 +662,7 @@ public class TestIteration extends SquashTMTest {
     public void testAddTestCase() {
 
         createServerMock("GET", "/iterations/1/test-plan?sort=id", 200, TEST_PLAN_ITEMS_REPLY_DATA);
+        createServerMock("GET", "/test-cases/10", 200, TestTestCase.TEST_CASE_REPLY_DATA2);
         Iteration iteration = new Iteration("https://localhost:4321/iterations/1", "iteration", 1, "my_iteration");
 
         try (MockedStatic mockedTestCase = mockStatic(TestCase.class);
@@ -668,13 +670,14 @@ public class TestIteration extends SquashTMTest {
         ) {
             mockedIterationTestPlanItem.when(() -> IterationTestPlanItem.fromJson(any(JSONObject.class))).thenCallRealMethod();
 
-            TestCase mTestCase = new TestCase("", "test-case", 10, "TC1");
+            TestCase mTestCase = spy(new TestCase("https://localhost:4321/test-cases/10", "test-case", 10, "TC1"));
             mockedTestCase.when(() -> TestCase.get(10)).thenReturn(mTestCase);
-            Dataset mDataset = spy(new Dataset("", "dataset", 11, "DS"));
-            mTestCase.setDatasets(List.of(mDataset));
 
-            iteration.addTestCase(10, 11);
-            mockedIterationTestPlanItem.verify(() -> IterationTestPlanItem.create(iteration, mTestCase, mDataset));
+            iteration.addTestCase(10, 2);
+            ArgumentCaptor<Dataset> datasetArgument = ArgumentCaptor.forClass(Dataset.class);
+            mockedIterationTestPlanItem.verify(() -> IterationTestPlanItem.create(eq(iteration), eq(mTestCase), datasetArgument.capture()));
+            Assert.assertEquals(datasetArgument.getValue().getName(), "left handed people");
+            verify(mTestCase).completeDetails(); // check we complete details as dataset is provided
         }
     }
 
@@ -689,7 +692,7 @@ public class TestIteration extends SquashTMTest {
         ) {
             mockedIterationTestPlanItem.when(() -> IterationTestPlanItem.fromJson(any(JSONObject.class))).thenCallRealMethod();
 
-            TestCase mTestCase = new TestCase("", "test-case", 10, "TC1");
+            TestCase mTestCase = new TestCase("https://localhost:4321/test-cases/10", "test-case", 10, "TC1");
             mockedTestCase.when(() -> TestCase.get(10)).thenReturn(mTestCase);
 
             iteration.addTestCase(10, null);
@@ -704,6 +707,7 @@ public class TestIteration extends SquashTMTest {
     public void testAddTestCaseDatasetDoesNotMatch() {
 
         createServerMock("GET", "/iterations/1/test-plan?sort=id", 200, TEST_PLAN_ITEMS_REPLY_DATA);
+        createServerMock("GET", "/test-cases/10", 200, TestTestCase.TEST_CASE_REPLY_DATA2);
         Iteration iteration = new Iteration("https://localhost:4321/iterations/1", "iteration", 1, "my_iteration");
 
         try (MockedStatic mockedTestCase = mockStatic(TestCase.class);
@@ -711,10 +715,8 @@ public class TestIteration extends SquashTMTest {
         ) {
             mockedIterationTestPlanItem.when(() -> IterationTestPlanItem.fromJson(any(JSONObject.class))).thenCallRealMethod();
 
-            TestCase mTestCase = new TestCase("", "test-case", 10, "TC1");
+            TestCase mTestCase = new TestCase("https://localhost:4321/test-cases/10", "test-case", 10, "TC1");
             mockedTestCase.when(() -> TestCase.get(10)).thenReturn(mTestCase);
-            Dataset mDataset = spy(new Dataset("", "dataset", 12, "DS"));
-            mTestCase.setDatasets(List.of(mDataset));
 
             iteration.addTestCase(10, 11);
         }
@@ -806,11 +808,13 @@ public class TestIteration extends SquashTMTest {
 
     /**
      * Test record the same test case with a different dataset
+     * => a new iteration test plan item is created
      */
     @Test
     public void testAddTestCaseAlreadyPresentDatasetDifferent() {
 
         createServerMock("GET", "/iterations/1/test-plan?sort=id", 200, TEST_PLAN_ITEMS_REPLY_DATA);
+        createServerMock("GET", "/test-cases/8", 200, TestTestCase.TEST_CASE_REPLY_DATA2);
         Iteration iteration = new Iteration("https://localhost:4321/iterations/1", "iteration", 1, "my_iteration");
 
         try (MockedStatic mockedTestCase = mockStatic(TestCase.class);
@@ -819,13 +823,11 @@ public class TestIteration extends SquashTMTest {
             mockedIterationTestPlanItem.when(() -> IterationTestPlanItem.fromJson(any(JSONObject.class))).thenCallRealMethod();
             mockedTestCase.when(() -> TestCase.fromJson(any(JSONObject.class))).thenCallRealMethod();
 
-            TestCase mTestCase = new TestCase("", "test-case", 8, "TC1");
+            TestCase mTestCase = new TestCase("https://localhost:4321/test-cases/8", "test-case", 8, "TC1");
             mockedTestCase.when(() -> TestCase.get(8)).thenReturn(mTestCase);
-            Dataset mDataset = spy(new Dataset("", "dataset", 11, "DS"));
-            mTestCase.setDatasets(List.of(mDataset));
 
-            iteration.addTestCase(8, 11);
-            mockedIterationTestPlanItem.verify(() -> IterationTestPlanItem.create(iteration, mTestCase, mDataset));
+            iteration.addTestCase(8, 2);
+            mockedIterationTestPlanItem.verify(() -> IterationTestPlanItem.create(eq(iteration), eq(mTestCase), any(Dataset.class)));
         }
     }
 
