@@ -4,6 +4,7 @@ import kong.unirest.core.json.JSONArray;
 import kong.unirest.core.json.JSONObject;
 
 public class CustomFieldValue {
+    public static final String FIELD_VALUE = "value";
     private String code;
     private String label;
     private Object value;
@@ -16,18 +17,18 @@ public class CustomFieldValue {
     }
 
     public static CustomFieldValue fromJson(JSONObject json) {
-        if (!json.has("value")) {
-            json.put("value", "");
+        if (!json.has(FIELD_VALUE)) {
+            json.put(FIELD_VALUE, "");
         }
-        if (json.get("value") instanceof JSONArray) {
+        if (json.get(FIELD_VALUE) instanceof JSONArray) {
             return new CustomFieldValue(json.getString("code"),
                     json.getString("label"),
-                    json.getJSONArray("value").toList());
+                    json.getJSONArray(FIELD_VALUE).toList());
         }
 
         return new CustomFieldValue(json.getString("code"),
                 json.getString("label"),
-                json.optString("value", "")
+                json.optString(FIELD_VALUE, "")
         );
     }
 

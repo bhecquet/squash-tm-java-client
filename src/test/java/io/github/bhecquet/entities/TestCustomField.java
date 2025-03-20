@@ -35,12 +35,12 @@ public class TestCustomField extends SquashTMTest {
         json.put("code", "code");
 
         CustomField cf = CustomField.fromJson(json);
-        Assert.assertEquals("https://example.com", cf.getUrl());
-        Assert.assertEquals("type", cf.getType());
-        Assert.assertEquals(1, cf.getId());
-        Assert.assertEquals("name", cf.getName());
-        Assert.assertEquals("label", cf.getLabel());
-        Assert.assertEquals("code", cf.getCode());
+        Assert.assertEquals(cf.getUrl(), "https://example.com");
+        Assert.assertEquals(cf.getType(), "type");
+        Assert.assertEquals(cf.getId(), 1);
+        Assert.assertEquals(cf.getName(), "name");
+        Assert.assertEquals(cf.getLabel(), "label");
+        Assert.assertEquals(cf.getCode(), "code");
     }
 
     @Test(expectedExceptions = SquashTmException.class)
@@ -52,7 +52,7 @@ public class TestCustomField extends SquashTMTest {
         json.put("label", "label");
         json.put("code", "code");
 
-        CustomField cf = CustomField.fromJson(json);
+        CustomField.fromJson(json);
     }
 
     @Test
@@ -203,7 +203,7 @@ public class TestCustomField extends SquashTMTest {
         GetRequest getRequest = (GetRequest) createServerMock("GET", "/custom-fields", 200, "{}", "requestBodyEntity");
         when(getRequest.asPaged(any(), (Function<HttpResponse<JsonNode>, String>) any(Function.class))).thenThrow(UnirestException.class);
 
-        List<CustomField> customFields = CustomField.getAll();
+        CustomField.getAll();
     }
 }
 
