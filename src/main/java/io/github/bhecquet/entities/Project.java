@@ -8,6 +8,8 @@ import kong.unirest.core.UnirestException;
 import kong.unirest.core.json.JSONException;
 import kong.unirest.core.json.JSONObject;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,7 +41,7 @@ public class Project extends Entity {
      * @return
      */
     public static Project get(String projectName) {
-        return getFromUrl(apiRootUrl + String.format("%s?projectName=%s", PROJECTS_URL, projectName));
+        return getFromUrl(apiRootUrl + String.format("%s?projectName=%s", PROJECTS_URL, URLEncoder.encode(projectName, StandardCharsets.UTF_8)));
     }
 
     /**

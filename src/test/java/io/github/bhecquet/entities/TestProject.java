@@ -61,6 +61,44 @@ public class TestProject extends SquashTMTest {
         Assert.assertEquals(project.getUrl(), "https://localhost:4321/projects/367");
     }
 
+    @Test
+    public void testGetProjectFromNameWithCharsToEncode() {
+        createServerMock("GET", "/projects?projectName=foo%5B", 200, "{\n" +
+                "  \"_type\" : \"project\",\n" +
+                "  \"id\" : 367,\n" +
+                "  \"description\" : \"<p>This project is the main sample project</p>\",\n" +
+                "  \"label\" : \"Main Sample Project\",\n" +
+                "  \"name\" : \"foo[\",\n" +
+                "  \"active\" : true,\n" +
+                "  \"attachments\" : [ ],\n" +
+                "  \"_links\" : {\n" +
+                "    \"self\" : {\n" +
+                "      \"href\" : \"https://localhost:4321/projects/367\"\n" +
+                "    },\n" +
+                "    \"requirements\" : {\n" +
+                "      \"href\" : \"https://localhost:4321/projects/367/requirements-library/content\"\n" +
+                "    },\n" +
+                "    \"test-cases\" : {\n" +
+                "      \"href\" : \"https://localhost:4321/projects/367/test-cases-library/content\"\n" +
+                "    },\n" +
+                "    \"campaigns\" : {\n" +
+                "      \"href\" : \"https://localhost:4321/projects/367/campaigns-library/content\"\n" +
+                "    },\n" +
+                "    \"clearances\" : {\n" +
+                "      \"href\" : \"https://localhost:4321/projects/367/clearances\"\n" +
+                "    },\n" +
+                "    \"attachments\" : {\n" +
+                "      \"href\" : \"https://localhost:4321/projects/attachments\"\n" +
+                "    }\n" +
+                "  }\n" +
+                "}");
+
+        Project project = Project.get("foo[");
+        Assert.assertEquals(project.getName(), "foo[");
+        Assert.assertEquals(project.getId(), 367);
+        Assert.assertEquals(project.getUrl(), "https://localhost:4321/projects/367");
+    }
+
     @Test(expectedExceptions = ConfigurationException.class)
     public void testGetProjectFromNameWithError() {
         GetRequest getRequest = (GetRequest) createServerMock("GET", "/projects?projectName=foo", 200, "{}", "requestBodyEntity");
