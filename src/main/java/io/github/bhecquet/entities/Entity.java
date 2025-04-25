@@ -13,6 +13,8 @@ import java.util.Map;
 public abstract class Entity {
 
     private static final String HEADER_CONTENT_TYPE = "Content-Type";
+    private static final String HEADER_ACCEPT = "Accept";
+    private static final String HEADER_ACCEPT_VALUE = "application/json, text/plain, */*";
     private static final String MIMETYPE_APPLICATION_JSON = "application/json";
     private static final String HEADER_AUTHORIZATION = "Authorization";
     private static final String HEADER_AUTHORIZATION_BEARER = "Bearer ";
@@ -87,33 +89,53 @@ public abstract class Entity {
 
     protected static GetRequest buildGetRequest(String url) {
         if (apiToken == null) {
-            return Unirest.get(updateUrl(url)).basicAuth(user, password).headerReplace(HEADER_CONTENT_TYPE, MIMETYPE_APPLICATION_JSON);
+            return Unirest.get(updateUrl(url)).basicAuth(user, password)
+                    .headerReplace(HEADER_ACCEPT, HEADER_ACCEPT_VALUE)
+                    .headerReplace(HEADER_CONTENT_TYPE, MIMETYPE_APPLICATION_JSON);
         } else {
-            return Unirest.get(updateUrl(url)).headerReplace(HEADER_CONTENT_TYPE, MIMETYPE_APPLICATION_JSON).headerReplace(HEADER_AUTHORIZATION, HEADER_AUTHORIZATION_BEARER + apiToken);
+            return Unirest.get(updateUrl(url))
+                    .headerReplace(HEADER_ACCEPT, HEADER_ACCEPT_VALUE)
+                    .headerReplace(HEADER_CONTENT_TYPE, MIMETYPE_APPLICATION_JSON)
+                    .headerReplace(HEADER_AUTHORIZATION, HEADER_AUTHORIZATION_BEARER + apiToken);
         }
     }
 
     protected static HttpRequestWithBody buildPostRequest(String url) {
         if (apiToken == null) {
-            return Unirest.post(updateUrl(url)).basicAuth(user, password).headerReplace(HEADER_CONTENT_TYPE, MIMETYPE_APPLICATION_JSON);
+            return Unirest.post(updateUrl(url)).basicAuth(user, password)
+                    .headerReplace(HEADER_ACCEPT, HEADER_ACCEPT_VALUE)
+                    .headerReplace(HEADER_CONTENT_TYPE, MIMETYPE_APPLICATION_JSON);
         } else {
-            return Unirest.post(updateUrl(url)).headerReplace(HEADER_CONTENT_TYPE, MIMETYPE_APPLICATION_JSON).headerReplace(HEADER_AUTHORIZATION, HEADER_AUTHORIZATION_BEARER + apiToken);
+            return Unirest.post(updateUrl(url))
+                    .headerReplace(HEADER_ACCEPT, HEADER_ACCEPT_VALUE)
+                    .headerReplace(HEADER_CONTENT_TYPE, MIMETYPE_APPLICATION_JSON)
+                    .headerReplace(HEADER_AUTHORIZATION, HEADER_AUTHORIZATION_BEARER + apiToken);
         }
     }
 
     protected static HttpRequestWithBody buildPatchRequest(String url) {
         if (apiToken == null) {
-            return Unirest.patch(updateUrl(url)).basicAuth(user, password).headerReplace(HEADER_CONTENT_TYPE, MIMETYPE_APPLICATION_JSON);
+            return Unirest.patch(updateUrl(url)).basicAuth(user, password)
+                    .headerReplace(HEADER_ACCEPT, HEADER_ACCEPT_VALUE)
+                    .headerReplace(HEADER_CONTENT_TYPE, MIMETYPE_APPLICATION_JSON);
         } else {
-            return Unirest.patch(updateUrl(url)).headerReplace(HEADER_CONTENT_TYPE, MIMETYPE_APPLICATION_JSON).headerReplace(HEADER_AUTHORIZATION, HEADER_AUTHORIZATION_BEARER + apiToken);
+            return Unirest.patch(updateUrl(url))
+                    .headerReplace(HEADER_ACCEPT, HEADER_ACCEPT_VALUE)
+                    .headerReplace(HEADER_CONTENT_TYPE, MIMETYPE_APPLICATION_JSON)
+                    .headerReplace(HEADER_AUTHORIZATION, HEADER_AUTHORIZATION_BEARER + apiToken);
         }
     }
 
     protected static HttpRequestWithBody buildDeleteRequest(String url) {
         if (apiToken == null) {
-            return Unirest.delete(updateUrl(url)).basicAuth(user, password).headerReplace(HEADER_CONTENT_TYPE, MIMETYPE_APPLICATION_JSON);
+            return Unirest.delete(updateUrl(url)).basicAuth(user, password)
+                    .headerReplace(HEADER_ACCEPT, HEADER_ACCEPT_VALUE)
+                    .headerReplace(HEADER_CONTENT_TYPE, MIMETYPE_APPLICATION_JSON);
         } else {
-            return Unirest.delete(updateUrl(url)).headerReplace(HEADER_CONTENT_TYPE, MIMETYPE_APPLICATION_JSON).headerReplace(HEADER_AUTHORIZATION, HEADER_AUTHORIZATION_BEARER + apiToken);
+            return Unirest.delete(updateUrl(url))
+                    .headerReplace(HEADER_ACCEPT, HEADER_ACCEPT_VALUE)
+                    .headerReplace(HEADER_CONTENT_TYPE, MIMETYPE_APPLICATION_JSON)
+                    .headerReplace(HEADER_AUTHORIZATION, HEADER_AUTHORIZATION_BEARER + apiToken);
         }
     }
 
