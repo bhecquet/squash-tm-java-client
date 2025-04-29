@@ -172,6 +172,13 @@ public abstract class Entity {
                 .asPaged(
                         r -> ((HttpRequest) r).asJson(),
                         r -> {
+                            if (((HttpResponse<JsonNode>) r).getStatus() >= 400) {
+                                if (((HttpResponse<JsonNode>) r).getBody() != null) {
+                                    throw new SquashTmException(String.format("request to %s failed[%d]: %s", request.getUrl(), ((HttpResponse<JsonNode>) r).getStatus(), ((HttpResponse<JsonNode>) r).getBody().toPrettyString()));
+                                } else {
+                                    throw new SquashTmException(String.format("request to %s failed", request.getUrl()));
+                                }
+                            }
                             JSONObject links = ((HttpResponse<JsonNode>) r).getBody().getObject().getJSONObject("_links");
                             if (links.has("next")) {
                                 return updateUrl(links.getJSONObject("next").getString("href"));
