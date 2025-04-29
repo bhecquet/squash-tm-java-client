@@ -570,7 +570,7 @@ public class TestProject extends SquashTMTest {
         }
     }
 
-    @Test(expectedExceptions = SquashTmException.class, expectedExceptionsMessageRegExp = "No custom field with code FOO exist in this instance")
+    @Test(expectedExceptions = ConfigurationException.class, expectedExceptionsMessageRegExp = "No custom field with code FOO exist in this instance")
     public void testBindCustomFieldNoMatchingCustomField() {
         HttpRequestWithBody postRequest = (HttpRequestWithBody) createServerMock("POST", "/projects/14/custom-fields/CAMPAIGN", 200, "{}", "request");
         Project project = new Project("https://localhost:4321/projects/14", "project", 14, "myProject");
@@ -581,7 +581,7 @@ public class TestProject extends SquashTMTest {
         }
     }
 
-    @Test(expectedExceptions = SquashTmException.class, expectedExceptionsMessageRegExp = ".*Entity type CAMP is not allowed.*")
+    @Test(expectedExceptions = ConfigurationException.class, expectedExceptionsMessageRegExp = ".*Entity type CAMP is not allowed.*")
     public void testBindCustomFieldBadEntityType() {
         Project project = new Project("https://localhost:4321/projects/14", "project", 14, "myProject");
         try (MockedStatic mockedCf = mockStatic(CustomField.class)) {

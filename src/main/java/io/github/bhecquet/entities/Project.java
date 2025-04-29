@@ -1,6 +1,7 @@
 package io.github.bhecquet.entities;
 
 
+import io.github.bhecquet.exceptions.BindCufException;
 import io.github.bhecquet.exceptions.ConfigurationException;
 import io.github.bhecquet.exceptions.NotImplementedException;
 import io.github.bhecquet.exceptions.SquashTmException;
@@ -197,11 +198,11 @@ public class Project extends Entity {
         List<String> allowedEntities = List.of("REQUIREMENT_FOLDER", "CAMPAIGN_FOLDER", "TESTCASE_FOLDER", "TEST_CASE", "TEST_STEP", "CAMPAIGN", "ITERATION", "TEST_SUITE", "REQUIREMENT_VERSION", "EXECUTION, EXECUTION_STEP");
         CustomField customField = CustomField.getByCode(customFieldCode);
         if (customField == null) {
-            throw new SquashTmException(String.format("No custom field with code %s exist in this instance", customFieldCode));
+            throw new ConfigurationException(String.format("No custom field with code %s exist in this instance", customFieldCode));
         }
 
         if (!allowedEntities.contains(entityType)) {
-            throw new SquashTmException(String.format("Entity type %s is not allowed: REQUIREMENT_FOLDER, CAMPAIGN_FOLDER, TESTCASE_FOLDER, TEST_CASE, TEST_STEP, CAMPAIGN, ITERATION, TEST_SUITE, REQUIREMENT_VERSION, EXECUTION, EXECUTION_STEP", entityType));
+            throw new ConfigurationException(String.format("Entity type %s is not allowed: REQUIREMENT_FOLDER, CAMPAIGN_FOLDER, TESTCASE_FOLDER, TEST_CASE, TEST_STEP, CAMPAIGN, ITERATION, TEST_SUITE, REQUIREMENT_VERSION, EXECUTION, EXECUTION_STEP", entityType));
         }
 
         buildPostRequest(url + "/custom-fields/" + entityType)
@@ -209,7 +210,7 @@ public class Project extends Entity {
                 .body(String.format("cufId=" + customField.getId()))
                 .asString()
                 .ifFailure(response -> {
-                    throw new SquashTmException(String.format("Cannot bind custom field '%s' to project %s: %s", customFieldCode, name, response.getBody()));
+                    throw new BindCufException(String.format("Cannot bind custom field '%s' to project %s: %s", customFieldCode, name, response.getBody()));
                 });
     }
 
