@@ -30,11 +30,14 @@ public abstract class Entity {
     protected static final String FIELD_PROJECTS = "projects";
     protected static final String FIELD_PATH = "path";
     protected static final String FIELD_TEST_CASES = "test-cases";
+    protected static final String FIELD_REQUIREMENT_FOLDERS = "requirement-folders";
 
     protected static final String TYPE_PROJECT = "project";
     protected static final String TYPE_CAMPAIGN_FOLDER = "campaign-folder";
     protected static final String TYPE_CAMPAIGN = "campaign";
     protected static final String TYPE_ITERATION = "iteration";
+    protected static final String TYPE_REQUIREMENT = "requirement";
+    protected static final String TYPE_REQUIREMENT_FOLDER = "requirement-folder";
 
     private static String user;
     private static String password;
