@@ -1,7 +1,6 @@
 package io.github.bhecquet.entities;
 
 import io.github.bhecquet.exceptions.SquashTmException;
-import kong.unirest.core.Unirest;
 import kong.unirest.core.UnirestException;
 import kong.unirest.core.json.JSONException;
 import kong.unirest.core.json.JSONObject;
@@ -90,7 +89,7 @@ public class IterationTestPlanItem extends Entity {
 
     @Override
     public void completeDetails() {
-        completeDetails(getJSonResponse(Unirest.get(url)));
+        completeDetails(getJSonResponse(buildGetRequest(url)));
     }
 
     private void completeDetails(JSONObject json) {
@@ -151,7 +150,7 @@ public class IterationTestPlanItem extends Entity {
     public Dataset getDataset() {
         return dataset;
     }
-    
+
     public TestSuite getTestSuite() {
         return testSuite;
     }

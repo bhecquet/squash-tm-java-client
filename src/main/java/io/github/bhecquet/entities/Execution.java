@@ -1,7 +1,6 @@
 package io.github.bhecquet.entities;
 
 import io.github.bhecquet.exceptions.SquashTmException;
-import kong.unirest.core.Unirest;
 import kong.unirest.core.UnirestException;
 import kong.unirest.core.json.JSONException;
 import kong.unirest.core.json.JSONObject;
@@ -45,7 +44,7 @@ public class Execution extends Entity {
 
     @Override
     public void completeDetails() {
-        JSONObject json = getJSonResponse(Unirest.get(url));
+        JSONObject json = getJSonResponse(buildGetRequest(url));
         completeDetails(json);
     }
 

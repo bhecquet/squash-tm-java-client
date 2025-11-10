@@ -2,7 +2,6 @@ package io.github.bhecquet.entities;
 
 import io.github.bhecquet.exceptions.ExecutionStepToExcludeException;
 import io.github.bhecquet.exceptions.SquashTmException;
-import kong.unirest.core.Unirest;
 import kong.unirest.core.UnirestException;
 import kong.unirest.core.json.JSONException;
 import kong.unirest.core.json.JSONObject;
@@ -76,7 +75,7 @@ public class ExecutionStep extends Step {
 
     @Override
     public void completeDetails() {
-        JSONObject json = getJSonResponse(Unirest.get(url));
+        JSONObject json = getJSonResponse(buildGetRequest(url));
 
         status = json.getString(FIELD_EXECUTION_STATUS);
         order = json.getInt(FIELD_EXECUTION_STEP_ORDER);
