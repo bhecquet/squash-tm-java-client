@@ -13,51 +13,45 @@ import java.util.List;
 /**
  * Object representing a requirement in Squash TM
  */
-public class Requirement extends Entity {
+public class RequirementVersion extends Entity {
 
     private static final String FIELD_DESCRIPTION = "description";
-    private static final String FIELD_PATH = "path";
-    private static final String FIELD_PROJECT = "project";
-    private static final String FIELD_AUTHOR = "created_by";
+    private static final String FIELD_REQUIREMENT = "requirement";
     private static final String FIELD_REFERENCE = "reference";
-    private static final String FIELD_TCTYPE = "type";
     private static final String FIELD_STATUS = "status";
     private static final String FIELD_CRITICALITY = "criticality";
-    private static final String FIELD_PREREQUISITE = "prerequisite";
     private static final String FIELD_TESTCASES = "verifying_test_cases";
     private static final String FIELD_CATEGORY = "category";
 
-    private static final String REQUIREMENT_URL = "requirements/%s";
-    private String path;
+    private static final String REQUIREMENT_VERSION_URL = "requirement-versions/%s";
     private String description;
     private String reference;
-    private String projectName = "";
-    private int projectId = -1;
-    private String author = "";
+    private int requirementId = -1;
+    private String requirementName = "";
     private String status = "";
     private String criticality = "";
     private String category = "";
 
-    public Requirement(String url, String type, int id, String name) {
+    public RequirementVersion(String url, String type, int id, String name) {
         super(url, type, id, name);
     }
 
-    public static Requirement fromJson(JSONObject json) {
+    public static RequirementVersion fromJson(JSONObject json) {
         try {
-            return new Requirement(
+            return new RequirementVersion(
                     json.getJSONObject("_links").getJSONObject("self").getString("href"),
                     json.getString(FIELD_TYPE),
                     json.getInt(FIELD_ID),
                     json.optString(FIELD_NAME, "")
             );
         } catch (JSONException e) {
-            throw new SquashTmException(String.format("Cannot create Requirement from JSON [%s] data: %s", json.toString(), e.getMessage()));
+            throw new SquashTmException(String.format("Cannot create Requirement Version from JSON [%s] data: %s", json.toString(), e.getMessage()));
         }
     }
 
-    public static Requirement get(int id) {
+    public static RequirementVersion get(int id) {
         try {
-            return fromJson(getJSonResponse(buildGetRequest(apiRootUrl + String.format(REQUIREMENT_URL, id))));
+            return fromJson(getJSonResponse(buildGetRequest(apiRootUrl + String.format(REQUIREMENT_VERSION_URL, id))));
         } catch (UnirestException e) {
             throw new SquashTmException(String.format("Requirement %d does not exist", id));
         }
@@ -72,18 +66,16 @@ public class Requirement extends Entity {
 
     private void completeDetails(JSONObject json) {
 
-        name = json.getJSONObject("current_version").getString(FIELD_NAME);
-        path = json.getString(FIELD_PATH);
-        description = json.getJSONObject("current_version").getString(FIELD_DESCRIPTION);
-        projectId = json.getJSONObject(FIELD_PROJECT).getInt(FIELD_ID);
-        projectName = json.getJSONObject(FIELD_PROJECT).getString(FIELD_NAME);
-        author = json.getJSONObject("current_version").getString(FIELD_AUTHOR);
-        reference = json.getJSONObject("current_version").getString(FIELD_REFERENCE);
-        status = json.getJSONObject("current_version").getString(FIELD_STATUS);
-        criticality = json.getJSONObject("current_version").getString(FIELD_CRITICALITY);
-        category = json.getJSONObject("current_version").getJSONObject(FIELD_CATEGORY).getString("code");
+        name = json.getString(FIELD_NAME);
+        description = json.getString(FIELD_DESCRIPTION);
+        requirementId = json.getJSONObject(FIELD_REQUIREMENT).getInt(FIELD_ID);
+        requirementName = json.getJSONObject(FIELD_REQUIREMENT).getString(FIELD_NAME);
+        reference = json.getString(FIELD_REFERENCE);
+        status = json.getString(FIELD_STATUS);
+        criticality = json.getString(FIELD_CRITICALITY);
+        category = json.getJSONObject(FIELD_CATEGORY).getString("code");
 
-        readCustomFields(json.getJSONObject("current_version").getJSONArray(FIELD_CUSTOM_FIELDS));
+        readCustomFields(json.getJSONArray(FIELD_CUSTOM_FIELDS));
 
     }
 
@@ -95,24 +87,16 @@ public class Requirement extends Entity {
         return reference;
     }
 
-    public String getPath() {
-        return path;
-    }
-
     public String getDescription() {
         return description;
     }
 
-    public String getProjectName() {
-        return projectName;
+    public String getRequirementName() {
+        return requirementName;
     }
 
-    public int getProjectId() {
-        return projectId;
-    }
-
-    public String getAuthor() {
-        return author;
+    public int getRequirementId() {
+        return requirementId;
     }
 
     public String getStatus() {
@@ -130,10 +114,11 @@ public class Requirement extends Entity {
     public List<TestCase> getCoveringTestCases() {
         List<TestCase> coveringTestCases = new ArrayList<>();
         JSONObject json = getJSonResponse(buildGetRequest(url));
-        for (JSONObject testcase : (List<JSONObject>) json.getJSONObject("current_version").getJSONArray(FIELD_TESTCASES).toList()) {
+        for (JSONObject testcase : (List<JSONObject>) json.getJSONArray(FIELD_TESTCASES).toList()) {
             TestCase coveringTestCase = TestCase.fromJson(testcase);
             coveringTestCases.add(coveringTestCase);
         }
         return coveringTestCases;
     }
+
 }

@@ -8,6 +8,7 @@ import kong.unirest.core.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Object representing a test case in Squash TM
@@ -78,7 +79,6 @@ public class TestCase extends Entity {
 
     @Override
     public void completeDetails() {
-
         JSONObject json = getJSonResponse(buildGetRequest(url));
         completeDetails(json);
     }
@@ -188,5 +188,17 @@ public class TestCase extends Entity {
 
     public String getMarque() {
         return marque;
+    }
+
+    public List<RequirementVersion> getCoveredRequirements() {
+        List<RequirementVersion> coveredRequirements = new ArrayList<>();
+        JSONObject json = getJSonResponse(buildGetRequest(url));
+        for (JSONObject reqver : (List<JSONObject>) json.getJSONArray(FIELD_REQUIREMENTS).toList()) {
+            if (Objects.equals(reqver.getString(FIELD_TYPE), "requirement-version")) {
+                RequirementVersion coveredRequirement = RequirementVersion.fromJson(reqver);
+                coveredRequirements.add(coveredRequirement);
+            }
+        }
+        return coveredRequirements;
     }
 }

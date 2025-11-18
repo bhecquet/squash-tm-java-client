@@ -325,26 +325,26 @@ public class TestRequirement extends SquashTMTest {
     public void testFromJson() {
 
         JSONObject json = new JSONObject();
-        json.put("_type", "test-case");
+        json.put("_type", "requirement");
         json.put("id", 1);
         json.put("name", "foo");
         json.put("_links", new JSONObject("{\"self\" : {" +
-                "          \"href\" : \"https://localhost:4321/test-case/1\"" +
+                "          \"href\" : \"https://localhost:4321/requirement/1\"" +
                 "        }}"));
 
         TestCase testCase = TestCase.fromJson(json);
         Assert.assertEquals(testCase.getId(), 1);
-        Assert.assertEquals(testCase.getUrl(), "https://localhost:4321/test-case/1");
+        Assert.assertEquals(testCase.getUrl(), "https://localhost:4321/requirement/1");
     }
 
     @Test(expectedExceptions = SquashTmException.class)
     public void testFromJsonWrongFormat() {
 
         JSONObject json = new JSONObject();
-        json.put("_type", "test-case");
+        json.put("_type", "requirement");
         json.put("name", "foo");
         json.put("_links", new JSONObject("{\"self\" : {" +
-                "          \"href\" : \"https://localhost:4321/test-case/1\"" +
+                "          \"href\" : \"https://localhost:4321/requirements/1\"" +
                 "        }}"));
 
         Requirement.fromJson(json);
@@ -388,8 +388,8 @@ public class TestRequirement extends SquashTMTest {
     public void testUpdateCustomFields() {
         HttpRequestWithBody patchRequest = (HttpRequestWithBody) createServerMock("PATCH", "/requirements/624", 200, REQUIREMENT_REPLY_DATA);
 
-        TestCase testCase = new TestCase("https://localhost:4321/requirements/624", "requirement", 624, "sample requirement 62-4");
-        testCase.updateCustomFields(Map.of("foo", "bar", "foo2", "bar2"));
+        Requirement requirement = new Requirement("https://localhost:4321/requirements/624", "requirement", 624, "sample requirement 62-4");
+        requirement.updateCustomFields(Map.of("foo", "bar", "foo2", "bar2"));
         ArgumentCaptor<JSONObject> jsonArgument = ArgumentCaptor.forClass(JSONObject.class);
         verify(patchRequest).body(jsonArgument.capture());
 
@@ -401,10 +401,22 @@ public class TestRequirement extends SquashTMTest {
     public void testUpdateCustomFieldsWithTags() {
         HttpRequestWithBody patchRequest = (HttpRequestWithBody) createServerMock("PATCH", "/requirements/624", 200, REQUIREMENT_REPLY_DATA);
 
-        TestCase testCase = new TestCase("https://localhost:4321/requirements/624", "requirement", 624, "sample requirement 62-4");
-        testCase.updateCustomFields(Map.of("tags", List.of("tag1", "tag2")));
+        Requirement requirement = new Requirement("https://localhost:4321/requirements/624", "requirement", 624, "sample requirement 62-4");
+        requirement.updateCustomFields(Map.of("tags", List.of("tag1", "tag2")));
 
         verify(patchRequest).body(new JSONObject("{\"_type\":\"requirement\",\"custom_fields\":[{\"code\":\"tags\",\"value\":[\"tag1\",\"tag2\"]}]}"));
+    }
+
+    @Test
+    public void testGetCoveringTestCases() {
+        createServerMock("GET", "/requirements/624", 200, REQUIREMENT_REPLY_DATA);
+
+        Requirement requirement = new Requirement("https://localhost:4321/requirements/624", "requirement", 624, "sample requirement 62-4");
+        List<TestCase> coveringTestCases = requirement.getCoveringTestCases();
+        Assert.assertEquals(coveringTestCases.size(), 3);
+        Assert.assertEquals(coveringTestCases.get(0).getId(), 100);
+        Assert.assertEquals(coveringTestCases.get(1).getName(), "sample scripted test case 2");
+        Assert.assertEquals(coveringTestCases.get(2).getType(), "keyword-test-case");
     }
 
 }

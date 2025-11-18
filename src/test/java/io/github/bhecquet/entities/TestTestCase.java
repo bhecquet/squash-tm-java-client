@@ -546,4 +546,15 @@ public class TestTestCase extends SquashTMTest {
 
         verify(patchRequest).body(new JSONObject("{\"_type\":\"test-case\",\"custom_fields\":[{\"code\":\"tags\",\"value\":[\"tag1\",\"tag2\"]}]}"));
     }
+
+    @Test
+    public void testGetCoveredRequirements() {
+        createServerMock("GET", "/test-cases/12", 200, TEST_CASE_REPLY_DATA);
+
+        TestCase testCase = new TestCase("https://localhost:4321/test-cases/12", "test-case", 12, "walking test");
+        List<RequirementVersion> coveredRequirements = testCase.getCoveredRequirements();
+        Assert.assertEquals(coveredRequirements.size(), 1);
+        Assert.assertEquals(coveredRequirements.get(0).getId(), 255);
+        Assert.assertEquals(coveredRequirements.get(0).getName(), "Must have legs");
+    }
 }
