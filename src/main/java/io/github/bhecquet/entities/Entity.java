@@ -31,6 +31,7 @@ public abstract class Entity {
     protected static final String FIELD_PATH = "path";
     protected static final String FIELD_TEST_CASES = "test-cases";
     protected static final String FIELD_REQUIREMENT_FOLDERS = "requirement-folders";
+    protected static final String FIELD_REQUIREMENTS = "requirements";
 
     protected static final String TYPE_PROJECT = "project";
     protected static final String TYPE_CAMPAIGN_FOLDER = "campaign-folder";

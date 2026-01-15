@@ -30,7 +30,9 @@ public class TestRealSquashInstance {
 
         String squashProject = System.getProperty("squashProject");
         Project project = Project.get(squashProject);
-        Campaign.create(project, "campaignCF", (String) null, Map.of("APP", List.of("comp1", "comp2")));
+        Campaign.create(project, "campaignCF", (String) null,
+                Map.of("TAGS", List.of("comp1", "comp2"))
+        );
     }
 
     @Test

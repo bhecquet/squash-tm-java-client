@@ -130,7 +130,7 @@ public class Campaign extends Entity {
                 return campaign;
             }
         }
-        return Campaign.create(project, campaignName, parentFolder, customFields);
+        return create(project, campaignName, parentFolder, customFields);
     }
 
     /**
@@ -190,7 +190,7 @@ public class Campaign extends Entity {
         scheduleEndDate = json.optString(FIELD_SCHEDULE_END_DATE, "");
         actualStartDate = json.optString(FIELD_ACTUAL_START_DATE, "");
         actualEndDate = json.optString(FIELD_ACTUAL_END_DATE, "");
-        path = json.getString(FIELD_PATH);
+        path = json.optString(FIELD_PATH, "");
 
         for (JSONObject jsonIteration : (List<JSONObject>) json.getJSONArray(FIELD_ITERATIONS).toList()) {
             iterations.add(Iteration.fromJson(jsonIteration));

@@ -4,18 +4,23 @@ import io.github.bhecquet.SquashTMTest;
 import io.github.bhecquet.exceptions.SquashTmException;
 import kong.unirest.core.GetRequest;
 import kong.unirest.core.HttpRequestWithBody;
+import kong.unirest.core.RequestBodyEntity;
 import kong.unirest.core.UnirestException;
 import kong.unirest.core.json.JSONObject;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 public class TestRequirement extends SquashTMTest {
 
@@ -290,9 +295,102 @@ public class TestRequirement extends SquashTMTest {
             "  }\n" +
             "}";
 
+    // reply when creating a requirement
+    public static final String REQUIREMENT_REPLY_DATA3 = "{\n" +
+            "  \"_type\" : \"requirement\",\n" +
+            "  \"id\" : 456,\n" +
+            "  \"name\" : \"new age\",\n" +
+            "  \"project\" : {\n" +
+            "    \"_type\" : \"project\",\n" +
+            "    \"id\" : 15,\n" +
+            "    \"name\" : \"Winter will be gone\",\n" +
+            "    \"_links\" : {\n" +
+            "      \"self\" : {\n" +
+            "        \"href\" : \"http://localhost:4321/api/rest/latest/projects/15\"\n" +
+            "      }\n" +
+            "    }\n" +
+            "  },\n" +
+            "  \"parent\" : {\n" +
+            "    \"_type\" : \"requirement-folder\",\n" +
+            "    \"id\" : 300,\n" +
+            "    \"name\" : \"root-level folder\",\n" +
+            "    \"_links\" : {\n" +
+            "      \"self\" : {\n" +
+            "        \"href\" : \"http://localhost:4321/api/rest/latest/requirement-folders/300\"\n" +
+            "      }\n" +
+            "    }\n" +
+            "  },\n" +
+            "  \"mode\" : \"NATIVE\",\n" +
+            "  \"current_version\" : {\n" +
+            "    \"_type\" : \"requirement-version\",\n" +
+            "    \"id\" : 333,\n" +
+            "    \"name\" : \"new age\",\n" +
+            "    \"reference\" : \"SAMP_REQ_VER\",\n" +
+            "    \"version_number\" : 1,\n" +
+            "    \"created_by\" : \"admin\",\n" +
+            "    \"created_on\" : \"2017-06-15T10:00:00.000+00:00\",\n" +
+            "    \"last_modified_by\" : \"admin\",\n" +
+            "    \"last_modified_on\" : \"2017-06-15T10:00:00.000+00:00\",\n" +
+            "    \"criticality\" : \"MINOR\",\n" +
+            "    \"category\" : {\n" +
+            "      \"code\" : \"CAT_USER_STORY\"\n" +
+            "    },\n" +
+            "    \"status\" : \"UNDER_REVIEW\",\n" +
+            "    \"description\" : \"<p>leave a comment please</p>\",\n" +
+            "    \"custom_fields\" : [ {\n" +
+            "      \"code\" : \"cuf_txt_note\",\n" +
+            "      \"label\" : \"note\",\n" +
+            "      \"value\" : \"Star Trek style welcomed but not mandatory\"\n" +
+            "    }, {\n" +
+            "      \"code\" : \"cuf_tags_see_also\",\n" +
+            "      \"label\" : \"see also\",\n" +
+            "      \"value\" : [ \"smart home\", \"sensors\", \"hand gesture\" ]\n" +
+            "    } ],\n" +
+            "    \"verifying_test_cases\" : [ ],\n" +
+            "    \"milestones\" : [ ],\n" +
+            "    \"attachments\" : [ ],\n" +
+            "    \"_links\" : {\n" +
+            "      \"self\" : {\n" +
+            "        \"href\" : \"http://localhost:4321/api/rest/latest/requirement-versions/333\"\n" +
+            "      }\n" +
+            "    }\n" +
+            "  },\n" +
+            "  \"versions\" : [ {\n" +
+            "    \"_type\" : \"requirement-version\",\n" +
+            "    \"id\" : 333,\n" +
+            "    \"name\" : \"new age\",\n" +
+            "    \"version_number\" : 1,\n" +
+            "    \"_links\" : {\n" +
+            "      \"self\" : {\n" +
+            "        \"href\" : \"http://localhost:4321/api/rest/latest/requirement-versions/333\"\n" +
+            "      }\n" +
+            "    }\n" +
+            "  } ],\n" +
+            "  \"remote_req_id\" : \"null\",\n" +
+            "  \"remote_req_url\" : \"null\",\n" +
+            "  \"remote_req_perimeter_status\" : \"null\",\n" +
+            "  \"_links\" : {\n" +
+            "    \"self\" : {\n" +
+            "      \"href\" : \"http://localhost:4321/api/rest/latest/requirements/456\"\n" +
+            "    },\n" +
+            "    \"project\" : {\n" +
+            "      \"href\" : \"http://localhost:4321/api/rest/latest/projects/15\"\n" +
+            "    },\n" +
+            "    \"current_version\" : {\n" +
+            "      \"href\" : \"http://localhost:4321/api/rest/latest/requirement-versions/333\"\n" +
+            "    }\n" +
+            "  }\n" +
+            "}";
+
+    private Project project;
+
+    @Mock
+    private RequirementFolder requirementFolder;
+
     @BeforeMethod
     public void init() {
-        Campaign.configureEntity("user", "pwd", SERVER_URL + "/");
+        project = spy(new Project("https://localhost:4321/projects/1", "project", 1, "project"));
+        Requirement.configureEntity("user", "pwd", SERVER_URL + "/");
     }
 
     @Test
@@ -417,6 +515,173 @@ public class TestRequirement extends SquashTMTest {
         Assert.assertEquals(coveringTestCases.get(0).getId(), 100);
         Assert.assertEquals(coveringTestCases.get(1).getName(), "sample scripted test case 2");
         Assert.assertEquals(coveringTestCases.get(2).getType(), "keyword-test-case");
+    }
+
+    @Test
+    public void testCreateRequirementNoFolder() {
+        HttpRequestWithBody postRequest = (HttpRequestWithBody) createServerMock("POST", "/requirements", 200, REQUIREMENT_REPLY_DATA3, "request");
+        Requirement.create(project, "myRequirement", "some description", new HashMap<>(), (RequirementFolder) null, Requirement.Criticality.UNDEFINED);
+        verify(postRequest).body(new JSONObject("{\"_type\":\"requirement\",\"parent\":{\"id\":1,\"_type\":\"project\"},\"current_version\":{\"_type\":\"requirement-version\",\"name\":\"myRequirement\",\"criticality\":\"UNDEFINED\",\"description\":\"some description\",\"status\":\"WORK_IN_PROGRESS\"}}"));
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "Requirement name cannot be null or empty")
+    public void testCreateRequirementNoName() {
+        createServerMock("POST", "/requirements", 200, REQUIREMENT_REPLY_DATA3, "request");
+        Requirement.create(project, null, "some description", new HashMap<>(), (RequirementFolder) null, Requirement.Criticality.UNDEFINED);
+    }
+
+    @Test
+    public void testCreateRequirementWithCustomFields() {
+        HttpRequestWithBody postRequest = (HttpRequestWithBody) createServerMock("POST", "/requirements", 200, REQUIREMENT_REPLY_DATA3, "request");
+        Requirement.create(project, "myRequirement", "some description", Map.of("APP", List.of("comp1", "comp2")), (RequirementFolder) null, Requirement.Criticality.UNDEFINED);
+        verify(postRequest).body(new JSONObject("{\"_type\":\"requirement\",\"parent\":{\"id\":1,\"_type\":\"project\"},\"current_version\":{\"_type\":\"requirement-version\",\"name\":\"myRequirement\",\"criticality\":\"UNDEFINED\",\"description\":\"some description\",\"status\":\"WORK_IN_PROGRESS\"},\"custom_fields\":[{\"code\":\"APP\",\"value\":[\"comp1\",\"comp2\"]}]}"));
+    }
+
+    @Test
+    public void testCreateRequirementWithFolder() {
+        HttpRequestWithBody postRequest = (HttpRequestWithBody) createServerMock("POST", "/requirements", 200, REQUIREMENT_REPLY_DATA3, "request");
+
+        RequirementFolder requirementFolder2 = new RequirementFolder(
+                "https://localhost:4321/requirement-folders/7",
+                "folder",
+                7,
+                "foo",
+                project,
+                null);
+        Requirement.create(project, "myRequirement", "some description", Map.of("APP", List.of("comp1", "comp2")), requirementFolder2, Requirement.Criticality.UNDEFINED);
+
+        verify(postRequest).body(new JSONObject("{\"_type\":\"requirement\",\"parent\":{\"id\":7,\"_type\":\"requirement-folder\"},\"current_version\":{\"_type\":\"requirement-version\",\"name\":\"myRequirement\",\"criticality\":\"UNDEFINED\",\"description\":\"some description\",\"status\":\"WORK_IN_PROGRESS\"},\"custom_fields\":[{\"code\":\"APP\",\"value\":[\"comp1\",\"comp2\"]}]}"));
+    }
+
+    @Test
+    public void testCreateRequirementWithFolder2() {
+        HttpRequestWithBody postRequest = (HttpRequestWithBody) createServerMock("POST", "/requirements", 200, REQUIREMENT_REPLY_DATA3, "request");
+
+        try (MockedStatic<RequirementFolder> mockedRequirementFolder = mockStatic(RequirementFolder.class);) {
+
+            mockedRequirementFolder.when(() -> RequirementFolder.createRequirementFolderTree(project, "folder1/folder2")).thenReturn(requirementFolder);
+            doReturn(new ArrayList<>()).when(project).getRequirements();
+
+            Requirement.create(project, "myRequirement", "some description", new HashMap<>(), "folder1/folder2", Requirement.Criticality.UNDEFINED);
+
+            verify(postRequest).body(new JSONObject("{\"_type\":\"requirement\",\"parent\":{\"id\":0,\"_type\":\"requirement-folder\"},\"current_version\":{\"_type\":\"requirement-version\",\"name\":\"myRequirement\",\"criticality\":\"UNDEFINED\",\"description\":\"some description\",\"status\":\"WORK_IN_PROGRESS\"}}"));
+            mockedRequirementFolder.verify(() -> RequirementFolder.createRequirementFolderTree(eq(project), eq("folder1/folder2")));
+        }
+    }
+
+    /**
+     * If requirement exists do not recreate it
+     */
+    @Test
+    public void testDoNotCreateRequirement() {
+        HttpRequestWithBody postRequest = (HttpRequestWithBody) createServerMock("POST", "/requirements", 200, "{}", "request");
+
+        try (MockedStatic<RequirementFolder> mockedRequirementFolder = mockStatic(RequirementFolder.class);) {
+
+            mockedRequirementFolder.when(() -> RequirementFolder.createRequirementFolderTree(project, "folder1/folder2")).thenReturn(requirementFolder);
+            doReturn(List.of(new Requirement("https://localhost:4321/requirements/1", "requirement", 1, "myRequirement", "/project/myRequirement"),
+                    new Requirement("https://localhost:4321/requirements/1", "requirement", 2, "myRequirement", "/project/folder1/folder2/myRequirement"))).when(project).getRequirements();
+
+            Requirement requirement = Requirement.create(project, "myRequirement", "some description", new HashMap<>(), "folder1/folder2", Requirement.Criticality.UNDEFINED);
+            Assert.assertEquals(requirement.getId(), 2); // check this is the requirement within the requested folder which is chosen
+            verify(postRequest, never()).body(any(JSONObject.class));
+            mockedRequirementFolder.verify(() -> RequirementFolder.createRequirementFolderTree(eq(project), eq("folder1/folder2")));
+        }
+    }
+
+    /**
+     * If requirement exists do not recreate it
+     */
+    @Test
+    public void testDoNotCreateRequirement2() {
+        HttpRequestWithBody postRequest = (HttpRequestWithBody) createServerMock("POST", "/requirements", 200, "{}", "request");
+
+        try (MockedStatic<RequirementFolder> mockedRequirementFolder = mockStatic(RequirementFolder.class);) {
+
+            mockedRequirementFolder.when(() -> RequirementFolder.createRequirementFolderTree(project, "folder1/folder2")).thenReturn(requirementFolder);
+            doReturn(List.of(new Requirement("https://localhost:4321/requirements/1", "requirement", 1, "myRequirement", "/project/myRequirement"),
+                    new Requirement("https://localhost:4321/requirements/1", "requirement", 2, "myRequirement", "/project/folder1/folder2/myRequirement"))).when(project).getRequirements();
+
+            Requirement requirement = Requirement.create(project, "myRequirement", "some description", new HashMap<>(), (String) null, Requirement.Criticality.UNDEFINED);
+
+            Assert.assertEquals(requirement.getId(), 1); // check this is the requirement within the requested folder which is chosen
+            verify(postRequest, never()).body(any(JSONObject.class));
+            mockedRequirementFolder.verify(() -> RequirementFolder.createRequirementFolderTree(eq(project), isNull()));
+        }
+    }
+
+    @Test(expectedExceptions = SquashTmException.class, expectedExceptionsMessageRegExp = "Cannot create requirement: myRequirement")
+    public void testCreateRequirementWithError() {
+        RequestBodyEntity postRequest = (RequestBodyEntity) createServerMock("POST", "/requirements", 200, "{}", "requestBodyEntity");
+        when(postRequest.asJson()).thenThrow(UnirestException.class);
+
+        RequirementFolder requirementFolder2 = new RequirementFolder(
+                "https://localhost:4321/requirement-folders/7",
+                "folder",
+                7,
+                "foo",
+                project,
+                null);
+        Requirement.create(project, "myRequirement", "some description", Map.of("APP", List.of("comp1", "comp2")), requirementFolder2, Requirement.Criticality.UNDEFINED);
+
+    }
+
+
+    @Test
+    public void testUpdateRequirement() {
+        HttpRequestWithBody patchRequest = (HttpRequestWithBody) createServerMock("PATCH", "/requirements/624", 200, REQUIREMENT_REPLY_DATA3, "request");
+        Requirement requirement = new Requirement("https://localhost:4321/requirements/624", "requirement", 624, "sample requirement 62-4");
+        requirement.update("myRequirement", "some description", new HashMap<>(), Requirement.Criticality.UNDEFINED, Requirement.Status.APPROVED);
+        verify(patchRequest).body(new JSONObject("{\"_type\":\"requirement\",\"current_version\":{\"_type\":\"requirement-version\",\"name\":\"myRequirement\",\"criticality\":\"UNDEFINED\",\"description\":\"some description\",\"status\":\"APPROVED\"},\"custom_fields\":[]}"));
+    }
+
+    @Test
+    public void testUpdateRequirementNoName() {
+        HttpRequestWithBody patchRequest = (HttpRequestWithBody) createServerMock("PATCH", "/requirements/624", 200, REQUIREMENT_REPLY_DATA3, "request");
+        Requirement requirement = new Requirement("https://localhost:4321/requirements/624", "requirement", 624, "sample requirement 62-4");
+        requirement.update(null, "some description", new HashMap<>(), Requirement.Criticality.UNDEFINED, Requirement.Status.APPROVED);
+        verify(patchRequest).body(new JSONObject("{\"_type\":\"requirement\",\"current_version\":{\"_type\":\"requirement-version\",\"criticality\":\"UNDEFINED\",\"description\":\"some description\",\"status\":\"APPROVED\"},\"custom_fields\":[]}"));
+    }
+
+    @Test
+    public void testUpdateRequirementNoDescription() {
+        HttpRequestWithBody patchRequest = (HttpRequestWithBody) createServerMock("PATCH", "/requirements/624", 200, REQUIREMENT_REPLY_DATA3, "request");
+        Requirement requirement = new Requirement("https://localhost:4321/requirements/624", "requirement", 624, "sample requirement 62-4");
+        requirement.update("myRequirement", null, new HashMap<>(), Requirement.Criticality.UNDEFINED, Requirement.Status.APPROVED);
+        verify(patchRequest).body(new JSONObject("{\"_type\":\"requirement\",\"current_version\":{\"_type\":\"requirement-version\",\"name\":\"myRequirement\",\"criticality\":\"UNDEFINED\",\"status\":\"APPROVED\"},\"custom_fields\":[]}"));
+    }
+
+    @Test
+    public void testUpdateRequirementWithCustomFields() {
+        HttpRequestWithBody patchRequest = (HttpRequestWithBody) createServerMock("PATCH", "/requirements/624", 200, REQUIREMENT_REPLY_DATA3, "request");
+        Requirement requirement = new Requirement("https://localhost:4321/requirements/624", "requirement", 624, "sample requirement 62-4");
+        requirement.update("myRequirement", null, Map.of("APP", List.of("comp1", "comp2")), Requirement.Criticality.UNDEFINED, Requirement.Status.APPROVED);
+        verify(patchRequest).body(new JSONObject("{\"_type\":\"requirement\",\"current_version\":{\"_type\":\"requirement-version\",\"name\":\"myRequirement\",\"criticality\":\"UNDEFINED\",\"status\":\"APPROVED\"},\"custom_fields\":[{\"value\":[\"comp1\",\"comp2\"],\"code\":\"APP\"}]}"));
+    }
+
+    @Test
+    public void testUpdateRequirementNoCriticality() {
+        HttpRequestWithBody patchRequest = (HttpRequestWithBody) createServerMock("PATCH", "/requirements/624", 200, REQUIREMENT_REPLY_DATA3, "request");
+        Requirement requirement = new Requirement("https://localhost:4321/requirements/624", "requirement", 624, "sample requirement 62-4");
+        requirement.update("myRequirement", "some description", new HashMap<>(), null, Requirement.Status.APPROVED);
+        verify(patchRequest).body(new JSONObject("{\"_type\":\"requirement\",\"current_version\":{\"_type\":\"requirement-version\",\"name\":\"myRequirement\",\"description\":\"some description\",\"status\":\"APPROVED\"},\"custom_fields\":[]}"));
+    }
+
+    @Test
+    public void testUpdateRequirementNoStatus() {
+        HttpRequestWithBody patchRequest = (HttpRequestWithBody) createServerMock("PATCH", "/requirements/624", 200, REQUIREMENT_REPLY_DATA3, "request");
+        Requirement requirement = new Requirement("https://localhost:4321/requirements/624", "requirement", 624, "sample requirement 62-4");
+        requirement.update("myRequirement", "some description", new HashMap<>(), Requirement.Criticality.UNDEFINED, null);
+        verify(patchRequest).body(new JSONObject("{\"_type\":\"requirement\",\"current_version\":{\"_type\":\"requirement-version\",\"name\":\"myRequirement\",\"criticality\":\"UNDEFINED\",\"description\":\"some description\"},\"custom_fields\":[]}"));
+    }
+
+
+    @Test(expectedExceptions = SquashTmException.class, expectedExceptionsMessageRegExp = "Cannot update requirement")
+    public void testUpdateRequirementWithError() {
+        RequestBodyEntity patchRequest = (RequestBodyEntity) createServerMock("PATCH", "/requirements/624", 200, "{}", "requestBodyEntity");
+        when(patchRequest.asJson()).thenThrow(UnirestException.class);
+        Requirement requirement = new Requirement("https://localhost:4321/requirements/624", "requirement", 624, "sample requirement 62-4");
+        requirement.update("myRequirement", "some description", new HashMap<>(), Requirement.Criticality.UNDEFINED, null);
     }
 
 }

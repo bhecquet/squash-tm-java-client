@@ -20,7 +20,8 @@ public class Project extends Entity {
     public static final String PROJECTS_URL = "projects";
     public static final String PROJECT_URL = "projects/%d";
     public static final String CAMPAIGNS_URL = "/campaigns";
-    public final static String TEAMS_URL = "teams";
+    public static final String REQUIREMENTS_URL = "/requirements";
+    public static final String TEAMS_URL = "teams";
     public static final String TEST_CASES_URL = "test-cases";
 
     public static final String TYPE_PROJECT = "project";
@@ -38,18 +39,16 @@ public class Project extends Entity {
     /**
      * Get project from its name
      *
-     * @param projectName
-     * @return
+     * @param projectName name of the projet to get
      */
     public static Project get(String projectName) {
         return getFromUrl(apiRootUrl + String.format("%s?projectName=%s", PROJECTS_URL, URLEncoder.encode(projectName, StandardCharsets.UTF_8)));
     }
 
     /**
-     * Get projet from its ID
+     * Get project from its ID
      *
-     * @param id
-     * @return
+     * @param id id of the project to get
      */
     public static Project get(int id) {
         return getFromUrl((apiRootUrl + String.format(PROJECT_URL, id)));
@@ -65,8 +64,6 @@ public class Project extends Entity {
 
     /**
      * Returns the list of projects accessible to this user
-     *
-     * @return
      */
     public static List<Project> getAll() {
         try {
@@ -109,29 +106,61 @@ public class Project extends Entity {
     }
 
     public List<Campaign> getCampaigns(String fields) {
-
+        JSONObject json;
         try {
-            JSONObject json = getPagedJSonResponse(buildGetRequest(url + CAMPAIGNS_URL + "?sort=id&fields=" + fields));
-
-            List<Campaign> campaigns = new ArrayList<>();
-            if (json.has(FIELD_EMBEDDED)) {
-                for (JSONObject folderJson : (List<JSONObject>) json.getJSONObject(FIELD_EMBEDDED).getJSONArray(FIELD_CAMPAIGNS).toList()) {
-                    Campaign newCampaign = Campaign.fromJson(folderJson);
-                    try {
-                        newCampaign.setPath(folderJson.getString("path"));
-                    } catch (JSONException e) {
-                    }
-                    try {
-                        newCampaign.readCustomFields(folderJson.getJSONArray(FIELD_CUSTOM_FIELDS));
-                    } catch (JSONException e) {
-                    }
-                    campaigns.add(newCampaign);
-                }
-            }
-            return campaigns;
+            json = getPagedJSonResponse(buildGetRequest(url + CAMPAIGNS_URL + "?sort=id&fields=" + fields));
         } catch (UnirestException e) {
             throw new SquashTmException(String.format("Cannot get list of campaigns for project %s: %s", name, e.getMessage()));
         }
+
+        List<Campaign> campaigns = new ArrayList<>();
+        if (json.has(FIELD_EMBEDDED)) {
+            for (JSONObject folderJson : (List<JSONObject>) json.getJSONObject(FIELD_EMBEDDED).getJSONArray(FIELD_CAMPAIGNS).toList()) {
+                Campaign newCampaign = Campaign.fromJson(folderJson);
+                try {
+                    newCampaign.setPath(folderJson.getString("path"));
+                } catch (JSONException e) {
+                    // no path present
+                }
+                try {
+                    newCampaign.readCustomFields(folderJson.getJSONArray(FIELD_CUSTOM_FIELDS));
+                } catch (JSONException e) {
+                    // no custom fields
+                }
+                campaigns.add(newCampaign);
+            }
+        }
+        return campaigns;
+
+    }
+
+    public List<Requirement> getRequirements() {
+        return getRequirements("path,name,reference");
+    }
+
+    public List<Requirement> getRequirements(String fields) {
+        JSONObject json;
+        try {
+            json = getPagedJSonResponse(buildGetRequest(url + REQUIREMENTS_URL + "?sort=id&fields=" + fields));
+        } catch (UnirestException e) {
+            throw new SquashTmException(String.format("Cannot get list of requirements for project %s: %s", name, e.getMessage()));
+        }
+
+        List<Requirement> requirements = new ArrayList<>();
+        if (json.has(FIELD_EMBEDDED)) {
+            for (JSONObject folderJson : (List<JSONObject>) json.getJSONObject(FIELD_EMBEDDED).getJSONArray(FIELD_REQUIREMENTS).toList()) {
+                Requirement newRequirement = Requirement.fromJson(folderJson);
+                try {
+                    newRequirement.setPath(folderJson.getString("path"));
+                } catch (JSONException e) {
+                    // no path present
+                }
+
+                requirements.add(newRequirement);
+            }
+        }
+        return requirements;
+
     }
 
     /**

@@ -468,13 +468,13 @@ public class TestCampaign extends SquashTMTest {
                 "  }" +
                 "}", "request");
 
-        CampaignFolder campaignFolder = new CampaignFolder(
+        CampaignFolder campaignFolder2 = new CampaignFolder(
                 "https://localhost:4321/campaign-folders/7",
                 7,
                 "folder",
                 project,
                 null);
-        Campaign.create(project, "myCampaign", campaignFolder, new HashMap<>());
+        Campaign.create(project, "myCampaign", campaignFolder2, new HashMap<>());
         verify(postRequest).body(new JSONObject("{\"_type\":\"campaign\",\"name\":\"myCampaign\",\"status\":\"PLANNED\",\"parent\":{\"id\":7,\"_type\":\"campaign-folder\"}}"));
     }
 
@@ -591,13 +591,13 @@ public class TestCampaign extends SquashTMTest {
         RequestBodyEntity postRequest = (RequestBodyEntity) createServerMock("POST", "/campaigns", 200, "{}", "requestBodyEntity");
         when(postRequest.asJson()).thenThrow(UnirestException.class);
 
-        CampaignFolder campaignFolder = new CampaignFolder(
+        CampaignFolder campaignFolder2 = new CampaignFolder(
                 "https://localhost:4321/campaign-folders/7",
                 7,
                 "folder",
                 project,
                 null);
-        Campaign.create(project, "myCampaign", campaignFolder, new HashMap<>());
+        Campaign.create(project, "myCampaign", campaignFolder2, new HashMap<>());
     }
 
     @Test
@@ -879,13 +879,13 @@ public class TestCampaign extends SquashTMTest {
         GetRequest getRequest = (GetRequest) createServerMock("GET", "/campaigns/1", 404, "{}");
         when(getRequest.asJson()).thenThrow(new UnirestException("Cannot get"));
 
-        Campaign campaign = Campaign.get(1);
+        Campaign.get(1);
     }
 
     @Test(expectedExceptions = SquashTmException.class, expectedExceptionsMessageRegExp = "request to https://localhost:4321 failed\\[404\\]: null")
     public void testGetFromIdWithError2() {
-        GetRequest getRequest = (GetRequest) createServerMock("GET", "/campaigns/1", 404, "{}");
+        createServerMock("GET", "/campaigns/1", 404, "{}");
 
-        Campaign campaign = Campaign.get(1);
+        Campaign.get(1);
     }
 }

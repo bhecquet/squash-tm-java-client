@@ -414,6 +414,150 @@ public class TestProject extends SquashTMTest {
         project.getCampaigns();
     }
 
+
+    @Test
+    public void testGetRequirements() {
+        createServerMock("GET", "/projects/14/requirements?sort=id&fields=path,name,reference", 200, "{\n" +
+                "  \"_embedded\" : {\n" +
+                "    \"requirements\" : [ {\n" +
+                "      \"_type\" : \"requirement\",\n" +
+                "      \"id\" : 122,\n" +
+                "      \"name\" : \"requirement 1\",\n" +
+                "      \"_links\" : {\n" +
+                "        \"self\" : {\n" +
+                "          \"href\" : \"http://localhost:4321/api/rest/latest/requirements/122\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }, {\n" +
+                "      \"_type\" : \"requirement\",\n" +
+                "      \"id\" : 147,\n" +
+                "      \"name\" : \"requirement 2\",\n" +
+                "      \"_links\" : {\n" +
+                "        \"self\" : {\n" +
+                "          \"href\" : \"http://localhost:4321/api/rest/latest/requirements/147\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }, {\n" +
+                "      \"_type\" : \"requirement\",\n" +
+                "      \"id\" : 255,\n" +
+                "      \"name\" : \"requirement 3\",\n" +
+                "      \"_links\" : {\n" +
+                "        \"self\" : {\n" +
+                "          \"href\" : \"http://localhost:4321/api/rest/latest/requirements/255\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    } ]\n" +
+                "  },\n" +
+                "  \"_links\" : {\n" +
+                "    \"first\" : {\n" +
+                "      \"href\" : \"http://localhost:4321/api/rest/latest/projects/14/requirements?page=0&size=3&sort=id,desc\"\n" +
+                "    },\n" +
+                "    \"prev\" : {\n" +
+                "      \"href\" : \"http://localhost:4321/api/rest/latest/projects/14/requirements?page=1&size=3&sort=id,desc\"\n" +
+                "    },\n" +
+                "    \"self\" : {\n" +
+                "      \"href\" : \"http://localhost:4321/api/rest/latest/projects/14/requirements?page=2&size=3&sort=id,desc\"\n" +
+                "    },\n" +
+                "    \"next\" : {\n" +
+                "      \"href\" : \"http://localhost:4321/api/rest/latest/projects/14/requirements?page=3&size=3&sort=id,desc\"\n" +
+                "    },\n" +
+                "    \"last\" : {\n" +
+                "      \"href\" : \"http://localhost:4321/api/rest/latest/projects/14/requirements?page=3&size=3&sort=id,desc\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"page\" : {\n" +
+                "    \"size\" : 3,\n" +
+                "    \"totalElements\" : 10,\n" +
+                "    \"totalPages\" : 4,\n" +
+                "    \"number\" : 2\n" +
+                "  }\n" +
+                "}");
+
+        Project project = new Project("https://localhost:4321/projects/14", "project", 14, "myProject");
+        List<Requirement> requirements = project.getRequirements();
+        Assert.assertEquals(requirements.size(), 3);
+        Assert.assertEquals(requirements.get(0).getName(), "requirement 1");
+        Assert.assertNull(requirements.get(0).getPath());
+    }
+
+    @Test
+    public void testGetRequirementsWithPath() {
+        createServerMock("GET", "/projects/14/requirements?sort=id&fields=path,name,reference", 200, "{\n" +
+                "  \"_embedded\" : {\n" +
+                "    \"requirements\" : [ {\n" +
+                "      \"_type\" : \"requirement\",\n" +
+                "      \"id\" : 122,\n" +
+                "      \"name\" : \"requirement 1\",\n" +
+                "      \"path\" : \"folder1/folder2\",\n" +
+                "      \"_links\" : {\n" +
+                "        \"self\" : {\n" +
+                "          \"href\" : \"http://localhost:4321/api/rest/latest/requirements/122\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }, {\n" +
+                "      \"_type\" : \"requirement\",\n" +
+                "      \"id\" : 147,\n" +
+                "      \"name\" : \"requirement 2\",\n" +
+                "      \"path\" : \"folder1/folder2\",\n" +
+                "      \"_links\" : {\n" +
+                "        \"self\" : {\n" +
+                "          \"href\" : \"http://localhost:4321/api/rest/latest/requirements/147\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }, {\n" +
+                "      \"_type\" : \"requirement\",\n" +
+                "      \"id\" : 255,\n" +
+                "      \"name\" : \"requirement 3\",\n" +
+                "      \"path\" : \"folder1\",\n" +
+                "      \"_links\" : {\n" +
+                "        \"self\" : {\n" +
+                "          \"href\" : \"http://localhost:4321/api/rest/latest/requirements/255\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    } ]\n" +
+                "  },\n" +
+                "  \"_links\" : {\n" +
+                "    \"first\" : {\n" +
+                "      \"href\" : \"http://localhost:4321/api/rest/latest/projects/14/requirements?page=0&size=3&sort=id,desc\"\n" +
+                "    },\n" +
+                "    \"prev\" : {\n" +
+                "      \"href\" : \"http://localhost:4321/api/rest/latest/projects/14/requirements?page=1&size=3&sort=id,desc\"\n" +
+                "    },\n" +
+                "    \"self\" : {\n" +
+                "      \"href\" : \"http://localhost:4321/api/rest/latest/projects/14/requirements?page=2&size=3&sort=id,desc\"\n" +
+                "    },\n" +
+                "    \"next\" : {\n" +
+                "      \"href\" : \"http://localhost:4321/api/rest/latest/projects/14/requirements?page=3&size=3&sort=id,desc\"\n" +
+                "    },\n" +
+                "    \"last\" : {\n" +
+                "      \"href\" : \"http://localhost:4321/api/rest/latest/projects/14/requirements?page=3&size=3&sort=id,desc\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"page\" : {\n" +
+                "    \"size\" : 3,\n" +
+                "    \"totalElements\" : 10,\n" +
+                "    \"totalPages\" : 4,\n" +
+                "    \"number\" : 2\n" +
+                "  }\n" +
+                "}");
+
+        Project project = new Project("https://localhost:4321/projects/14", "project", 14, "myProject");
+        List<Requirement> requirements = project.getRequirements();
+        Assert.assertEquals(requirements.size(), 3);
+        Assert.assertEquals(requirements.get(0).getName(), "requirement 1");
+        Assert.assertEquals(requirements.get(0).getPath(), "folder1/folder2");
+    }
+
+
+    @Test(expectedExceptions = SquashTmException.class)
+    public void testGetRequirementsWithError() {
+        GetRequest getRequest = (GetRequest) createServerMock("GET", "/projects/14/requirements?sort=id&fields=path,name,reference", 200, "{}", "requestBodyEntity");
+        when(getRequest.asPaged(any(), (Function<HttpResponse<JsonNode>, String>) any(Function.class))).thenThrow(UnirestException.class);
+
+        Project project = new Project("https://localhost:4321/projects/14", "project", 14, "myProject");
+        project.getRequirements();
+    }
+
     @Test
     public void testSetClearance() {
         Project project = new Project("https://localhost:4321/projects/367", "project", 367, "myProject");
