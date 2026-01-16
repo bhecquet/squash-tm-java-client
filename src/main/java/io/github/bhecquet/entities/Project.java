@@ -186,7 +186,7 @@ public class Project extends Entity {
      * Remove permissions of given users to the project
      *
      * @param userTeamIds ID of the user/team for which we remove permission
-     * @return
+     * @return Squash reply
      */
     public JSONObject deleteClearances(List<Integer> userTeamIds) {
         try {
@@ -198,8 +198,6 @@ public class Project extends Entity {
 
     /**
      * Return list of testcases from project
-     *
-     * @return
      */
     public List<TestCase> getTestCases() {
         try {
@@ -220,7 +218,7 @@ public class Project extends Entity {
     /**
      * Bind the custom field searched by its code to the provided entityType
      *
-     * @param customFieldCode
+     * @param customFieldCode the code of custom field
      * @param entityType      One of "REQUIREMENT_FOLDER", "CAMPAIGN_FOLDER", "TESTCASE_FOLDER", "TEST_CASE", "TEST_STEP", "CAMPAIGN", "ITERATION", "TEST_SUITE", "REQUIREMENT_VERSION", "EXECUTION, EXECUTION_STEP"
      */
     public void bindCustomField(String customFieldCode, String entityType) {
@@ -236,7 +234,7 @@ public class Project extends Entity {
 
         buildPostRequest(url + "/custom-fields/" + entityType)
                 .queryString("cufId", customField.getId())
-                .body(String.format("cufId=" + customField.getId()))
+                .body("cufId=" + customField.getId())
                 .asString()
                 .ifFailure(response -> {
                     throw new BindCufException(String.format("Cannot bind custom field '%s' to project %s: %s", customFieldCode, name, response.getBody()));

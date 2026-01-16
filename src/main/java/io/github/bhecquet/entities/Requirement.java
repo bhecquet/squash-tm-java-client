@@ -27,10 +27,8 @@ public class Requirement extends Entity {
     private static final String FIELD_PROJECT = "project";
     private static final String FIELD_AUTHOR = "created_by";
     private static final String FIELD_REFERENCE = "reference";
-    private static final String FIELD_TCTYPE = "type";
     private static final String FIELD_STATUS = "status";
     private static final String FIELD_CRITICALITY = "criticality";
-    private static final String FIELD_PREREQUISITE = "prerequisite";
     private static final String FIELD_TESTCASES = "verifying_test_cases";
     private static final String FIELD_CATEGORY = "category";
 
