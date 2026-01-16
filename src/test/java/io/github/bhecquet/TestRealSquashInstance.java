@@ -2,10 +2,13 @@ package io.github.bhecquet;
 
 import io.github.bhecquet.entities.Campaign;
 import io.github.bhecquet.entities.Project;
+import io.github.bhecquet.entities.Requirement;
+import org.testng.Assert;
 import org.testng.SkipException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -41,5 +44,14 @@ public class TestRealSquashInstance {
         Project project = Project.get(squashProject);
         project.bindCustomField("TAGS", "CAMPAIGN");
 
+    }
+
+    @Test
+    public void testRequirements() {
+        String squashProject = System.getProperty("squashProject");
+        Project project = Project.get(squashProject);
+        Assert.assertFalse(project.getRequirements().isEmpty());
+        Requirement newReq = Requirement.create(project, "Req from API", "Req description", new HashMap<>(), "foo/bar", Requirement.Criticality.CRITICAL);
+        newReq.update("Name updated", null, null, null, null);
     }
 }
