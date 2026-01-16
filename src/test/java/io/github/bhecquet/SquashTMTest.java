@@ -199,6 +199,7 @@ public class SquashTMTest {
         HttpRequest<?> request = mock(HttpRequest.class);
         JsonNode json = mock(JsonNode.class);
         HttpRequestWithBody postRequest = spy(HttpRequestWithBody.class);
+        when(response.ifFailure(any())).thenReturn(response);
 
         PagedList<JsonNode> pageList = new PagedList<>(); // for asPaged method
 

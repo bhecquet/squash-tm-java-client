@@ -700,14 +700,14 @@ public class TestProject extends SquashTMTest {
         GetRequest getRequest = (GetRequest) createServerMock("GET", "/projects/14/test-cases?sort=id", 200, "{}");
         when(getRequest.asPaged(any(), (Function<HttpResponse<JsonNode>, String>) any(Function.class))).thenThrow(UnirestException.class);
         Project project = new Project("https://localhost:4321/projects/14", "project", 14, "myProject");
-        List<TestCase> testCases = project.getTestCases();
+        project.getTestCases();
     }
 
     @Test
     public void testBindCustomField() {
         HttpRequestWithBody postRequest = (HttpRequestWithBody) createServerMock("POST", "/projects/14/custom-fields/CAMPAIGN", 200, "{}", "request");
         Project project = new Project("https://localhost:4321/projects/14", "project", 14, "myProject");
-        try (MockedStatic mockedCf = mockStatic(CustomField.class)) {
+        try (MockedStatic<CustomField> mockedCf = mockStatic(CustomField.class)) {
             mockedCf.when(() -> CustomField.getByCode("FOO")).thenReturn(new CustomField("https://localhost:4321/custom-fields/12", "custom-field", 12, "foo", "Foo", "CODE"));
             project.bindCustomField("FOO", "CAMPAIGN");
             verify(postRequest).body("cufId=12");
@@ -718,7 +718,7 @@ public class TestProject extends SquashTMTest {
     public void testBindCustomFieldNoMatchingCustomField() {
         HttpRequestWithBody postRequest = (HttpRequestWithBody) createServerMock("POST", "/projects/14/custom-fields/CAMPAIGN", 200, "{}", "request");
         Project project = new Project("https://localhost:4321/projects/14", "project", 14, "myProject");
-        try (MockedStatic mockedCf = mockStatic(CustomField.class)) {
+        try (MockedStatic<CustomField> mockedCf = mockStatic(CustomField.class)) {
             mockedCf.when(() -> CustomField.getByCode("FOO")).thenReturn(null);
             project.bindCustomField("FOO", "CAMPAIGN");
             verify(postRequest).body("cufId=12");
@@ -728,9 +728,20 @@ public class TestProject extends SquashTMTest {
     @Test(expectedExceptions = ConfigurationException.class, expectedExceptionsMessageRegExp = ".*Entity type CAMP is not allowed.*")
     public void testBindCustomFieldBadEntityType() {
         Project project = new Project("https://localhost:4321/projects/14", "project", 14, "myProject");
-        try (MockedStatic mockedCf = mockStatic(CustomField.class)) {
+        try (MockedStatic<CustomField> mockedCf = mockStatic(CustomField.class)) {
             mockedCf.when(() -> CustomField.getByCode("FOO")).thenReturn(new CustomField("https://localhost:4321/custom-fields/12", "custom-field", 12, "foo", "Foo", "CODE"));
             project.bindCustomField("FOO", "CAMP");
+        }
+    }
+
+    @Test(expectedExceptions = SquashTmException.class, expectedExceptionsMessageRegExp = "Cannot bing CUF")
+    public void testBindCustomFieldError2() {
+        RequestBodyEntity postRequest = (RequestBodyEntity) createServerMock("POST", "/projects/14/custom-fields/CAMPAIGN", 200, "OK", "requestBodyEntity");
+        when(postRequest.asString()).thenThrow(UnirestException.class);
+        Project project = new Project("https://localhost:4321/projects/14", "project", 14, "myProject");
+        try (MockedStatic<CustomField> mockedCf = mockStatic(CustomField.class)) {
+            mockedCf.when(() -> CustomField.getByCode("FOO")).thenReturn(new CustomField("https://localhost:4321/custom-fields/12", "custom-field", 12, "foo", "Foo", "CODE"));
+            project.bindCustomField("FOO", "CAMPAIGN");
         }
     }
 }

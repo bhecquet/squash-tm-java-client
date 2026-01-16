@@ -232,13 +232,17 @@ public class Project extends Entity {
             throw new ConfigurationException(String.format("Entity type %s is not allowed: REQUIREMENT_FOLDER, CAMPAIGN_FOLDER, TESTCASE_FOLDER, TEST_CASE, TEST_STEP, CAMPAIGN, ITERATION, TEST_SUITE, REQUIREMENT_VERSION, EXECUTION, EXECUTION_STEP", entityType));
         }
 
-        buildPostRequest(url + "/custom-fields/" + entityType)
-                .queryString("cufId", customField.getId())
-                .body("cufId=" + customField.getId())
-                .asString()
-                .ifFailure(response -> {
-                    throw new BindCufException(String.format("Cannot bind custom field '%s' to project %s: %s", customFieldCode, name, response.getBody()));
-                });
+        try {
+            buildPostRequest(url + "/custom-fields/" + entityType)
+                    .queryString("cufId", customField.getId())
+                    .body("cufId=" + customField.getId())
+                    .asString()
+                    .ifFailure(response -> {
+                        throw new BindCufException(String.format("Cannot bind custom field '%s' to project %s: %s", customFieldCode, name, response.getBody()));
+                    });
+        } catch (UnirestException e) {
+            throw new SquashTmException("Cannot bing CUF", e);
+        }
     }
 
 }

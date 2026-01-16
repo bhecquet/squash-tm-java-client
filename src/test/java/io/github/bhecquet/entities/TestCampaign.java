@@ -29,7 +29,7 @@ public class TestCampaign extends SquashTMTest {
     @BeforeMethod
     public void init() {
         project = spy(new Project("https://localhost:4321/projects/1", "project", 1, "project"));
-        Campaign.configureEntity("user", "pwd", SERVER_URL + "/");
+        Campaign.configureEntityByToken("token", SERVER_URL + "/");
     }
 
     //For code coverage only I don't get the meaning of this constructor
