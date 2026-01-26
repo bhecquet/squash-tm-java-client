@@ -3,6 +3,7 @@ package io.github.bhecquet.entities;
 import io.github.bhecquet.exceptions.SquashTmException;
 import kong.unirest.core.*;
 import kong.unirest.core.json.JSONArray;
+import kong.unirest.core.json.JSONException;
 import kong.unirest.core.json.JSONObject;
 
 import java.time.Instant;
@@ -32,6 +33,7 @@ public abstract class Entity {
     protected static final String FIELD_TEST_CASES = "test-cases";
     protected static final String FIELD_REQUIREMENT_FOLDERS = "requirement-folders";
     protected static final String FIELD_REQUIREMENTS = "requirements";
+    protected static final String FIELD_HIGH_LEVEL_REQUIREMENTS = "high-level-requirements";
 
     protected static final String TYPE_PROJECT = "project";
     protected static final String TYPE_CAMPAIGN_FOLDER = "campaign-folder";
@@ -39,6 +41,8 @@ public abstract class Entity {
     protected static final String TYPE_ITERATION = "iteration";
     protected static final String TYPE_REQUIREMENT = "requirement";
     protected static final String TYPE_REQUIREMENT_FOLDER = "requirement-folder";
+    protected static final String TYPE_EXECUTION = "execution";
+    protected static final String TYPE_REQUIREMENT_HIGH_LEVEL = "high-level-requirement";
 
     private static String user;
     private static String password;
@@ -71,6 +75,32 @@ public abstract class Entity {
         this.id = id;
         this.name = name;
         this.type = type;
+    }
+
+    public static Entity entityFromJson(JSONObject json) {
+        try {
+            String type = json.getString(FIELD_TYPE);
+            if (TYPE_PROJECT.equals(type)) {
+                return Project.fromJson(json);
+            } else if (TYPE_CAMPAIGN.equals(type)) {
+                return Campaign.fromJson(json);
+            } else if (TYPE_CAMPAIGN_FOLDER.equals(type)) {
+                return CampaignFolder.fromJson(json);
+            } else if (TYPE_EXECUTION.equals(type)) {
+                return Execution.fromJson(json);
+            } else if (TYPE_ITERATION.equals(type)) {
+                return Iteration.fromJson(json);
+            } else if (TYPE_REQUIREMENT_FOLDER.equals(type)) {
+                return RequirementFolder.fromJson(json);
+            } else if (TYPE_REQUIREMENT.equals(type) || TYPE_REQUIREMENT_HIGH_LEVEL.equals(type)) {
+                return Requirement.fromJson(json);
+            } else {
+                return null;
+            }
+        } catch (JSONException e) {
+            throw new SquashTmException(String.format("Cannot create Requirement from JSON [%s] data: %s", json.toString(), e.getMessage()));
+        }
+
     }
 
     public abstract void completeDetails();

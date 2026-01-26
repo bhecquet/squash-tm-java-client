@@ -1,6 +1,5 @@
 package io.github.bhecquet.entities;
 
-import io.github.bhecquet.exceptions.ExecutionStepToExcludeException;
 import io.github.bhecquet.exceptions.SquashTmException;
 import kong.unirest.core.UnirestException;
 import kong.unirest.core.json.JSONException;
@@ -76,9 +75,17 @@ public class ExecutionStep extends Step {
     @Override
     public void completeDetails() {
         JSONObject json = getJSonResponse(buildGetRequest(url));
+        completeDetails(json);
+    }
 
-        status = json.getString(FIELD_EXECUTION_STATUS);
-        order = json.getInt(FIELD_EXECUTION_STEP_ORDER);
+    private void completeDetails(JSONObject json) {
+        try {
+            status = json.getString(FIELD_EXECUTION_STATUS);
+        } catch (JSONException e) {/* ignore */}
+        try {
+            order = json.getInt(FIELD_EXECUTION_STEP_ORDER);
+        } catch (JSONException e) {/* ignore */}
+
         expectedResult = json.optString(FIELD_EXPECTED_RESULT, "");
         action = json.optString(FIELD_ACTION, "");
         comment = json.optString(FIELD_COMMENT, "");
@@ -87,16 +94,18 @@ public class ExecutionStep extends Step {
         try {
             // when "referenced_test_step" is null, exclude line
             referencedStepId = json.getJSONObject(FIELD_REFERENCED_TEST_STEP).getInt(FIELD_ID);
-        } catch (JSONException e) {
-            throw new ExecutionStepToExcludeException();
-        }
+        } catch (JSONException e) {/* ignore */}
 
-        readCustomFields(json.getJSONArray(FIELD_CUSTOM_FIELDS));
+        try {
+            readCustomFields(json.getJSONArray(FIELD_CUSTOM_FIELDS));
+        } catch (JSONException e) {/* ignore */}
+        try {
+            testStepCustomFields = new ArrayList<>();
+            for (JSONObject field : (List<JSONObject>) json.getJSONArray(FIELD_TEST_STEP_CUSTOM_FIELDS).toList()) {
+                testStepCustomFields.add(CustomFieldValue.fromJson(field));
+            }
+        } catch (JSONException e) {/* ignore */}
 
-        testStepCustomFields = new ArrayList<>();
-        for (JSONObject field : (List<JSONObject>) json.getJSONArray(FIELD_TEST_STEP_CUSTOM_FIELDS).toList()) {
-            testStepCustomFields.add(CustomFieldValue.fromJson(field));
-        }
     }
 
     public static ExecutionStep get(int id) {
@@ -109,12 +118,14 @@ public class ExecutionStep extends Step {
 
     public static ExecutionStep fromJson(JSONObject json) {
         try {
-            return new ExecutionStep(
+            ExecutionStep executionStep = new ExecutionStep(
                     json.getJSONObject("_links").getJSONObject("self").getString("href"),
                     json.getString(FIELD_TYPE),
                     json.getInt(FIELD_ID),
                     json.getString(FIELD_ACTION)
             );
+            executionStep.completeDetails(json);
+            return executionStep;
 
         } catch (JSONException e) {
             throw new SquashTmException(String.format("Cannot create execution step from JSON [%s] data: %s", json.toString(), e.getMessage()));

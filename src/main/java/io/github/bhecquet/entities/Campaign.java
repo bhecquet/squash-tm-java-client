@@ -7,14 +7,20 @@ import kong.unirest.core.json.JSONArray;
 import kong.unirest.core.json.JSONException;
 import kong.unirest.core.json.JSONObject;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Campaign extends Entity {
 
 
+    private static final Map<Project, EntityCache<Campaign>> campaignCaches = new ConcurrentHashMap<>();
     public static final String CAMPAIGNS_URL = "campaigns";
+    public static final String CAMPAIGNS_FOR_PROJECT_URL = "projects/%d/campaigns";
     private static final String CAMPAIGN_URL = "campaigns/%s";
     public static final String ITERATIONS_URL = "/iterations";
 
@@ -52,9 +58,10 @@ public class Campaign extends Entity {
     /**
      * Get list of all campaigns
      *
-     * @return
+     * @deprecated use getAll(Project) instead
      */
     @SuppressWarnings("unchecked")
+    @Deprecated(since = "1.0.25")
     public static List<Campaign> getAll() {
         try {
             JSONObject json = getPagedJSonResponse(buildGetRequest(apiRootUrl + CAMPAIGNS_URL));
@@ -69,6 +76,50 @@ public class Campaign extends Entity {
         } catch (UnirestException e) {
             throw new SquashTmException("Cannot get all campaigns", e);
         }
+    }
+
+    /**
+     * Returns all the campaigns for the project
+     *
+     * @param project the project
+     */
+    public static List<Campaign> getAll(Project project) {
+        return getAll(project, "path,name,reference");
+    }
+
+    /**
+     * Returns all the campaigns for the project, given fields
+     *
+     * @param project the project
+     * @param fields  fields to retrieve
+     */
+    public static List<Campaign> getAll(Project project, String fields) {
+        JSONObject json;
+        try {
+            json = getPagedJSonResponse(buildGetRequest(apiRootUrl + String.format(CAMPAIGNS_FOR_PROJECT_URL, project.getId()) + "?sort=id&fields=" + URLEncoder.encode(fields, StandardCharsets.UTF_8)));
+        } catch (UnirestException e) {
+            throw new SquashTmException(String.format("Cannot get list of campaigns for project %s: %s", project.getName(), e.getMessage()));
+        }
+
+        List<Campaign> campaigns = new ArrayList<>();
+        if (json.has(FIELD_EMBEDDED)) {
+            for (JSONObject folderJson : (List<JSONObject>) json.getJSONObject(FIELD_EMBEDDED).getJSONArray(FIELD_CAMPAIGNS).toList()) {
+                Campaign newCampaign = Campaign.fromJson(folderJson);
+                try {
+                    newCampaign.setPath(folderJson.getString("path"));
+                } catch (JSONException e) {
+                    // no path present
+                }
+                try {
+                    newCampaign.readCustomFields(folderJson.getJSONArray(FIELD_CUSTOM_FIELDS));
+                } catch (JSONException e) {
+                    // no custom fields
+                }
+                campaigns.add(newCampaign);
+            }
+        }
+        return campaigns;
+
     }
 
     /**
@@ -87,7 +138,7 @@ public class Campaign extends Entity {
                 for (JSONObject iterationJson : (List<JSONObject>) json.getJSONObject(FIELD_EMBEDDED).getJSONArray(FIELD_ITERATIONS).toList()) {
                     Iteration iteration = Iteration.fromJson(iterationJson);
                     iterations.add(iteration);
-                    iteration.completeDetails(iterationJson);
+                    iteration.completeDetails(iterationJson, true);
 
                 }
             }
@@ -99,11 +150,13 @@ public class Campaign extends Entity {
 
     public static Campaign fromJson(JSONObject json) {
         try {
-            return new Campaign(
+            Campaign campaign = new Campaign(
                     json.getJSONObject("_links").getJSONObject("self").getString("href"),
                     json.getString(FIELD_TYPE),
                     json.getInt(FIELD_ID),
                     json.getString(FIELD_NAME));
+            campaign.completeDetails(json);
+            return campaign;
         } catch (JSONException e) {
             throw new SquashTmException(String.format("Cannot create Campaign from JSON [%s] data: %s", json.toString(), e.getMessage()));
         }
@@ -114,19 +167,31 @@ public class Campaign extends Entity {
      * Folder tree will also be created if necessary
      *
      * @param campaignName name of the campaign to create
-     * @param folderPath   folder path to which campaign will be created. e.g: foo/bar
+     * @param folderPath   folder path to which campaign will be created. e.g: foo/bar. Beware that this will not work as expected if one of folder contains a "/"
      */
     public static Campaign create(Project project, String campaignName, String folderPath, Map<String, Object> customFields) {
+        return create(project, campaignName, folderPath == null ? new ArrayList<>() : Arrays.asList(folderPath.split("/")), customFields);
+    }
+
+    /**
+     * Creates a campaign if it does not exist
+     * Folder tree will also be created if necessary
+     *
+     * @param campaignName name of the campaign to create
+     * @param folderPath   folder path to which campaign will be created. e.g: [foo, bar]
+     */
+    public static Campaign create(Project project, String campaignName, List<String> folderPath, Map<String, Object> customFields) {
 
         CampaignFolder parentFolder = CampaignFolder.createCampaignFolderTree(project, folderPath);
 
         if (folderPath == null) {
-            folderPath = "";
+            folderPath = new ArrayList<>();
         }
 
         // do not create campaign if it exists
-        for (Campaign campaign : project.getCampaigns()) {
-            if (campaign.getName().equals(campaignName) && campaign.getPath().equals(String.format("/%s/%s/%s", project.getName(), folderPath, campaignName).replace("//", "/"))) {
+        campaignCaches.putIfAbsent(project, new EntityCache<>(300));
+        for (Campaign campaign : campaignCaches.get(project).getAll(Campaign::getAll, project)) {
+            if (campaign.getName().equals(campaignName) && campaign.getPath().equals(String.format("/%s/%s/%s", project.getName(), String.join("/", folderPath), campaignName).replace("//", "/"))) {
                 return campaign;
             }
         }
@@ -134,12 +199,12 @@ public class Campaign extends Entity {
     }
 
     /**
-     * CReates the campaign
+     * Creates the campaign
      *
-     * @param project
-     * @param campaignName
-     * @param parentFolder
-     * @return
+     * @param project      project to create campaign in
+     * @param campaignName name of the campaign
+     * @param parentFolder the parent folder of the campaign
+     * @return the created campaign
      */
     public static Campaign create(Project project, String campaignName, CampaignFolder parentFolder, Map<String, Object> customFields) {
 
@@ -170,7 +235,10 @@ public class Campaign extends Entity {
 
             JSONObject json = getJSonResponse(buildPostRequest(apiRootUrl + CAMPAIGNS_URL).body(body));
 
-            return fromJson(json);
+            Campaign campaign = fromJson(json);
+            campaignCaches.putIfAbsent(project, new EntityCache<>(300));
+            campaignCaches.get(project).add(campaign);
+            return campaign;
 
         } catch (UnirestException e) {
             throw new SquashTmException(String.format("Cannot create campaign %s", campaignName), e);
@@ -184,18 +252,28 @@ public class Campaign extends Entity {
     }
 
     private void completeDetails(JSONObject json) {
-        projectId = json.getJSONObject(TYPE_PROJECT).getInt(FIELD_ID);
-        projectName = json.getJSONObject(TYPE_PROJECT).getString(FIELD_NAME);
+        try {
+            projectId = json.getJSONObject(TYPE_PROJECT).getInt(FIELD_ID);
+        } catch (JSONException e) {/* ignore */}
+        try {
+            projectName = json.getJSONObject(TYPE_PROJECT).getString(FIELD_NAME);
+        } catch (JSONException e) {/* ignore */}
+
         scheduleStartDate = json.optString(FIELD_SCHEDULE_START_DATE, "");
         scheduleEndDate = json.optString(FIELD_SCHEDULE_END_DATE, "");
         actualStartDate = json.optString(FIELD_ACTUAL_START_DATE, "");
         actualEndDate = json.optString(FIELD_ACTUAL_END_DATE, "");
         path = json.optString(FIELD_PATH, "");
 
-        for (JSONObject jsonIteration : (List<JSONObject>) json.getJSONArray(FIELD_ITERATIONS).toList()) {
-            iterations.add(Iteration.fromJson(jsonIteration));
-        }
-        readCustomFields(json.getJSONArray(FIELD_CUSTOM_FIELDS));
+
+        try {
+            for (JSONObject jsonIteration : (List<JSONObject>) json.getJSONArray(FIELD_ITERATIONS).toList()) {
+                iterations.add(Iteration.fromJson(jsonIteration));
+            }
+        } catch (JSONException e) {/* ignore */}
+        try {
+            readCustomFields(json.getJSONArray(FIELD_CUSTOM_FIELDS));
+        } catch (JSONException e) {/* ignore */}
     }
 
     public static Campaign get(int id) {
@@ -239,6 +317,10 @@ public class Campaign extends Entity {
 
     public String getActualEndDate() {
         return actualEndDate;
+    }
+
+    public static Map<Project, EntityCache<Campaign>> getCampaignCaches() {
+        return campaignCaches;
     }
 
 }

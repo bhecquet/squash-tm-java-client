@@ -21,12 +21,14 @@ public class TestSuite extends Entity {
 
     public static TestSuite fromJson(JSONObject json) {
         try {
-            return new TestSuite(
+            TestSuite testSuite = new TestSuite(
                     json.getJSONObject("_links").getJSONObject("self").getString("href"),
                     json.getString(FIELD_TYPE),
                     json.getInt(FIELD_ID),
                     json.optString(FIELD_NAME, "")
             );
+            testSuite.completeDetails(json);
+            return testSuite;
 
         } catch (JSONException e) {
             throw new SquashTmException(String.format("Cannot create test suite from JSON [%s] data: %s", json.toString(), e.getMessage()));
@@ -39,13 +41,16 @@ public class TestSuite extends Entity {
     }
 
     private void completeDetails(JSONObject json) {
-        iterationTestPlanItems = new ArrayList<>();
+        try {
+            iterationTestPlanItems = new ArrayList<>();
 
-        for (JSONObject jsonIterationTestPlanItem : (List<JSONObject>) json.getJSONArray(FIELD_TEST_PLAN).toList()) {
-            IterationTestPlanItem item = IterationTestPlanItem.fromJson(jsonIterationTestPlanItem);
-            item.setTestSuite(this);
-            iterationTestPlanItems.add(item);
-        }
+            for (JSONObject jsonIterationTestPlanItem : (List<JSONObject>) json.getJSONArray(FIELD_TEST_PLAN).toList()) {
+                IterationTestPlanItem item = IterationTestPlanItem.fromJson(jsonIterationTestPlanItem);
+                item.setTestSuite(this);
+                iterationTestPlanItems.add(item);
+            }
+
+        } catch (JSONException e) {/* ignore */}
     }
 
     public static TestSuite get(int id) {

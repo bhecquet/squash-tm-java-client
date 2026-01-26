@@ -45,7 +45,7 @@ public class IterationTestPlanItem extends Entity {
     /**
      * Create an execution for this item
      *
-     * @return
+     * @return the iteration test plan item
      */
     public TestPlanItemExecution createExecution() {
         try {
@@ -58,7 +58,7 @@ public class IterationTestPlanItem extends Entity {
     /**
      * Create an execution for this item, providing a result
      *
-     * @return
+     * @return the execution object
      */
     public TestPlanItemExecution createExecutionWithResult(TestPlanItemExecution.ExecutionStatus result, String comment) {
 
@@ -80,7 +80,7 @@ public class IterationTestPlanItem extends Entity {
                     referencedTestCase == null ? null : TestCase.fromJson(referencedTestCase),
                     referencedDataset == null ? null : Dataset.fromJson(referencedDataset)
             );
-            iterationTestPlanItem.status = json.optString(FIELD_EXECUTION_STATUS, null);
+            iterationTestPlanItem.completeDetails(json);
             return iterationTestPlanItem;
         } catch (JSONException e) {
             throw new SquashTmException(String.format("Cannot create IterationTestPlanItem from JSON [%s] data: %s", json.toString(), e.getMessage()));
@@ -95,12 +95,15 @@ public class IterationTestPlanItem extends Entity {
     private void completeDetails(JSONObject json) {
         executions = new ArrayList<>();
 
+        status = json.optString(FIELD_EXECUTION_STATUS, null);
         lastExecutedBy = json.optString(FIELD_LAST_EXECUTED_BY, "");
         lastExecutedOn = json.optString(FIELD_LAST_EXECUTED_ON, "");
 
-        for (JSONObject jsonExecution : (List<JSONObject>) json.getJSONArray(FIELD_EXECUTIONS).toList()) {
-            executions.add(Execution.fromJson(jsonExecution));
-        }
+        try {
+            for (JSONObject jsonExecution : (List<JSONObject>) json.getJSONArray(FIELD_EXECUTIONS).toList()) {
+                executions.add(Execution.fromJson(jsonExecution));
+            }
+        } catch (JSONException e) {/* ignore */}
     }
 
     public static IterationTestPlanItem get(int id) {

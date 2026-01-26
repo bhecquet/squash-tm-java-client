@@ -8,10 +8,14 @@ import kong.unirest.core.json.JSONException;
 import kong.unirest.core.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class RequirementFolder extends Entity {
 
+    private static final Map<Project, EntityCache<RequirementFolder>> requirementFolderCaches = new ConcurrentHashMap<>();
     public static final String REQUIREMENT_FOLDER_URL = "requirement-folders";
     public static final String REQUIREMENT_FOLDER_TREE_URL = REQUIREMENT_FOLDER_URL + "/" + "tree/%s";
     public static final String REQUIREMENT_FOLDER_CONTENT_URL = "requirement-folders/%s/content";
@@ -45,6 +49,7 @@ public class RequirementFolder extends Entity {
             throw new SquashTmException("Cannot get all requirement folders", e);
         }
     }
+
 
     /**
      * Get all requirement folders for this project
@@ -95,15 +100,26 @@ public class RequirementFolder extends Entity {
      * @return the final requirement folder
      */
     public static RequirementFolder createRequirementFolderTree(Project project, String folderPath) {
+        return RequirementFolder.createRequirementFolderTree(project, folderPath == null ? new ArrayList<>() : Arrays.asList(folderPath.split("/")));
+    }
+
+    /**
+     * Creates all the requirement folders from the provided path
+     *
+     * @param project    the project to which this folder belongs
+     * @param folderPath path of folders. as a list
+     * @return the final requirement folder
+     */
+    public static RequirementFolder createRequirementFolderTree(Project project, List<String> folderPath) {
         if (folderPath == null) {
-            folderPath = "";
+            folderPath = new ArrayList<>();
         }
 
         // create folder where requirement will be located
         RequirementFolder parentFolder = null;
-        for (String folderName : folderPath.split("/")) {
+        for (String folderName : folderPath) {
 
-            if (folderName.isEmpty()) {
+            if (folderName.trim().isEmpty()) {
                 continue;
             }
 
@@ -115,7 +131,9 @@ public class RequirementFolder extends Entity {
 
     private static RequirementFolder createRequirementFolders(Project project, String folderName, RequirementFolder parentFolder) {
 
-        List<RequirementFolder> requirementFolders = getAll(project);
+        // creates the cache
+        requirementFolderCaches.putIfAbsent(project, new EntityCache<>(300));
+        List<RequirementFolder> requirementFolders = requirementFolderCaches.get(project).getAll(RequirementFolder::getAll, project);
 
         boolean folderExists = false;
         for (RequirementFolder existingFolder : requirementFolders) {
@@ -215,9 +233,12 @@ public class RequirementFolder extends Entity {
             }
 
             JSONObject json = getJSonResponse(buildPostRequest(apiRootUrl + REQUIREMENT_FOLDER_URL).body(body));
+            RequirementFolder requirementFolder = RequirementFolder.fromJson(json);
 
+            requirementFolderCaches.putIfAbsent(project, new EntityCache<>(300));
+            requirementFolderCaches.get(project).add(requirementFolder);
 
-            return RequirementFolder.fromJson(json);
+            return requirementFolder;
 
         } catch (UnirestException e) {
             throw new SquashTmException(String.format("Cannot create requirement %s", requirementFolderName), e);
@@ -248,5 +269,9 @@ public class RequirementFolder extends Entity {
 
     public void setParent(Entity parent) {
         this.parent = parent;
+    }
+
+    public static Map<Project, EntityCache<RequirementFolder>> getRequirementFolderCaches() {
+        return requirementFolderCaches;
     }
 }

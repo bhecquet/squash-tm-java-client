@@ -58,12 +58,14 @@ public class TestCase extends Entity {
 
     public static TestCase fromJson(JSONObject json) {
         try {
-            return new TestCase(
+            TestCase testCase = new TestCase(
                     json.getJSONObject("_links").getJSONObject("self").getString("href"),
                     json.getString(FIELD_TYPE),
                     json.getInt(FIELD_ID),
                     json.optString(FIELD_NAME, "")
             );
+            testCase.completeDetails(json, false);
+            return testCase;
         } catch (JSONException e) {
             throw new SquashTmException(String.format("Cannot create TestCase from JSON [%s] data: %s", json.toString(), e.getMessage()));
         }
@@ -80,37 +82,71 @@ public class TestCase extends Entity {
     @Override
     public void completeDetails() {
         JSONObject json = getJSonResponse(buildGetRequest(url));
-        completeDetails(json);
+        completeDetails(json, true);
     }
 
-    private void completeDetails(JSONObject json) {
+    /**
+     * @param json                     JSON to get
+     * @param completeDependentObjects whether we call related objects found in json
+     */
+    private void completeDetails(JSONObject json, boolean completeDependentObjects) {
 
         testSteps = new ArrayList<>();
 
         automatedTestReference = json.optString(FIELD_AUTOMATED_TEST_REFERENCE, "");
-        path = json.getString(FIELD_PATH);
-        description = json.getString(FIELD_DESCRIPTION);
-        projectId = json.getJSONObject(FIELD_PROJECT).getInt(FIELD_ID);
-        projectName = json.getJSONObject(FIELD_PROJECT).getString(FIELD_NAME);
-        author = json.getString(FIELD_AUTHOR);
-        nature = json.getJSONObject(FIELD_NATURE).getString("code");
-        tctype = json.getJSONObject(FIELD_TCTYPE).getString("code");
-        reference = json.getString(FIELD_REFERENCE);
-        status = json.getString(FIELD_STATUS);
-        importance = json.getString(FIELD_IMPORTANCE);
-        prerequisite = json.getString(FIELD_PREREQUISITE);
-        requirementNumber = json.getJSONArray(FIELD_REQUIREMENTS).length();
-
-        for (JSONObject step : (List<JSONObject>) json.getJSONArray(FIELD_STEPS).toList()) {
-            testSteps.addAll(TestStep.fromJson(step));
-        }
-        for (JSONObject datasetJson : (List<JSONObject>) json.getJSONArray(FIELD_DATASETS).toList()) {
-            Dataset dataset = Dataset.fromJson(datasetJson);
-            dataset.setTestCase(this);
-            datasets.add(dataset);
-        }
-
-        readCustomFields(json.getJSONArray(FIELD_CUSTOM_FIELDS));
+        try {
+            path = json.getString(FIELD_PATH);
+        } catch (JSONException e) {/* ignore */}
+        try {
+            description = json.getString(FIELD_DESCRIPTION);
+        } catch (JSONException e) {/* ignore */}
+        try {
+            projectId = json.getJSONObject(FIELD_PROJECT).getInt(FIELD_ID);
+        } catch (JSONException e) {/* ignore */}
+        try {
+            projectName = json.getJSONObject(FIELD_PROJECT).getString(FIELD_NAME);
+        } catch (JSONException e) {/* ignore */}
+        try {
+            author = json.getString(FIELD_AUTHOR);
+        } catch (JSONException e) {/* ignore */}
+        try {
+            nature = json.getJSONObject(FIELD_NATURE).getString("code");
+        } catch (JSONException e) {/* ignore */}
+        try {
+            tctype = json.getJSONObject(FIELD_TCTYPE).getString("code");
+        } catch (JSONException e) {/* ignore */}
+        try {
+            reference = json.getString(FIELD_REFERENCE);
+        } catch (JSONException e) {/* ignore */}
+        try {
+            status = json.getString(FIELD_STATUS);
+        } catch (JSONException e) {/* ignore */}
+        try {
+            importance = json.getString(FIELD_IMPORTANCE);
+        } catch (JSONException e) {/* ignore */}
+        try {
+            prerequisite = json.getString(FIELD_PREREQUISITE);
+        } catch (JSONException e) {/* ignore */}
+        try {
+            requirementNumber = json.getJSONArray(FIELD_REQUIREMENTS).length();
+        } catch (JSONException e) {/* ignore */}
+        try {
+            if (completeDependentObjects) {
+                for (JSONObject step : (List<JSONObject>) json.getJSONArray(FIELD_STEPS).toList()) {
+                    testSteps.addAll(TestStep.fromJson(step));
+                }
+            }
+        } catch (JSONException e) {/* ignore */}
+        try {
+            for (JSONObject datasetJson : (List<JSONObject>) json.getJSONArray(FIELD_DATASETS).toList()) {
+                Dataset dataset = Dataset.fromJson(datasetJson);
+                dataset.setTestCase(this);
+                datasets.add(dataset);
+            }
+        } catch (JSONException e) {/* ignore */}
+        try {
+            readCustomFields(json.getJSONArray(FIELD_CUSTOM_FIELDS));
+        } catch (JSONException e) {/* ignore */}
 
     }
 

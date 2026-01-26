@@ -42,9 +42,9 @@ public class Iteration extends Entity {
      * Add a test case/dataset in this iteration, given their id
      * If test case is already in the iteration, do not add it a second time
      *
-     * @param testCaseId
-     * @param datasetId
-     * @return
+     * @param testCaseId id of the test case
+     * @param datasetId  id of the dataset
+     * @return the iteration test plan item
      */
     public IterationTestPlanItem addTestCase(int testCaseId, Integer datasetId) {
 
@@ -102,22 +102,23 @@ public class Iteration extends Entity {
 
     public static Iteration fromJson(JSONObject json) {
         try {
-            return new Iteration(json.getJSONObject("_links").getJSONObject("self").getString("href"),
+            Iteration iteration = new Iteration(json.getJSONObject("_links").getJSONObject("self").getString("href"),
                     json.getString(FIELD_TYPE),
                     json.getInt(FIELD_ID),
                     json.getString(FIELD_NAME));
+            iteration.completeDetails(json, false);
+            return iteration;
         } catch (JSONException e) {
             throw new SquashTmException(String.format("Cannot create Iteration from JSON [%s] data: %s", json.toString(), e.getMessage()));
         }
     }
-
 
     /**
      * Creates an interation in a campaign if it does not exist
      *
      * @param campaign      the campaign where iteration will be created
      * @param iterationName name of the iteration to create
-     * @return
+     * @return the created iteration
      */
     public static Iteration create(Campaign campaign, String iterationName) {
         for (Iteration iteration : campaign.getIterations()) {
@@ -150,39 +151,46 @@ public class Iteration extends Entity {
     public void completeDetails() {
 
         JSONObject json = getJSonResponse(buildGetRequest(url));
-        completeDetails(json);
+        completeDetails(json, true);
     }
 
-    public void completeDetails(JSONObject json) {
+    /**
+     * @param json                     JSON to get
+     * @param completeDependentObjects whether we call related objects found in json
+     */
+    public void completeDetails(JSONObject json, boolean completeDependentObjects) {
 
         scheduleStartDate = json.optString(FIELD_SCHEDULE_START_DATE, "");
         scheduleEndDate = json.optString(FIELD_SCHEDULE_END_DATE, "");
         actualStartDate = json.optString(FIELD_ACTUAL_START_DATE, "");
         actualEndDate = json.optString(FIELD_ACTUAL_END_DATE, "");
-        reference = json.getString(FIELD_REFERENCE);
-        testSuites = new ArrayList<>();
 
-        for (JSONObject jsonTestSuite : (List<JSONObject>) json.getJSONArray(FIELD_TEST_SUITE).toList()) {
-            testSuites.add(TestSuite.fromJson(jsonTestSuite));
-        }
+        try {
+            reference = json.getString(FIELD_REFERENCE);
+        } catch (JSONException e) {/* ignore */}
+        try {
+            testSuites = new ArrayList<>();
+            for (JSONObject jsonTestSuite : (List<JSONObject>) json.getJSONArray(FIELD_TEST_SUITE).toList()) {
+                testSuites.add(TestSuite.fromJson(jsonTestSuite));
+            }
+        } catch (JSONException e) {/* ignore */}
 
         // in case project is not present, it means we get Iteration JSON from campaign list
         // in this case, we won't look at test plan
-        if (json.getJSONObject("_links").has("project")) {
+        if (completeDependentObjects && json.getJSONObject("_links").has("project")) {
             project = Project.getFromUrl(json.getJSONObject("_links").getJSONObject("project").getString("href"));
             iterationTestPlanItems = getAllTestCases();
         }
 
-
-        readCustomFields(json.getJSONArray(FIELD_CUSTOM_FIELDS));
+        try {
+            readCustomFields(json.getJSONArray(FIELD_CUSTOM_FIELDS));
+        } catch (JSONException e) {/* ignore */}
     }
 
     public static Iteration get(int id) {
         try {
             JSONObject json = getJSonResponse(buildGetRequest(apiRootUrl + String.format(ITERATION_URL, id)));
-            Iteration iteration = fromJson(json);
-
-            return iteration;
+            return fromJson(json);
         } catch (UnirestException e) {
             throw new SquashTmException(String.format("Iteration %d does not exist", id));
         }

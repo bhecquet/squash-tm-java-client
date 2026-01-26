@@ -17,12 +17,12 @@
  */
 package io.github.bhecquet;
 
+import io.github.bhecquet.entities.EntityCache;
 import io.github.bhecquet.exceptions.TestConfigurationException;
 import kong.unirest.core.*;
 import kong.unirest.core.json.JSONArray;
 import kong.unirest.core.json.JSONException;
 import kong.unirest.core.json.JSONObject;
-import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 import org.mockito.exceptions.base.MockitoException;
@@ -56,10 +56,7 @@ public class SquashTMTest {
     public HttpResponse<String> responseAliveString;
     public UnirestInstance unirestInstance;
 
-    protected static ThreadLocal<MockedStatic> mockedUnirest = new ThreadLocal<>();
-    protected MockedStatic mockedWebUiDriverFactory;
-    protected MockedConstruction mockedWebUiDriver;
-    protected MockedConstruction mockedRemoteWebDriver;
+    protected static ThreadLocal<MockedStatic<Unirest>> mockedUnirest = new ThreadLocal<>();
 
     protected GetRequest namedApplicationRequest;
     protected GetRequest namedEnvironmentRequest;
@@ -78,6 +75,8 @@ public class SquashTMTest {
     @BeforeMethod
     public void initMocks(final Method method, final ITestContext testNGCtx, final ITestResult testResult) throws Exception {
 
+        // disable caching to avoid problems in tests
+        EntityCache.setEnabled(false);
         MockitoAnnotations.initMocks(this);
 
         getAliveRequest = mock(GetRequest.class);
@@ -96,8 +95,8 @@ public class SquashTMTest {
                 mockedUnirest.set(mockStatic(Unirest.class));
             }
         }
-        mockedUnirest.get().when(() -> Unirest.spawnInstance()).thenReturn(unirestInstance);
-        mockedUnirest.get().when(() -> Unirest.config()).thenReturn(unirestConfig);
+        mockedUnirest.get().when(Unirest::spawnInstance).thenReturn(unirestInstance);
+        mockedUnirest.get().when(Unirest::config).thenReturn(unirestConfig);
 
 
     }
@@ -109,24 +108,10 @@ public class SquashTMTest {
             mockedUnirest.remove();
         }
 
-        if (mockedWebUiDriver != null) {
-            mockedWebUiDriver.close();
-            mockedWebUiDriver = null;
-        }
-        if (mockedRemoteWebDriver != null) {
-            mockedRemoteWebDriver.close();
-            mockedRemoteWebDriver = null;
-        }
-        if (mockedWebUiDriverFactory != null) {
-            mockedWebUiDriverFactory.close();
-            mockedWebUiDriverFactory = null;
-        }
     }
 
     /**
      * Method for creating server reply mock
-     *
-     * @throws UnirestException
      */
 
     public HttpRequest<?> createServerMock(String requestType, String apiPath, int statusCode, String replyData) throws UnirestException {
@@ -152,7 +137,6 @@ public class SquashTMTest {
      * @param replyData
      * @param responseType if "request", replies with the POST request object (HttpRequestWithBody.class). If "body", replies with the body (MultipartBody.class)
      * @return
-     * @throws UnirestException
      */
     public HttpRequest<?> createServerMock(String requestType, String apiPath, int statusCode, File replyData, String responseType) throws UnirestException {
         return createServerMock(SERVER_URL, requestType, apiPath, statusCode, (Object) replyData, responseType);
@@ -182,7 +166,6 @@ public class SquashTMTest {
      * @param replyData    the list of response data. In case service is called more times than the number of provided responses, the last one will be repeated
      * @param responseType "request", "requestBodyEntity", "body". if "request", replies with the POST request object (HttpRequestWithBody.class). If "body", replies with the body (MultipartBody.class)
      * @return
-     * @throws UnirestException
      */
     public HttpRequest<?> createServerMock(String serverUrl, String requestType, String apiPath, int statusCode, final List<Object> replyData, String responseType) throws UnirestException {
         System.out.println(serverUrl + apiPath);

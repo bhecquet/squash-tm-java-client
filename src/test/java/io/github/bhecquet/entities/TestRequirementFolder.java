@@ -4,10 +4,7 @@ package io.github.bhecquet.entities;
 import io.github.bhecquet.SquashTMTest;
 import io.github.bhecquet.exceptions.NotImplementedException;
 import io.github.bhecquet.exceptions.SquashTmException;
-import kong.unirest.core.GetRequest;
-import kong.unirest.core.HttpRequestWithBody;
-import kong.unirest.core.RequestBodyEntity;
-import kong.unirest.core.UnirestException;
+import kong.unirest.core.*;
 import kong.unirest.core.json.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -768,15 +765,59 @@ public class TestRequirementFolder extends SquashTMTest {
         verify(postRequest).body(new JSONObject("{\"_type\":\"requirement-folder\",\"name\":\"bar\",\"parent\":{\"_type\":\"requirement-folder\",\"id\":33,\"name\":\"Requirement folder 1\"}}"));
     }
 
+    /**
+     * With cache, request to tree is done only once
+     */
+    @Test
+    public void testCreateRequirementFolderTreeWithCache() {
+        EntityCache.setEnabled(true);
+
+        // requirement folder creation
+        createServerMock("POST", "/requirement-folders", 200, REQ_FOLDER_CREATION_RESPONSE, "request");
+
+        // requirement folder tree
+        HttpRequest<?> getRequest = createServerMock("GET", "/requirement-folders/tree/14", 200, REQ_FOLDER_TREE_PROJECT);
+
+        RequirementFolder.createRequirementFolderTree(project, "foo/bar");
+        RequirementFolder.createRequirementFolderTree(project, "foo/bar");
+
+        verify(getRequest).asJson();
+
+        // check cache contains the new requirement (only one, because mock always returns the same id)
+        Assert.assertNotNull(RequirementFolder.getRequirementFolderCaches().get(project).get(33));
+    }
+
+    /**
+     * With cache, request to tree is done twice
+     */
+    @Test
+    public void testCreateRequirementFolderTreeWithoutCache() {
+        EntityCache.setEnabled(false);
+
+        // requirement folder creation
+        createServerMock("POST", "/requirement-folders", 200, REQ_FOLDER_CREATION_RESPONSE, "request");
+
+        // requirement folder tree
+        HttpRequest<?> getRequest = createServerMock("GET", "/requirement-folders/tree/14", 200, REQ_FOLDER_TREE_PROJECT);
+
+        RequirementFolder.createRequirementFolderTree(project, "foo/bar");
+        RequirementFolder.createRequirementFolderTree(project, "foo/bar");
+
+        verify(getRequest, atLeast(2)).asJson();
+
+        // check cache does not contain the new requirement
+        Assert.assertNull(RequirementFolder.getRequirementFolderCaches().get(project).get(33));
+    }
+
     @Test
     public void testCreateRequirementFolderTreeNoFolder() {
         // requirement folder creation
-        HttpRequestWithBody postRequest = (HttpRequestWithBody) createServerMock("POST", "/requirement-folders", 200, SIMPLE_GET_REQ_FOLDER, "request");
+        createServerMock("POST", "/requirement-folders", 200, SIMPLE_GET_REQ_FOLDER, "request");
 
         // requirement folder tree
         createServerMock("GET", "/requirement-folders/tree/14", 200, REQ_FOLDER_TREE_PROJECT);
 
-        RequirementFolder createdFolder = RequirementFolder.createRequirementFolderTree(project, null);
+        RequirementFolder createdFolder = RequirementFolder.createRequirementFolderTree(project, (String) null);
         Assert.assertNull(createdFolder);
     }
 

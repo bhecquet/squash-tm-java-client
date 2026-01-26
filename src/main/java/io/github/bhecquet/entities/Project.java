@@ -101,14 +101,22 @@ public class Project extends Entity {
         }
     }
 
+    /**
+     * @deprecated Use Campaign.getAll instead
+     */
+    @Deprecated(since = "1.0.25")
     public List<Campaign> getCampaigns() {
         return getCampaigns("path,name,reference");
     }
 
+    /**
+     * @deprecated Use Campaign.getAll instead
+     */
+    @Deprecated(since = "1.0.25")
     public List<Campaign> getCampaigns(String fields) {
         JSONObject json;
         try {
-            json = getPagedJSonResponse(buildGetRequest(url + CAMPAIGNS_URL + "?sort=id&fields=" + fields));
+            json = getPagedJSonResponse(buildGetRequest(url + CAMPAIGNS_URL + "?sort=id&fields=" + URLEncoder.encode(fields, StandardCharsets.UTF_8)));
         } catch (UnirestException e) {
             throw new SquashTmException(String.format("Cannot get list of campaigns for project %s: %s", name, e.getMessage()));
         }
@@ -131,35 +139,6 @@ public class Project extends Entity {
             }
         }
         return campaigns;
-
-    }
-
-    public List<Requirement> getRequirements() {
-        return getRequirements("path,name,reference");
-    }
-
-    public List<Requirement> getRequirements(String fields) {
-        JSONObject json;
-        try {
-            json = getPagedJSonResponse(buildGetRequest(url + REQUIREMENTS_URL + "?sort=id&fields=" + fields));
-        } catch (UnirestException e) {
-            throw new SquashTmException(String.format("Cannot get list of requirements for project %s: %s", name, e.getMessage()));
-        }
-
-        List<Requirement> requirements = new ArrayList<>();
-        if (json.has(FIELD_EMBEDDED)) {
-            for (JSONObject folderJson : (List<JSONObject>) json.getJSONObject(FIELD_EMBEDDED).getJSONArray(FIELD_REQUIREMENTS).toList()) {
-                Requirement newRequirement = Requirement.fromJson(folderJson);
-                try {
-                    newRequirement.setPath(folderJson.getString("path"));
-                } catch (JSONException e) {
-                    // no path present
-                }
-
-                requirements.add(newRequirement);
-            }
-        }
-        return requirements;
 
     }
 

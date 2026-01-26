@@ -50,8 +50,8 @@ public class TestRealSquashInstance {
     public void testRequirements() {
         String squashProject = System.getProperty("squashProject");
         Project project = Project.get(squashProject);
-        Assert.assertFalse(project.getRequirements().isEmpty());
-        Requirement newReq = Requirement.create(project, "Req from API", "Req description", new HashMap<>(), "foo/bar", Requirement.Criticality.CRITICAL);
+        Assert.assertFalse(Requirement.getAll(project).isEmpty());
+        Requirement newReq = Requirement.create(project, false, "Req from API", "Req description", new HashMap<>(), "foo/bar", Requirement.Criticality.CRITICAL);
         newReq.update("Name updated", null, null, null, null);
     }
 }

@@ -9,10 +9,14 @@ import kong.unirest.core.json.JSONException;
 import kong.unirest.core.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class CampaignFolder extends Entity {
 
+    private static final Map<Project, EntityCache<CampaignFolder>> campaignFolderCaches = new ConcurrentHashMap<>();
     public static final String CAMPAIGN_FOLDER_URL = "campaign-folders";
     public static final String CAMPAIGN_FOLDER_TREE_URL = CAMPAIGN_FOLDER_URL + "/" + "tree/%s";
 
@@ -28,8 +32,9 @@ public class CampaignFolder extends Entity {
     /**
      * Get all campaign folders (should not be used on large instances)
      *
-     * @return
+     * @deprecated Use getAll(project) instead
      */
+    @Deprecated(since = "1.0.25")
     public static List<CampaignFolder> getAll() {
         try {
             JSONObject json = getPagedJSonResponse(buildGetRequest(apiRootUrl + CAMPAIGN_FOLDER_URL));
@@ -48,8 +53,6 @@ public class CampaignFolder extends Entity {
 
     /**
      * Get all campaign folders for this project
-     *
-     * @return
      */
     public static List<CampaignFolder> getAll(Project project) {
         try {
@@ -68,7 +71,7 @@ public class CampaignFolder extends Entity {
             throw new SquashTmException("Cannot get all campaign folders", e);
         }
     }
-    
+
     private static List<CampaignFolder> readCampaignFolderFromTree(JSONObject folderJson, Project project, Entity parent) {
         List<CampaignFolder> campaignFolders = new ArrayList<>();
         CampaignFolder campaignFolder = new CampaignFolder(folderJson.getString("url"),
@@ -94,13 +97,17 @@ public class CampaignFolder extends Entity {
      * @return the final campaign folder
      */
     public static CampaignFolder createCampaignFolderTree(Project project, String folderPath) {
+        return createCampaignFolderTree(project, folderPath == null ? new ArrayList<>() : Arrays.asList(folderPath.split("/")));
+    }
+
+    public static CampaignFolder createCampaignFolderTree(Project project, List<String> folderPath) {
         if (folderPath == null) {
-            folderPath = "";
+            folderPath = new ArrayList<>();
         }
 
         // create folder where campaign will be located
         CampaignFolder parentFolder = null;
-        for (String folderName : folderPath.split("/")) {
+        for (String folderName : folderPath) {
 
             if (folderName.isEmpty()) {
                 continue;
@@ -114,7 +121,8 @@ public class CampaignFolder extends Entity {
 
     private static CampaignFolder createCampaignFolders(Project project, String folderName, CampaignFolder parentFolder) {
 
-        List<CampaignFolder> campaignFolders = getAll(project);
+        campaignFolderCaches.putIfAbsent(project, new EntityCache<>(300));
+        List<CampaignFolder> campaignFolders = campaignFolderCaches.get(project).getAll(CampaignFolder::getAll, project);
 
         boolean folderExists = false;
         for (CampaignFolder existingFolder : campaignFolders) {
@@ -198,9 +206,13 @@ public class CampaignFolder extends Entity {
             }
 
             JSONObject json = getJSonResponse(buildPostRequest(apiRootUrl + CAMPAIGN_FOLDER_URL).body(body));
+            CampaignFolder campaignFolder = CampaignFolder.fromJson(json);
 
+            // store in cache
+            campaignFolderCaches.putIfAbsent(project, new EntityCache<>(300));
+            campaignFolderCaches.get(project).add(campaignFolder);
 
-            return CampaignFolder.fromJson(json);
+            return campaignFolder;
 
         } catch (UnirestException e) {
             throw new SquashTmException(String.format("Cannot create campaign %s", campaignFolderName), e);
@@ -231,5 +243,9 @@ public class CampaignFolder extends Entity {
 
     public void setParent(Entity parent) {
         this.parent = parent;
+    }
+
+    public static Map<Project, EntityCache<CampaignFolder>> getCampaignFolderCaches() {
+        return campaignFolderCaches;
     }
 }

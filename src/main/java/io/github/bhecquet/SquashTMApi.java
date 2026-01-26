@@ -1,10 +1,7 @@
 package io.github.bhecquet;
 
 
-import io.github.bhecquet.entities.Entity;
-import io.github.bhecquet.entities.IterationTestPlanItem;
-import io.github.bhecquet.entities.Project;
-import io.github.bhecquet.entities.TestPlanItemExecution;
+import io.github.bhecquet.entities.*;
 import io.github.bhecquet.exceptions.ConfigurationException;
 import kong.unirest.core.HttpResponse;
 import kong.unirest.core.JsonNode;
@@ -59,6 +56,14 @@ public class SquashTMApi {
         if (checkConnexion) {
             testConnection(true);
         }
+    }
+
+    /**
+     * Enable caching of entities
+     * To use mainly in batch because for now, if a cache is enabled for a project in a web application, this cache will be kept forever, there is no cleaning
+     */
+    public void enableCache() {
+        EntityCache.setEnabled(true);
     }
 
     /**

@@ -6,7 +6,6 @@ import kong.unirest.core.json.JSONException;
 import kong.unirest.core.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class TestStep extends Step {
@@ -44,7 +43,7 @@ public class TestStep extends Step {
                         json.optString(FIELD_ACTION, "")
                 );
                 testStep.readCustomFields(json.getJSONArray(FIELD_CUSTOM_FIELDS));
-                return Arrays.asList(testStep);
+                return List.of(testStep);
             } else if ("call-step".equals(stepType)) {
                 if ("unauthorized-resource".equals(json.getJSONObject(FIELD_CALLED_TEST_CASE).getString(FIELD_TYPE))) {
                     return new ArrayList<>();

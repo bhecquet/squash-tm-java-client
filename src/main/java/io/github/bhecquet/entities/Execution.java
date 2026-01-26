@@ -30,14 +30,16 @@ public class Execution extends Entity {
 
     public static Execution fromJson(JSONObject json) {
         try {
-            return new Execution(
+            Execution execution = new Execution(
                     json.getJSONObject("_links").getJSONObject("self").getString("href"),
                     json.getString(FIELD_TYPE),
                     json.getInt(FIELD_ID)
             );
+            execution.completeDetails(json);
+            return execution;
 
         } catch (JSONException e) {
-            throw new SquashTmException(String.format("Cannot create execution from JSON [%s] data: %s", json.toString(), e.getMessage()));
+            throw new SquashTmException(String.format("Cannot create execution from JSON [%s] data: %s", json, e.getMessage()));
         }
     }
 
@@ -51,16 +53,24 @@ public class Execution extends Entity {
     private void completeDetails(JSONObject json) {
         executionSteps = new ArrayList<>();
 
-        status = json.getString(FIELD_EXECUTION_STATUS);
-        order = json.getInt(FIELD_EXECUTION_ORDER);
+        try {
+            status = json.getString(FIELD_EXECUTION_STATUS);
+        } catch (JSONException e) {/* ignore */}
+        try {
+            order = json.getInt(FIELD_EXECUTION_ORDER);
+        } catch (JSONException e) {/* ignore */}
+
         lastExecutedBy = json.optString(FIELD_LAST_EXECUTED_BY, ""); // dans le cas où ce n'est pas exécuté, les données sont absentes
         lastExecutedOn = json.optString(FIELD_LAST_EXECUTED_ON, "");
 
-        for (JSONObject jsonIterationTestPlanItem : (List<JSONObject>) json.getJSONArray(FIELD_EXECUTION_STEPS).toList()) {
-            executionSteps.add(ExecutionStep.fromJson(jsonIterationTestPlanItem));
-        }
-
-        readCustomFields(json.getJSONArray(FIELD_CUSTOM_FIELDS));
+        try {
+            for (JSONObject jsonIterationTestPlanItem : (List<JSONObject>) json.getJSONArray(FIELD_EXECUTION_STEPS).toList()) {
+                executionSteps.add(ExecutionStep.fromJson(jsonIterationTestPlanItem));
+            }
+        } catch (JSONException e) {/* ignore */}
+        try {
+            readCustomFields(json.getJSONArray(FIELD_CUSTOM_FIELDS));
+        } catch (JSONException e) {/* ignore */}
     }
 
     public static Execution get(int id) {

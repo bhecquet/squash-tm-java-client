@@ -21,6 +21,114 @@ import static org.mockito.Mockito.*;
 
 public class TestCampaign extends SquashTMTest {
 
+    public static final String CREATE_CAMPAIGN_REPLY_DATA = "{" +
+            "  \"_type\" : \"campaign\"," +
+            "  \"id\" : 332," +
+            "  \"name\" : \"Campaign Test\"," +
+            "  \"reference\" : \"ABCD\"," +
+            "  \"description\" : \"<p>Sed eget rhoncus sapien. Nam et pulvinar nisi. su Do</p>\"," +
+            "  \"status\" : \"PLANNED\"," +
+            "  \"project\" : {" +
+            "    \"_type\" : \"project\"," +
+            "    \"id\" : 44," +
+            "    \"_links\" : {" +
+            "      \"self\" : {" +
+            "        \"href\" : \"https://localhost:4321/projects/44\"" +
+            "      }" +
+            "    }" +
+            "  }," +
+            "  \"path\" : \"/sample project/campaign folder/Campaign Test\"," +
+            "  \"parent\" : {" +
+            "    \"_type\" : \"project\"," +
+            "    \"id\" : 44," +
+            "    \"_links\" : {" +
+            "      \"self\" : {" +
+            "        \"href\" : \"https://localhost:4321/projects/44\"" +
+            "      }" +
+            "    }" +
+            "  }," +
+            "  \"created_by\" : \"admin\"," +
+            "  \"created_on\" : \"2017-06-15T10:00:00.000+0000\"," +
+            "  \"last_modified_by\" : \"admin\"," +
+            "  \"last_modified_on\" : \"2017-06-15T10:00:00.000+0000\"," +
+            "  \"scheduled_start_date\" : \"2021-08-31T10:00:00.000+0000\"," +
+            "  \"scheduled_end_date\" : \"2031-09-29T10:00:00.000+0000\"," +
+            "  \"actual_start_date\" : \"2034-09-29T10:00:00.000+0000\"," +
+            "  \"actual_end_date\" : \"2035-09-29T10:00:00.000+0000\"," +
+            "  \"actual_start_auto\" : false," +
+            "  \"actual_end_auto\" : false," +
+            "  \"custom_fields\" : [ {" +
+            "    \"code\" : \"CUF_A\"," +
+            "    \"label\" : \"Cuf A\"," +
+            "    \"value\" : \"value of A\"" +
+            "  }, {" +
+            "    \"code\" : \"CUF_B\"," +
+            "    \"label\" : \"Cuf B\"," +
+            "    \"value\" : \"value of B\"" +
+            "  } ]," +
+            "  \"iterations\" : [ ]," +
+            "  \"test_plan\" : [ ]," +
+            "  \"attachments\" : [ ]," +
+            "  \"_links\" : {" +
+            "    \"self\" : {" +
+            "      \"href\" : \"https://localhost:4321/campaigns/332\"" +
+            "    }" +
+            "  }" +
+            "}";
+    public static final String CREATE_CAMPAIGN_WITH_FOLDER_REPLY_DATA = "{" +
+            "  \"_type\" : \"campaign\"," +
+            "  \"id\" : 332," +
+            "  \"name\" : \"Campaign Test\"," +
+            "  \"reference\" : \"ABCD\"," +
+            "  \"description\" : \"<p>Sed eget rhoncus sapien. Nam et pulvinar nisi. su Do</p>\"," +
+            "  \"status\" : \"PLANNED\"," +
+            "  \"project\" : {" +
+            "    \"_type\" : \"project\"," +
+            "    \"id\" : 44," +
+            "    \"_links\" : {" +
+            "      \"self\" : {" +
+            "        \"href\" : \"https://localhost:4321/projects/44\"" +
+            "      }" +
+            "    }" +
+            "  }," +
+            "  \"path\" : \"/sample project/campaign folder/Campaign Test\"," +
+            "  \"parent\" : {" +
+            "    \"_type\" : \"campaign-folder\"," +
+            "    \"id\" : 7," +
+            "    \"_links\" : {" +
+            "      \"self\" : {" +
+            "        \"href\" : \"https://localhost:4321/campaign-folders/7\"" +
+            "      }" +
+            "    }" +
+            "  }," +
+            "  \"created_by\" : \"admin\"," +
+            "  \"created_on\" : \"2017-06-15T10:00:00.000+0000\"," +
+            "  \"last_modified_by\" : \"admin\"," +
+            "  \"last_modified_on\" : \"2017-06-15T10:00:00.000+0000\"," +
+            "  \"scheduled_start_date\" : \"2021-08-31T10:00:00.000+0000\"," +
+            "  \"scheduled_end_date\" : \"2031-09-29T10:00:00.000+0000\"," +
+            "  \"actual_start_date\" : \"2034-09-29T10:00:00.000+0000\"," +
+            "  \"actual_end_date\" : \"2035-09-29T10:00:00.000+0000\"," +
+            "  \"actual_start_auto\" : false," +
+            "  \"actual_end_auto\" : false," +
+            "  \"custom_fields\" : [ {" +
+            "    \"code\" : \"CUF_A\"," +
+            "    \"label\" : \"Cuf A\"," +
+            "    \"value\" : \"value of A\"" +
+            "  }, {" +
+            "    \"code\" : \"CUF_B\"," +
+            "    \"label\" : \"Cuf B\"," +
+            "    \"value\" : \"value of B\"" +
+            "  } ]," +
+            "  \"iterations\" : [ ]," +
+            "  \"test_plan\" : [ ]," +
+            "  \"attachments\" : [ ]," +
+            "  \"_links\" : {" +
+            "    \"self\" : {" +
+            "      \"href\" : \"https://localhost:4321/campaigns/332\"" +
+            "    }" +
+            "  }" +
+            "}";
     private Project project;
 
     @Mock
@@ -293,180 +401,21 @@ public class TestCampaign extends SquashTMTest {
 
     @Test
     public void testCreateCampaignNoFolder() {
-        HttpRequestWithBody postRequest = (HttpRequestWithBody) createServerMock("POST", "/campaigns", 200, "{" +
-                "  \"_type\" : \"campaign\"," +
-                "  \"id\" : 332," +
-                "  \"name\" : \"Campaign Test\"," +
-                "  \"reference\" : \"ABCD\"," +
-                "  \"description\" : \"<p>Sed eget rhoncus sapien. Nam et pulvinar nisi. su Do</p>\"," +
-                "  \"status\" : \"PLANNED\"," +
-                "  \"project\" : {" +
-                "    \"_type\" : \"project\"," +
-                "    \"id\" : 44," +
-                "    \"_links\" : {" +
-                "      \"self\" : {" +
-                "        \"href\" : \"https://localhost:4321/projects/44\"" +
-                "      }" +
-                "    }" +
-                "  }," +
-                "  \"path\" : \"/sample project/campaign folder/Campaign Test\"," +
-                "  \"parent\" : {" +
-                "    \"_type\" : \"project\"," +
-                "    \"id\" : 44," +
-                "    \"_links\" : {" +
-                "      \"self\" : {" +
-                "        \"href\" : \"https://localhost:4321/projects/44\"" +
-                "      }" +
-                "    }" +
-                "  }," +
-                "  \"created_by\" : \"admin\"," +
-                "  \"created_on\" : \"2017-06-15T10:00:00.000+0000\"," +
-                "  \"last_modified_by\" : \"admin\"," +
-                "  \"last_modified_on\" : \"2017-06-15T10:00:00.000+0000\"," +
-                "  \"scheduled_start_date\" : \"2021-08-31T10:00:00.000+0000\"," +
-                "  \"scheduled_end_date\" : \"2031-09-29T10:00:00.000+0000\"," +
-                "  \"actual_start_date\" : \"2034-09-29T10:00:00.000+0000\"," +
-                "  \"actual_end_date\" : \"2035-09-29T10:00:00.000+0000\"," +
-                "  \"actual_start_auto\" : false," +
-                "  \"actual_end_auto\" : false," +
-                "  \"custom_fields\" : [ {" +
-                "    \"code\" : \"CUF_A\"," +
-                "    \"label\" : \"Cuf A\"," +
-                "    \"value\" : \"value of A\"" +
-                "  }, {" +
-                "    \"code\" : \"CUF_B\"," +
-                "    \"label\" : \"Cuf B\"," +
-                "    \"value\" : \"value of B\"" +
-                "  } ]," +
-                "  \"iterations\" : [ ]," +
-                "  \"test_plan\" : [ ]," +
-                "  \"attachments\" : [ ]," +
-                "  \"_links\" : {" +
-                "    \"self\" : {" +
-                "      \"href\" : \"https://localhost:4321/campaigns/332\"" +
-                "    }" +
-                "  }" +
-                "}", "request");
+        HttpRequestWithBody postRequest = (HttpRequestWithBody) createServerMock("POST", "/campaigns", 200, CREATE_CAMPAIGN_REPLY_DATA, "request");
         Campaign.create(project, "myCampaign", (CampaignFolder) null, new HashMap<>());
         verify(postRequest).body(new JSONObject("{\"_type\":\"campaign\",\"name\":\"myCampaign\",\"status\":\"PLANNED\",\"parent\":{\"id\":1,\"_type\":\"project\"}}"));
     }
 
     @Test
     public void testCreateCampaignWithCustomFields() {
-        HttpRequestWithBody postRequest = (HttpRequestWithBody) createServerMock("POST", "/campaigns", 200, "{" +
-                "  \"_type\" : \"campaign\"," +
-                "  \"id\" : 332," +
-                "  \"name\" : \"Campaign Test\"," +
-                "  \"reference\" : \"ABCD\"," +
-                "  \"description\" : \"<p>Sed eget rhoncus sapien. Nam et pulvinar nisi. su Do</p>\"," +
-                "  \"status\" : \"PLANNED\"," +
-                "  \"project\" : {" +
-                "    \"_type\" : \"project\"," +
-                "    \"id\" : 44," +
-                "    \"_links\" : {" +
-                "      \"self\" : {" +
-                "        \"href\" : \"https://localhost:4321/projects/44\"" +
-                "      }" +
-                "    }" +
-                "  }," +
-                "  \"path\" : \"/sample project/campaign folder/Campaign Test\"," +
-                "  \"parent\" : {" +
-                "    \"_type\" : \"project\"," +
-                "    \"id\" : 44," +
-                "    \"_links\" : {" +
-                "      \"self\" : {" +
-                "        \"href\" : \"https://localhost:4321/projects/44\"" +
-                "      }" +
-                "    }" +
-                "  }," +
-                "  \"created_by\" : \"admin\"," +
-                "  \"created_on\" : \"2017-06-15T10:00:00.000+0000\"," +
-                "  \"last_modified_by\" : \"admin\"," +
-                "  \"last_modified_on\" : \"2017-06-15T10:00:00.000+0000\"," +
-                "  \"scheduled_start_date\" : \"2021-08-31T10:00:00.000+0000\"," +
-                "  \"scheduled_end_date\" : \"2031-09-29T10:00:00.000+0000\"," +
-                "  \"actual_start_date\" : \"2034-09-29T10:00:00.000+0000\"," +
-                "  \"actual_end_date\" : \"2035-09-29T10:00:00.000+0000\"," +
-                "  \"actual_start_auto\" : false," +
-                "  \"actual_end_auto\" : false," +
-                "  \"custom_fields\" : [ {" +
-                "    \"code\" : \"CUF_A\"," +
-                "    \"label\" : \"Cuf A\"," +
-                "    \"value\" : \"value of A\"" +
-                "  }, {" +
-                "    \"code\" : \"CUF_B\"," +
-                "    \"label\" : \"Cuf B\"," +
-                "    \"value\" : \"value of B\"" +
-                "  } ]," +
-                "  \"iterations\" : [ ]," +
-                "  \"test_plan\" : [ ]," +
-                "  \"attachments\" : [ ]," +
-                "  \"_links\" : {" +
-                "    \"self\" : {" +
-                "      \"href\" : \"https://localhost:4321/campaigns/332\"" +
-                "    }" +
-                "  }" +
-                "}", "request");
+        HttpRequestWithBody postRequest = (HttpRequestWithBody) createServerMock("POST", "/campaigns", 200, CREATE_CAMPAIGN_REPLY_DATA, "request");
         Campaign.create(project, "myCampaign", (CampaignFolder) null, Map.of("APP", List.of("comp1", "comp2")));
         verify(postRequest).body(new JSONObject("{\"_type\":\"campaign\",\"name\":\"myCampaign\",\"status\":\"PLANNED\",\"parent\":{\"id\":1,\"_type\":\"project\"},\"custom_fields\":[{\"value\":[\"comp1\",\"comp2\"],\"code\":\"APP\"}]}"));
     }
 
     @Test
     public void testCreateCampaignWithFolder() {
-        HttpRequestWithBody postRequest = (HttpRequestWithBody) createServerMock("POST", "/campaigns", 200, "{" +
-                "  \"_type\" : \"campaign\"," +
-                "  \"id\" : 332," +
-                "  \"name\" : \"Campaign Test\"," +
-                "  \"reference\" : \"ABCD\"," +
-                "  \"description\" : \"<p>Sed eget rhoncus sapien. Nam et pulvinar nisi. su Do</p>\"," +
-                "  \"status\" : \"PLANNED\"," +
-                "  \"project\" : {" +
-                "    \"_type\" : \"project\"," +
-                "    \"id\" : 44," +
-                "    \"_links\" : {" +
-                "      \"self\" : {" +
-                "        \"href\" : \"https://localhost:4321/projects/44\"" +
-                "      }" +
-                "    }" +
-                "  }," +
-                "  \"path\" : \"/sample project/campaign folder/Campaign Test\"," +
-                "  \"parent\" : {" +
-                "    \"_type\" : \"campaign-folder\"," +
-                "    \"id\" : 7," +
-                "    \"_links\" : {" +
-                "      \"self\" : {" +
-                "        \"href\" : \"https://localhost:4321/campaign-folders/7\"" +
-                "      }" +
-                "    }" +
-                "  }," +
-                "  \"created_by\" : \"admin\"," +
-                "  \"created_on\" : \"2017-06-15T10:00:00.000+0000\"," +
-                "  \"last_modified_by\" : \"admin\"," +
-                "  \"last_modified_on\" : \"2017-06-15T10:00:00.000+0000\"," +
-                "  \"scheduled_start_date\" : \"2021-08-31T10:00:00.000+0000\"," +
-                "  \"scheduled_end_date\" : \"2031-09-29T10:00:00.000+0000\"," +
-                "  \"actual_start_date\" : \"2034-09-29T10:00:00.000+0000\"," +
-                "  \"actual_end_date\" : \"2035-09-29T10:00:00.000+0000\"," +
-                "  \"actual_start_auto\" : false," +
-                "  \"actual_end_auto\" : false," +
-                "  \"custom_fields\" : [ {" +
-                "    \"code\" : \"CUF_A\"," +
-                "    \"label\" : \"Cuf A\"," +
-                "    \"value\" : \"value of A\"" +
-                "  }, {" +
-                "    \"code\" : \"CUF_B\"," +
-                "    \"label\" : \"Cuf B\"," +
-                "    \"value\" : \"value of B\"" +
-                "  } ]," +
-                "  \"iterations\" : [ ]," +
-                "  \"test_plan\" : [ ]," +
-                "  \"attachments\" : [ ]," +
-                "  \"_links\" : {" +
-                "    \"self\" : {" +
-                "      \"href\" : \"https://localhost:4321/campaigns/332\"" +
-                "    }" +
-                "  }" +
-                "}", "request");
+        HttpRequestWithBody postRequest = (HttpRequestWithBody) createServerMock("POST", "/campaigns", 200, CREATE_CAMPAIGN_WITH_FOLDER_REPLY_DATA, "request");
 
         CampaignFolder campaignFolder2 = new CampaignFolder(
                 "https://localhost:4321/campaign-folders/7",
@@ -480,69 +429,17 @@ public class TestCampaign extends SquashTMTest {
 
     @Test
     public void testCreateCampaignWithFolder2() {
-        HttpRequestWithBody postRequest = (HttpRequestWithBody) createServerMock("POST", "/campaigns", 200, "{" +
-                "  \"_type\" : \"campaign\"," +
-                "  \"id\" : 332," +
-                "  \"name\" : \"Campaign Test\"," +
-                "  \"reference\" : \"ABCD\"," +
-                "  \"description\" : \"<p>Sed eget rhoncus sapien. Nam et pulvinar nisi. su Do</p>\"," +
-                "  \"status\" : \"PLANNED\"," +
-                "  \"project\" : {" +
-                "    \"_type\" : \"project\"," +
-                "    \"id\" : 44," +
-                "    \"_links\" : {" +
-                "      \"self\" : {" +
-                "        \"href\" : \"https://localhost:4321/projects/44\"" +
-                "      }" +
-                "    }" +
-                "  }," +
-                "  \"path\" : \"/sample project/campaign folder/Campaign Test\"," +
-                "  \"parent\" : {" +
-                "    \"_type\" : \"campaign-folder\"," +
-                "    \"id\" : 7," +
-                "    \"_links\" : {" +
-                "      \"self\" : {" +
-                "        \"href\" : \"https://localhost:4321/campaign-folders/7\"" +
-                "      }" +
-                "    }" +
-                "  }," +
-                "  \"created_by\" : \"admin\"," +
-                "  \"created_on\" : \"2017-06-15T10:00:00.000+0000\"," +
-                "  \"last_modified_by\" : \"admin\"," +
-                "  \"last_modified_on\" : \"2017-06-15T10:00:00.000+0000\"," +
-                "  \"scheduled_start_date\" : \"2021-08-31T10:00:00.000+0000\"," +
-                "  \"scheduled_end_date\" : \"2031-09-29T10:00:00.000+0000\"," +
-                "  \"actual_start_date\" : \"2034-09-29T10:00:00.000+0000\"," +
-                "  \"actual_end_date\" : \"2035-09-29T10:00:00.000+0000\"," +
-                "  \"actual_start_auto\" : false," +
-                "  \"actual_end_auto\" : false," +
-                "  \"custom_fields\" : [ {" +
-                "    \"code\" : \"CUF_A\"," +
-                "    \"label\" : \"Cuf A\"," +
-                "    \"value\" : \"value of A\"" +
-                "  }, {" +
-                "    \"code\" : \"CUF_B\"," +
-                "    \"label\" : \"Cuf B\"," +
-                "    \"value\" : \"value of B\"" +
-                "  } ]," +
-                "  \"iterations\" : [ ]," +
-                "  \"test_plan\" : [ ]," +
-                "  \"attachments\" : [ ]," +
-                "  \"_links\" : {" +
-                "    \"self\" : {" +
-                "      \"href\" : \"https://localhost:4321/campaigns/332\"" +
-                "    }" +
-                "  }" +
-                "}", "request");
+        HttpRequestWithBody postRequest = (HttpRequestWithBody) createServerMock("POST", "/campaigns", 200, CREATE_CAMPAIGN_WITH_FOLDER_REPLY_DATA, "request");
 
-        try (MockedStatic mockedCampaignFolder = mockStatic(CampaignFolder.class);) {
+        try (MockedStatic<CampaignFolder> mockedCampaignFolder = mockStatic(CampaignFolder.class);
+             MockedStatic<Campaign> mockedCampaign = mockStatic(Campaign.class, CALLS_REAL_METHODS)) {
 
-            mockedCampaignFolder.when(() -> CampaignFolder.createCampaignFolderTree(project, "folder1/folder2")).thenReturn(campaignFolder);
-            doReturn(new ArrayList<>()).when(project).getCampaigns();
+            mockedCampaignFolder.when(() -> CampaignFolder.createCampaignFolderTree(project, List.of("folder1", "folder2"))).thenReturn(campaignFolder);
+            mockedCampaign.when(() -> Campaign.getAll(project)).thenReturn(new ArrayList<>());
 
             Campaign.create(project, "myCampaign", "folder1/folder2", new HashMap<>());
             verify(postRequest).body(new JSONObject("{\"_type\":\"campaign\",\"name\":\"myCampaign\",\"status\":\"PLANNED\",\"parent\":{\"id\":0,\"_type\":\"campaign-folder\"}}"));
-            mockedCampaignFolder.verify(() -> CampaignFolder.createCampaignFolderTree(eq(project), eq("folder1/folder2")));
+            mockedCampaignFolder.verify(() -> CampaignFolder.createCampaignFolderTree(eq(project), eq(List.of("folder1", "folder2"))));
         }
     }
 
@@ -553,16 +450,64 @@ public class TestCampaign extends SquashTMTest {
     public void testDoNotCreateCampaign() {
         HttpRequestWithBody postRequest = (HttpRequestWithBody) createServerMock("POST", "/campaigns", 200, "{}", "request");
 
-        try (MockedStatic mockedCampaignFolder = mockStatic(CampaignFolder.class);) {
+        try (MockedStatic<CampaignFolder> mockedCampaignFolder = mockStatic(CampaignFolder.class);
+             MockedStatic<Campaign> mockedCampaign = mockStatic(Campaign.class, CALLS_REAL_METHODS)) {
 
             mockedCampaignFolder.when(() -> CampaignFolder.createCampaignFolderTree(project, "folder1/folder2")).thenReturn(campaignFolder);
-            doReturn(List.of(new Campaign("https://localhost:4321/campaigns/1", "campaign", 1, "myCampaign", "/project/myCampaign"),
-                    new Campaign("https://localhost:4321/campaigns/1", "campaign", 2, "myCampaign", "/project/folder1/folder2/myCampaign"))).when(project).getCampaigns();
+            mockedCampaign.when(() -> Campaign.getAll(project)).thenReturn(List.of(new Campaign("https://localhost:4321/campaigns/1", "campaign", 1, "myCampaign", "/project/myCampaign"),
+                    new Campaign("https://localhost:4321/campaigns/1", "campaign", 2, "myCampaign", "/project/folder1/folder2/myCampaign")));
 
             Campaign campaign = Campaign.create(project, "myCampaign", "folder1/folder2", new HashMap<>());
             Assert.assertEquals(campaign.getId(), 2); // check this is the campaign within the requested folder which is choosen
             verify(postRequest, never()).body(any(JSONObject.class));
-            mockedCampaignFolder.verify(() -> CampaignFolder.createCampaignFolderTree(eq(project), eq("folder1/folder2")));
+            mockedCampaignFolder.verify(() -> CampaignFolder.createCampaignFolderTree(eq(project), eq(List.of("folder1", "folder2"))));
+        }
+    }
+
+    /**
+     * With cache enabled, we should get all campaigns only once
+     */
+    @Test
+    public void testCreateCampaignWithCache() {
+        EntityCache.setEnabled(true);
+        createServerMock("POST", "/campaigns", 200, CREATE_CAMPAIGN_REPLY_DATA, "request");
+
+        try (MockedStatic<CampaignFolder> mockedCampaignFolder = mockStatic(CampaignFolder.class);
+             MockedStatic<Campaign> mockedCampaign = mockStatic(Campaign.class, CALLS_REAL_METHODS)) {
+
+            mockedCampaignFolder.when(() -> CampaignFolder.createCampaignFolderTree(project, "folder1/folder2")).thenReturn(campaignFolder);
+            mockedCampaign.when(() -> Campaign.getAll(project)).thenReturn(List.of(new Campaign("https://localhost:4321/campaigns/2", "campaign", 2, "myCampaign", "/project/myCampaign"),
+                    new Campaign("https://localhost:4321/campaigns/3", "campaign", 3, "myCampaign", "/project/folder1/folder2/myCampaign")));
+
+            // check we get campaign list only once
+            Campaign.create(project, "myCampaign", "folder1/folder2", new HashMap<>());
+            Campaign.create(project, "myCampaign2", "folder1/folder2", new HashMap<>());
+            mockedCampaign.verify(() -> Campaign.getAll(project), times(2)); // once when mock is created, once for Campaign creation
+
+            // check cache contains the new campaign (only one, because mock always returns the same id
+            Assert.assertNotNull(Campaign.getCampaignCaches().get(project).get(332));
+        }
+    }
+
+    @Test
+    public void testCreateCampaignWithoutCache() {
+        EntityCache.setEnabled(false);
+        createServerMock("POST", "/campaigns", 200, CREATE_CAMPAIGN_REPLY_DATA, "request");
+
+        try (MockedStatic<CampaignFolder> mockedCampaignFolder = mockStatic(CampaignFolder.class);
+             MockedStatic<Campaign> mockedCampaign = mockStatic(Campaign.class, CALLS_REAL_METHODS)) {
+
+            mockedCampaignFolder.when(() -> CampaignFolder.createCampaignFolderTree(project, "folder1/folder2")).thenReturn(campaignFolder);
+            mockedCampaign.when(() -> Campaign.getAll(project)).thenReturn(List.of(new Campaign("https://localhost:4321/campaigns/2", "campaign", 2, "myCampaign", "/project/myCampaign"),
+                    new Campaign("https://localhost:4321/campaigns/3", "campaign", 3, "myCampaign", "/project/folder1/folder2/myCampaign")));
+
+            // check we get campaign list only once
+            Campaign.create(project, "myCampaign", "folder1/folder2", new HashMap<>());
+            Campaign.create(project, "myCampaign2", "folder1/folder2", new HashMap<>());
+            mockedCampaign.verify(() -> Campaign.getAll(project), times(3)); // once when mock is created, 2 for Campaign creation
+
+            // check cache does not contain the new campaign
+            Assert.assertNull(Campaign.getCampaignCaches().get(project).get(332));
         }
     }
 
@@ -573,16 +518,17 @@ public class TestCampaign extends SquashTMTest {
     public void testDoNotCreateCampaign2() {
         HttpRequestWithBody postRequest = (HttpRequestWithBody) createServerMock("POST", "/campaigns", 200, "{}", "request");
 
-        try (MockedStatic mockedCampaignFolder = mockStatic(CampaignFolder.class);) {
+        try (MockedStatic<CampaignFolder> mockedCampaignFolder = mockStatic(CampaignFolder.class);
+             MockedStatic<Campaign> mockedCampaign = mockStatic(Campaign.class, CALLS_REAL_METHODS)) {
 
             mockedCampaignFolder.when(() -> CampaignFolder.createCampaignFolderTree(project, "folder1/folder2")).thenReturn(campaignFolder);
-            doReturn(List.of(new Campaign("https://localhost:4321/campaigns/1", "campaign", 1, "myCampaign", "/project/myCampaign"),
-                    new Campaign("https://localhost:4321/campaigns/1", "campaign", 2, "myCampaign", "/project/folder1/folder2/myCampaign"))).when(project).getCampaigns();
+            mockedCampaign.when(() -> Campaign.getAll(project)).thenReturn(List.of(new Campaign("https://localhost:4321/campaigns/1", "campaign", 1, "myCampaign", "/project/myCampaign"),
+                    new Campaign("https://localhost:4321/campaigns/1", "campaign", 2, "myCampaign", "/project/folder1/folder2/myCampaign")));
 
             Campaign campaign = Campaign.create(project, "myCampaign", (String) null, null);
             Assert.assertEquals(campaign.getId(), 1); // check this is the campaign within the requested folder which is choosen
             verify(postRequest, never()).body(any(JSONObject.class));
-            mockedCampaignFolder.verify(() -> CampaignFolder.createCampaignFolderTree(eq(project), isNull()));
+            mockedCampaignFolder.verify(() -> CampaignFolder.createCampaignFolderTree(eq(project), eq(new ArrayList<>())));
         }
     }
 
@@ -887,5 +833,163 @@ public class TestCampaign extends SquashTMTest {
         createServerMock("GET", "/campaigns/1", 404, "{}");
 
         Campaign.get(1);
+    }
+
+    @Test
+    public void testGetAllCampaigns() {
+        createServerMock("GET", "/projects/14/campaigns?sort=id&fields=path%2Cname%2Creference", 200, "{\n" +
+                "  \"_embedded\" : {\n" +
+                "    \"campaigns\" : [ {\n" +
+                "      \"_type\" : \"campaign\",\n" +
+                "      \"id\" : 255,\n" +
+                "      \"name\" : \"campaign 1\",\n" +
+                "      \"reference\" : \"C-1\",\n" +
+                "      \"_links\" : {\n" +
+                "        \"self\" : {\n" +
+                "          \"href\" : \"https://localhost:4321/campaigns/255\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }, {\n" +
+                "      \"_type\" : \"campaign\",\n" +
+                "      \"id\" : 122,\n" +
+                "      \"name\" : \"campaign 2\",\n" +
+                "      \"reference\" : \"C-2\",\n" +
+                "      \"_links\" : {\n" +
+                "        \"self\" : {\n" +
+                "          \"href\" : \"https://localhost:4321/campaigns/122\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }, {\n" +
+                "      \"_type\" : \"campaign\",\n" +
+                "      \"id\" : 147,\n" +
+                "      \"name\" : \"campaign 3\",\n" +
+                "      \"reference\" : \"C-3\",\n" +
+                "      \"_links\" : {\n" +
+                "        \"self\" : {\n" +
+                "          \"href\" : \"https://localhost:4321/campaigns/147\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    } ]\n" +
+                "  },\n" +
+                "  \"_links\" : {\n" +
+                "    \"first\" : {\n" +
+                "      \"href\" : \"https://localhost:4321/projects/14/campaigns?page=0&size=3&sort=name,desc\"\n" +
+                "    },\n" +
+                "    \"prev\" : {\n" +
+                "      \"href\" : \"https://localhost:4321/projects/14/campaigns?page=1&size=3&sort=name,desc\"\n" +
+                "    },\n" +
+                "    \"self\" : {\n" +
+                "      \"href\" : \"https://localhost:4321/projects/14/campaigns?page=2&size=3&sort=name,desc\"\n" +
+                "    },\n" +
+                "    \"next\" : {\n" +
+                "      \"href\" : \"https://localhost:4321/projects/14/campaigns?page=3&size=3&sort=name,desc\"\n" +
+                "    },\n" +
+                "    \"last\" : {\n" +
+                "      \"href\" : \"https://localhost:4321/projects/14/campaigns?page=3&size=3&sort=name,desc\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"page\" : {\n" +
+                "    \"size\" : 3,\n" +
+                "    \"totalElements\" : 10,\n" +
+                "    \"totalPages\" : 4,\n" +
+                "    \"number\" : 2\n" +
+                "  }\n" +
+                "}");
+
+        project = new Project("https://localhost:4321/projects/14", "project", 14, "myProject");
+        List<Campaign> campaigns = Campaign.getAll(project);
+        Assert.assertEquals(campaigns.size(), 3);
+        Assert.assertEquals(campaigns.get(0).getName(), "campaign 1");
+        Assert.assertEquals(campaigns.get(0).getPath(), "");
+    }
+
+    @Test
+    public void testGetCampaignsWithPathAndCustomFields() {
+        createServerMock("GET", "/projects/14/campaigns?sort=id&fields=path%2Cname%2Creference", 200, "{\n" +
+                "  \"_embedded\" : {\n" +
+                "    \"campaigns\" : [ {\n" +
+                "      \"_type\" : \"campaign\",\n" +
+                "      \"id\" : 255,\n" +
+                "      \"name\" : \"campaign 1\",\n" +
+                "      \"path\": \"/folder1/folder2\"," +
+                "      \"reference\" : \"C-1\",\n" +
+                "      \"_links\" : {\n" +
+                "        \"self\" : {\n" +
+                "          \"href\" : \"https://localhost:4321/campaigns/255\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }, {\n" +
+                "      \"_type\" : \"campaign\",\n" +
+                "      \"id\" : 122,\n" +
+                "      \"name\" : \"campaign 2\",\n" +
+                "      \"reference\" : \"C-2\",\n" +
+                "      \"_links\" : {\n" +
+                "        \"self\" : {\n" +
+                "          \"href\" : \"https://localhost:4321/campaigns/122\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }, {\n" +
+                "      \"_type\" : \"campaign\",\n" +
+                "      \"id\" : 147,\n" +
+                "      \"name\" : \"campaign 3\",\n" +
+                "      \"reference\" : \"C-3\",\n" +
+                "      \"custom_fields\" : [ {\n" +
+                "          \"code\" : \"cuf_txt_note\",\n" +
+                "          \"label\" : \"Cuf A\"," +
+                "          \"value\" : \"Star Trek style welcomed but not mandatory\"\n" +
+                "        }, {\n" +
+                "          \"code\" : \"cuf_tags_see_also\",\n" +
+                "          \"label\" : \"Cuf B\"," +
+                "          \"value\" : [ \"smart home\", \"sensors\", \"hand gesture\" ]\n" +
+                "        } ]," +
+                "      \"_links\" : {\n" +
+                "        \"self\" : {\n" +
+                "          \"href\" : \"https://localhost:4321/campaigns/147\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    } ]\n" +
+                "  },\n" +
+                "  \"_links\" : {\n" +
+                "    \"first\" : {\n" +
+                "      \"href\" : \"https://localhost:4321/projects/14/campaigns?page=0&size=3&sort=name,desc\"\n" +
+                "    },\n" +
+                "    \"prev\" : {\n" +
+                "      \"href\" : \"https://localhost:4321/projects/14/campaigns?page=1&size=3&sort=name,desc\"\n" +
+                "    },\n" +
+                "    \"self\" : {\n" +
+                "      \"href\" : \"https://localhost:4321/projects/14/campaigns?page=2&size=3&sort=name,desc\"\n" +
+                "    },\n" +
+                "    \"next\" : {\n" +
+                "      \"href\" : \"https://localhost:4321/projects/14/campaigns?page=3&size=3&sort=name,desc\"\n" +
+                "    },\n" +
+                "    \"last\" : {\n" +
+                "      \"href\" : \"https://localhost:4321/projects/14/campaigns?page=3&size=3&sort=name,desc\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"page\" : {\n" +
+                "    \"size\" : 3,\n" +
+                "    \"totalElements\" : 10,\n" +
+                "    \"totalPages\" : 4,\n" +
+                "    \"number\" : 2\n" +
+                "  }\n" +
+                "}");
+
+        project = new Project("https://localhost:4321/projects/14", "project", 14, "myProject");
+        List<Campaign> campaigns = Campaign.getAll(project);
+        Assert.assertEquals(campaigns.size(), 3);
+        Assert.assertEquals(campaigns.get(0).getName(), "campaign 1");
+        Assert.assertEquals(campaigns.get(0).getPath(), "/folder1/folder2");
+        Assert.assertEquals(campaigns.get(2).getCustomFields().size(), 2);
+        Assert.assertEquals(campaigns.get(2).getCustomFields().get(0).getCode(), "cuf_txt_note");
+    }
+
+
+    @Test(expectedExceptions = SquashTmException.class)
+    public void testGetCampaignsWithError() {
+        GetRequest getRequest = (GetRequest) createServerMock("GET", "/projects/14/campaigns?sort=id&fields=path%2Cname%2Creference", 200, "{}", "requestBodyEntity");
+        when(getRequest.asPaged(any(), (Function<HttpResponse<JsonNode>, String>) any(Function.class))).thenThrow(UnirestException.class);
+
+        project = new Project("https://localhost:4321/projects/14", "project", 14, "myProject");
+        Campaign.getAll(project);
     }
 }

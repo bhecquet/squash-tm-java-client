@@ -818,6 +818,46 @@ public class TestCampaignFolder extends SquashTMTest {
     }
 
     @Test
+    public void testCreateCampaignFolderTreeWithCache() {
+        EntityCache.setEnabled(true);
+
+        // campaign folder creation
+        HttpRequestWithBody postRequest = (HttpRequestWithBody) createServerMock("POST", "/campaign-folders", 200, CAMPAIGN_FOLDER_POST_REPLY_DATA, "request");
+
+        // campaign folder tree
+        HttpRequest<?> getRequest = createServerMock("GET", "/campaign-folders/tree/14", 200, GET_ALL_FOLDERS_BY_PROJECT_REPLY_DATA);
+
+        CampaignFolder.createCampaignFolderTree(project, "foo/bar");
+        CampaignFolder.createCampaignFolderTree(project, "foo/bar2");
+
+        // with cache enabled, we get list of campaign folders only once
+        verify(getRequest).asJson();
+
+        // check cache contains the new campaign folder (only one, because mock always returns the same id)
+        Assert.assertNotNull(CampaignFolder.getCampaignFolderCaches().get(project).get(33));
+    }
+
+    @Test
+    public void testCreateCampaignFolderTreeWithoutCache() {
+        EntityCache.setEnabled(false);
+
+        // campaign folder creation
+        HttpRequestWithBody postRequest = (HttpRequestWithBody) createServerMock("POST", "/campaign-folders", 200, CAMPAIGN_FOLDER_POST_REPLY_DATA, "request");
+
+        // campaign folder tree
+        HttpRequest<?> getRequest = createServerMock("GET", "/campaign-folders/tree/14", 200, GET_ALL_FOLDERS_BY_PROJECT_REPLY_DATA);
+
+        CampaignFolder.createCampaignFolderTree(project, "foo/bar");
+        CampaignFolder.createCampaignFolderTree(project, "foo/bar2");
+
+        // with cache enabled, we get list of campaign folders twice
+        verify(getRequest, times(4)).asJson(); // 2 for campaign creation, 2 for getting campaign folder list
+
+        // check cache does not contain the new campaign folder
+        Assert.assertNull(CampaignFolder.getCampaignFolderCaches().get(project).get(33));
+    }
+
+    @Test
     public void testCreateCampaignFolderTreeNoFolder() {
         // campaign folder creation
         HttpRequestWithBody postRequest = (HttpRequestWithBody) createServerMock("POST", "/campaign-folders", 200, CAMPAIGN_FOLDER_POST_REPLY_DATA, "request");
@@ -825,7 +865,7 @@ public class TestCampaignFolder extends SquashTMTest {
         // campaign folder tree
         createServerMock("GET", "/campaign-folders/tree/14", 200, GET_ALL_FOLDERS_BY_PROJECT_REPLY_DATA);
 
-        CampaignFolder createdFolder = CampaignFolder.createCampaignFolderTree(project, null);
+        CampaignFolder createdFolder = CampaignFolder.createCampaignFolderTree(project, (String) null);
         Assert.assertNull(createdFolder);
     }
 

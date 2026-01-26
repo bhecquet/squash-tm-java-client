@@ -7,9 +7,10 @@ import kong.unirest.core.json.JSONArray;
 import kong.unirest.core.json.JSONException;
 import kong.unirest.core.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Object representing a requirement in Squash TM
@@ -22,8 +23,10 @@ public class Requirement extends Entity {
 
     public enum Status {WORK_IN_PROGRESS, UNDER_REVIEW, APPROVED, OBSOLETE}
 
+    private static final Map<Project, EntityCache<Requirement>> requirementCaches = new ConcurrentHashMap<>();
     private static final String FIELD_DESCRIPTION = "description";
     private static final String FIELD_PATH = "path";
+    private static final String FIELD_PARENT = "parent";
     private static final String FIELD_PROJECT = "project";
     private static final String FIELD_AUTHOR = "created_by";
     private static final String FIELD_REFERENCE = "reference";
@@ -34,6 +37,7 @@ public class Requirement extends Entity {
 
     public static final String REQUIREMENT_URL = "requirements/%s";
     public static final String REQUIREMENTS_URL = "requirements";
+    public static final String REQUIREMENTS_FOR_PROJECT_URL = "projects/%d/requirements";
     private String path;
     private String description;
     private String reference;
@@ -43,6 +47,7 @@ public class Requirement extends Entity {
     private Status status = Status.WORK_IN_PROGRESS;
     private Criticality criticality = Criticality.UNDEFINED;
     private String category = "";
+    private Entity parent = null;
 
     public Requirement(String url, String type, int id, String name) {
         super(url, type, id, name);
@@ -55,12 +60,15 @@ public class Requirement extends Entity {
 
     public static Requirement fromJson(JSONObject json) {
         try {
-            return new Requirement(
+            Requirement requirement = new Requirement(
                     json.getJSONObject("_links").getJSONObject("self").getString("href"),
                     json.getString(FIELD_TYPE),
                     json.getInt(FIELD_ID),
                     json.optString(FIELD_NAME, "")
             );
+            requirement.completeDetails(json);
+
+            return requirement;
         } catch (JSONException e) {
             throw new SquashTmException(String.format("Cannot create Requirement from JSON [%s] data: %s", json.toString(), e.getMessage()));
         }
@@ -80,13 +88,18 @@ public class Requirement extends Entity {
      * Check will be done only on requirement name
      *
      * @param project      the project where requirement will be created
+     * @param isHighLevel  true if it's a high level requirement
      * @param name         requirement name
      * @param description  requirement description
      * @param customFields custom fields to set
      * @param folderPath   where requirement will be created: "foo/bar"
      * @param criticality  criticality of requirement
      */
-    public static Requirement create(Project project, String name, String description, Map<String, Object> customFields, String folderPath, Criticality criticality) {
+    public static Requirement create(Project project, boolean isHighLevel, String name, String description, Map<String, Object> customFields, String folderPath, Criticality criticality) {
+        return create(project, isHighLevel, name, description, customFields, folderPath == null ? new ArrayList<>() : Arrays.asList(folderPath.split("/")), criticality);
+    }
+
+    public static Requirement create(Project project, boolean isHighLevel, String name, String description, Map<String, Object> customFields, List<String> folderPath, Criticality criticality) {
         if (project == null) {
             throw new IllegalArgumentException("Project cannot be null");
         }
@@ -94,16 +107,22 @@ public class Requirement extends Entity {
         RequirementFolder parentFolder = RequirementFolder.createRequirementFolderTree(project, folderPath);
 
         if (folderPath == null) {
-            folderPath = "";
+            folderPath = new ArrayList<>();
         }
 
-        for (Requirement requirement : project.getRequirements()) {
+        // creates the cache
+        requirementCaches.putIfAbsent(project, new EntityCache<>(300));
+        for (Requirement requirement : requirementCaches.get(project).getAll(Requirement::getAll, project)) {
             if (requirement.getName().equals(name)
-                    && requirement.getPath().equals(String.format("/%s/%s/%s", project.getName(), folderPath, name).replace("//", "/"))) {
+                    && requirement.getPath().equals(String.format("/%s/%s/%s", project.getName(), String.join("/", folderPath), name).replace("//", "/"))) {
                 return requirement;
             }
         }
-        return create(project, name, description, customFields, parentFolder, criticality);
+
+        ParentEntity parent;
+        parent = new ParentEntity(Objects.requireNonNullElse(parentFolder, project));
+
+        return create(project, isHighLevel, name, description, customFields, parent, criticality);
     }
 
     /**
@@ -111,28 +130,29 @@ public class Requirement extends Entity {
      * Check will be done only on requirement name
      *
      * @param project      the project where requirement will be created
+     * @param isHighLevel  true if it's a high level requirement
      * @param name         requirement name
      * @param description  requirement description
      * @param customFields custom fields to set
-     * @param parentFolder where requirement will be created: "foo/bar"
+     * @param parentEntity where requirement will be created: "foo/bar"
      * @param criticality  criticality of requirement
      */
-    public static Requirement create(Project project, String name, String description, Map<String, Object> customFields, RequirementFolder parentFolder, Criticality criticality) {
+    public static Requirement create(Project project, boolean isHighLevel, String name, String description, Map<String, Object> customFields, ParentEntity parentEntity, Criticality criticality) {
         if (name == null || name.isEmpty()) {
             throw new IllegalArgumentException("Requirement name cannot be null or empty");
+        }
+        if (parentEntity == null) {
+            parentEntity = new ParentEntity(project);
         }
 
         try {
             JSONObject body = new JSONObject();
-            body.put(FIELD_TYPE, "requirement");
+            body.put(FIELD_TYPE, isHighLevel ? TYPE_REQUIREMENT_HIGH_LEVEL : TYPE_REQUIREMENT);
             JSONObject parent = new JSONObject();
-            if (parentFolder == null) {
-                parent.put(FIELD_ID, project.id);
-                parent.put(FIELD_TYPE, TYPE_PROJECT);
-            } else {
-                parent.put(FIELD_ID, parentFolder.id);
-                parent.put(FIELD_TYPE, "requirement-folder");
-            }
+
+            parent.put(FIELD_ID, parentEntity.getId());
+            parent.put(FIELD_TYPE, parentEntity.getType());
+
             body.put("parent", parent);
 
             JSONObject currentVersion = new JSONObject();
@@ -154,7 +174,9 @@ public class Requirement extends Entity {
             JSONObject json = getJSonResponse(buildPostRequest(apiRootUrl + REQUIREMENTS_URL).body(body));
 
             Requirement requirement = fromJson(json);
-            requirement.completeDetails(json);
+            requirementCaches.putIfAbsent(project, new EntityCache<>(300));
+            requirementCaches.get(project).add(requirement);
+
             return requirement;
         } catch (UnirestException e) {
             throw new SquashTmException(String.format("Cannot create requirement: %s", name), e);
@@ -220,20 +242,74 @@ public class Requirement extends Entity {
 
     private void completeDetails(JSONObject json) {
 
-        name = json.getJSONObject(FIELD_CURRENT_VERSION).getString(FIELD_NAME);
-        description = json.getJSONObject(FIELD_CURRENT_VERSION).getString(FIELD_DESCRIPTION);
-        projectId = json.getJSONObject(FIELD_PROJECT).getInt(FIELD_ID);
-        projectName = json.getJSONObject(FIELD_PROJECT).getString(FIELD_NAME);
-        path = json.optString(FIELD_PATH, "");
-        author = json.getJSONObject(FIELD_CURRENT_VERSION).getString(FIELD_AUTHOR);
-        reference = json.getJSONObject(FIELD_CURRENT_VERSION).getString(FIELD_REFERENCE);
-        status = Status.valueOf(json.getJSONObject(FIELD_CURRENT_VERSION).getString(FIELD_STATUS));
-        criticality = Criticality.valueOf(json.getJSONObject(FIELD_CURRENT_VERSION).getString(FIELD_CRITICALITY));
-        category = json.getJSONObject(FIELD_CURRENT_VERSION).getJSONObject(FIELD_CATEGORY).getString("code");
-
-        readCustomFields(json.getJSONObject(FIELD_CURRENT_VERSION).getJSONArray(FIELD_CUSTOM_FIELDS));
+        try {
+            name = json.getJSONObject(FIELD_CURRENT_VERSION).getString(FIELD_NAME);
+        } catch (JSONException e) {/* ignore */}
+        try {
+            description = json.getJSONObject(FIELD_CURRENT_VERSION).getString(FIELD_DESCRIPTION);
+        } catch (JSONException e) {/* ignore */}
+        try {
+            projectId = json.getJSONObject(FIELD_PROJECT).getInt(FIELD_ID);
+        } catch (JSONException e) {/* ignore */}
+        try {
+            projectName = json.getJSONObject(FIELD_PROJECT).getString(FIELD_NAME);
+        } catch (JSONException e) {/* ignore */}
+        try {
+            path = json.optString(FIELD_PATH, "");
+        } catch (JSONException e) {/* ignore */}
+        try {
+            author = json.getJSONObject(FIELD_CURRENT_VERSION).getString(FIELD_AUTHOR);
+        } catch (JSONException e) {/* ignore */}
+        try {
+            reference = json.getJSONObject(FIELD_CURRENT_VERSION).getString(FIELD_REFERENCE);
+        } catch (JSONException e) {/* ignore */}
+        try {
+            status = Status.valueOf(json.getJSONObject(FIELD_CURRENT_VERSION).getString(FIELD_STATUS));
+        } catch (JSONException e) {/* ignore */}
+        try {
+            criticality = Criticality.valueOf(json.getJSONObject(FIELD_CURRENT_VERSION).getString(FIELD_CRITICALITY));
+        } catch (JSONException e) {/* ignore */}
+        try {
+            category = json.getJSONObject(FIELD_CURRENT_VERSION).getJSONObject(FIELD_CATEGORY).getString("code");
+        } catch (JSONException e) {/* ignore */}
+        try {
+            readCustomFields(json.getJSONObject(FIELD_CURRENT_VERSION).getJSONArray(FIELD_CUSTOM_FIELDS));
+        } catch (JSONException e) {/* ignore */}
+        try {
+            parent = Entity.entityFromJson(json.getJSONObject(FIELD_PARENT));
+        } catch (JSONException e) {/* ignore */}
 
     }
+
+
+    public static List<Requirement> getAll(Project project) {
+        return getAll(project, "path,name,reference");
+    }
+
+    public static List<Requirement> getAll(Project project, String fields) {
+        JSONObject json;
+        try {
+            json = getPagedJSonResponse(buildGetRequest(apiRootUrl + String.format(REQUIREMENTS_FOR_PROJECT_URL, project.getId()) + "?sort=id&fields=" + URLEncoder.encode(fields, StandardCharsets.UTF_8)));
+        } catch (UnirestException e) {
+            throw new SquashTmException(String.format("Cannot get list of requirements for project %s: %s", project.getName(), e.getMessage()));
+        }
+
+        List<Requirement> requirements = new ArrayList<>();
+        if (json.has(FIELD_EMBEDDED)) {
+            for (JSONObject folderJson : (List<JSONObject>) json.getJSONObject(FIELD_EMBEDDED).getJSONArray(FIELD_REQUIREMENTS).toList()) {
+                requirements.add(Requirement.fromJson(folderJson));
+            }
+
+            if (json.getJSONObject(FIELD_EMBEDDED).has(FIELD_HIGH_LEVEL_REQUIREMENTS)) {
+                for (JSONObject folderJson : (List<JSONObject>) json.getJSONObject(FIELD_EMBEDDED).getJSONArray(FIELD_HIGH_LEVEL_REQUIREMENTS).toList()) {
+                    requirements.add(Requirement.fromJson(folderJson));
+                }
+            }
+        }
+        return requirements;
+
+    }
+
 
     public String getReference() {
         return reference;
@@ -275,6 +351,10 @@ public class Requirement extends Entity {
         this.path = path;
     }
 
+    public Entity getParent() {
+        return parent;
+    }
+
     public List<TestCase> getCoveringTestCases() {
         List<TestCase> coveringTestCases = new ArrayList<>();
         JSONObject json = getJSonResponse(buildGetRequest(url));
@@ -283,5 +363,9 @@ public class Requirement extends Entity {
             coveringTestCases.add(coveringTestCase);
         }
         return coveringTestCases;
+    }
+
+    public static Map<Project, EntityCache<Requirement>> getRequirementCache() {
+        return requirementCaches;
     }
 }
