@@ -121,7 +121,7 @@ public class CampaignFolder extends Entity {
 
     private static CampaignFolder createCampaignFolders(Project project, String folderName, CampaignFolder parentFolder) {
 
-        campaignFolderCaches.putIfAbsent(project, new EntityCache<>(300));
+        campaignFolderCaches.putIfAbsent(project, new EntityCache<>());
         List<CampaignFolder> campaignFolders = campaignFolderCaches.get(project).getAll(CampaignFolder::getAll, project);
 
         boolean folderExists = false;
@@ -209,7 +209,7 @@ public class CampaignFolder extends Entity {
             CampaignFolder campaignFolder = CampaignFolder.fromJson(json);
 
             // store in cache
-            campaignFolderCaches.putIfAbsent(project, new EntityCache<>(300));
+            campaignFolderCaches.putIfAbsent(project, new EntityCache<>());
             campaignFolderCaches.get(project).add(campaignFolder);
 
             return campaignFolder;

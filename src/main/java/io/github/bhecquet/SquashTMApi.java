@@ -62,8 +62,9 @@ public class SquashTMApi {
      * Enable caching of entities
      * To use mainly in batch because for now, if a cache is enabled for a project in a web application, this cache will be kept forever, there is no cleaning
      */
-    public void enableCache() {
+    public void enableCache(int refreshInterval) {
         EntityCache.setEnabled(true);
+        EntityCache.setDefaultRefreshInterval(refreshInterval);
     }
 
     /**

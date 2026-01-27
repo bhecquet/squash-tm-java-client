@@ -189,7 +189,7 @@ public class Campaign extends Entity {
         }
 
         // do not create campaign if it exists
-        campaignCaches.putIfAbsent(project, new EntityCache<>(300));
+        campaignCaches.putIfAbsent(project, new EntityCache<>());
         for (Campaign campaign : campaignCaches.get(project).getAll(Campaign::getAll, project)) {
             if (campaign.getName().equals(campaignName) && campaign.getPath().equals(String.format("/%s/%s/%s", project.getName(), String.join("/", folderPath), campaignName).replace("//", "/"))) {
                 return campaign;
@@ -236,7 +236,7 @@ public class Campaign extends Entity {
             JSONObject json = getJSonResponse(buildPostRequest(apiRootUrl + CAMPAIGNS_URL).body(body));
 
             Campaign campaign = fromJson(json);
-            campaignCaches.putIfAbsent(project, new EntityCache<>(300));
+            campaignCaches.putIfAbsent(project, new EntityCache<>());
             campaignCaches.get(project).add(campaign);
             return campaign;
 

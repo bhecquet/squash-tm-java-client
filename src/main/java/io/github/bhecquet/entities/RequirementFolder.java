@@ -132,7 +132,7 @@ public class RequirementFolder extends Entity {
     private static RequirementFolder createRequirementFolders(Project project, String folderName, RequirementFolder parentFolder) {
 
         // creates the cache
-        requirementFolderCaches.putIfAbsent(project, new EntityCache<>(300));
+        requirementFolderCaches.putIfAbsent(project, new EntityCache<>());
         List<RequirementFolder> requirementFolders = requirementFolderCaches.get(project).getAll(RequirementFolder::getAll, project);
 
         boolean folderExists = false;
@@ -235,7 +235,7 @@ public class RequirementFolder extends Entity {
             JSONObject json = getJSonResponse(buildPostRequest(apiRootUrl + REQUIREMENT_FOLDER_URL).body(body));
             RequirementFolder requirementFolder = RequirementFolder.fromJson(json);
 
-            requirementFolderCaches.putIfAbsent(project, new EntityCache<>(300));
+            requirementFolderCaches.putIfAbsent(project, new EntityCache<>());
             requirementFolderCaches.get(project).add(requirementFolder);
 
             return requirementFolder;

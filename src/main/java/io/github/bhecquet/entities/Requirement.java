@@ -111,7 +111,7 @@ public class Requirement extends Entity {
         }
 
         // creates the cache
-        requirementCaches.putIfAbsent(project, new EntityCache<>(300));
+        requirementCaches.putIfAbsent(project, new EntityCache<>());
         for (Requirement requirement : requirementCaches.get(project).getAll(Requirement::getAll, project)) {
             if (requirement.getName().equals(name)
                     && requirement.getPath().equals(String.format("/%s/%s/%s", project.getName(), String.join("/", folderPath), name).replace("//", "/"))) {
@@ -174,7 +174,7 @@ public class Requirement extends Entity {
             JSONObject json = getJSonResponse(buildPostRequest(apiRootUrl + REQUIREMENTS_URL).body(body));
 
             Requirement requirement = fromJson(json);
-            requirementCaches.putIfAbsent(project, new EntityCache<>(300));
+            requirementCaches.putIfAbsent(project, new EntityCache<>());
             requirementCaches.get(project).add(requirement);
 
             return requirement;

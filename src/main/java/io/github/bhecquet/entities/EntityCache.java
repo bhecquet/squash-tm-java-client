@@ -10,11 +10,16 @@ import java.util.function.Function;
 
 public class EntityCache<E extends Entity> {
 
+    private static int defaultRefreshInterval = 300;
     private static boolean enabled = false;
     private static final Object lock = new Object();
     private final int refreshInterval;
     private Instant lastRefresh = Instant.EPOCH;
     private final Map<Integer, E> data = new ConcurrentHashMap<>();
+
+    public EntityCache() {
+        this(defaultRefreshInterval);
+    }
 
     /**
      * Creates a cache that will refresh at most every 'refreshInterval' seconds
@@ -76,5 +81,9 @@ public class EntityCache<E extends Entity> {
             }
 
         }
+    }
+
+    public static void setDefaultRefreshInterval(int refreshInterval) {
+        defaultRefreshInterval = refreshInterval;
     }
 }
