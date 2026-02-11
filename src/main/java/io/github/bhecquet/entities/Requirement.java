@@ -94,12 +94,13 @@ public class Requirement extends Entity {
      * @param customFields custom fields to set
      * @param folderPath   where requirement will be created: "foo/bar"
      * @param criticality  criticality of requirement
+     * @param category     the category code for the requirement. May be null if project supports it
      */
-    public static Requirement create(Project project, boolean isHighLevel, String name, String description, Map<String, Object> customFields, String folderPath, Criticality criticality) {
-        return create(project, isHighLevel, name, description, customFields, folderPath == null ? new ArrayList<>() : Arrays.asList(folderPath.split("/")), criticality);
+    public static Requirement create(Project project, boolean isHighLevel, String name, String description, Map<String, Object> customFields, String folderPath, Criticality criticality, String category) {
+        return create(project, isHighLevel, name, description, customFields, folderPath == null ? new ArrayList<>() : Arrays.asList(folderPath.split("/")), criticality, category);
     }
 
-    public static Requirement create(Project project, boolean isHighLevel, String name, String description, Map<String, Object> customFields, List<String> folderPath, Criticality criticality) {
+    public static Requirement create(Project project, boolean isHighLevel, String name, String description, Map<String, Object> customFields, List<String> folderPath, Criticality criticality, String category) {
         if (project == null) {
             throw new IllegalArgumentException("Project cannot be null");
         }
@@ -122,7 +123,7 @@ public class Requirement extends Entity {
         ParentEntity parent;
         parent = new ParentEntity(Objects.requireNonNullElse(parentFolder, project));
 
-        return create(project, isHighLevel, name, description, customFields, parent, criticality);
+        return create(project, isHighLevel, name, description, customFields, parent, criticality, category);
     }
 
     /**
@@ -136,8 +137,9 @@ public class Requirement extends Entity {
      * @param customFields custom fields to set
      * @param parentEntity where requirement will be created: "foo/bar"
      * @param criticality  criticality of requirement
+     * @param category     the category code for the requirement. May be null if project supports it
      */
-    public static Requirement create(Project project, boolean isHighLevel, String name, String description, Map<String, Object> customFields, ParentEntity parentEntity, Criticality criticality) {
+    public static Requirement create(Project project, boolean isHighLevel, String name, String description, Map<String, Object> customFields, ParentEntity parentEntity, Criticality criticality, String category) {
         if (name == null || name.isEmpty()) {
             throw new IllegalArgumentException("Requirement name cannot be null or empty");
         }
@@ -161,15 +163,21 @@ public class Requirement extends Entity {
             currentVersion.put(FIELD_CRITICALITY, criticality);
             currentVersion.put(FIELD_DESCRIPTION, description == null ? "" : description);
             currentVersion.put(FIELD_STATUS, Status.WORK_IN_PROGRESS.name());
-            body.put(FIELD_CURRENT_VERSION, currentVersion);
+
+            if (category != null && !category.isEmpty()) {
+                currentVersion.put(FIELD_CATEGORY, new JSONObject(Map.of("code", category)));
+            }
 
             if (customFields != null && !customFields.isEmpty()) {
                 JSONArray cFields = new JSONArray();
                 for (Map.Entry<String, Object> customField : customFields.entrySet()) {
                     cFields.put(Map.of("code", customField.getKey(), "value", customField.getValue()));
                 }
-                body.put(FIELD_CUSTOM_FIELDS, cFields);
+                currentVersion.put(FIELD_CUSTOM_FIELDS, cFields);
             }
+
+            body.put(FIELD_CURRENT_VERSION, currentVersion);
+
 
             JSONObject json = getJSonResponse(buildPostRequest(apiRootUrl + REQUIREMENTS_URL).body(body));
 
