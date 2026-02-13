@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.github.bhecquet</groupId>
     <artifactId>squash-tm-java-client</artifactId>
-    <version>1.0.26-SNAPSHOT</version>
+    <version>1.0.27-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>Squash TM Java client</name>
     <description>A Java client for connecting to Squash TM Test Manager API</description>
