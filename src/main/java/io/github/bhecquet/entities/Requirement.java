@@ -96,11 +96,11 @@ public class Requirement extends Entity {
      * @param criticality  criticality of requirement
      * @param category     the category code for the requirement. May be null if project supports it
      */
-    public static Requirement create(Project project, boolean isHighLevel, String name, String description, Map<String, Object> customFields, String folderPath, Criticality criticality, String category) {
-        return create(project, isHighLevel, name, description, customFields, folderPath == null ? new ArrayList<>() : Arrays.asList(folderPath.split("/")), criticality, category);
+    public static Requirement create(Project project, boolean isHighLevel, String name, String description, Map<String, Object> customFields, String folderPath, Criticality criticality, String category, Status status) {
+        return create(project, isHighLevel, name, description, customFields, folderPath == null ? new ArrayList<>() : Arrays.asList(folderPath.split("/")), criticality, category, status);
     }
 
-    public static Requirement create(Project project, boolean isHighLevel, String name, String description, Map<String, Object> customFields, List<String> folderPath, Criticality criticality, String category) {
+    public static Requirement create(Project project, boolean isHighLevel, String name, String description, Map<String, Object> customFields, List<String> folderPath, Criticality criticality, String category, Status status) {
         if (project == null) {
             throw new IllegalArgumentException("Project cannot be null");
         }
@@ -123,7 +123,7 @@ public class Requirement extends Entity {
         ParentEntity parent;
         parent = new ParentEntity(Objects.requireNonNullElse(parentFolder, project));
 
-        return create(project, isHighLevel, name, description, customFields, parent, criticality, category);
+        return create(project, isHighLevel, name, description, customFields, parent, criticality, category, status);
     }
 
     /**
@@ -139,7 +139,7 @@ public class Requirement extends Entity {
      * @param criticality  criticality of requirement
      * @param category     the category code for the requirement. May be null if project supports it
      */
-    public static Requirement create(Project project, boolean isHighLevel, String name, String description, Map<String, Object> customFields, ParentEntity parentEntity, Criticality criticality, String category) {
+    public static Requirement create(Project project, boolean isHighLevel, String name, String description, Map<String, Object> customFields, ParentEntity parentEntity, Criticality criticality, String category, Status status) {
         if (name == null || name.isEmpty()) {
             throw new IllegalArgumentException("Requirement name cannot be null or empty");
         }
@@ -162,7 +162,7 @@ public class Requirement extends Entity {
             currentVersion.put(FIELD_NAME, name);
             currentVersion.put(FIELD_CRITICALITY, criticality);
             currentVersion.put(FIELD_DESCRIPTION, description == null ? "" : description);
-            currentVersion.put(FIELD_STATUS, Status.WORK_IN_PROGRESS.name());
+            currentVersion.put(FIELD_STATUS, status == null ? Status.WORK_IN_PROGRESS.name() : status.name());
 
             if (category != null && !category.isEmpty()) {
                 currentVersion.put(FIELD_CATEGORY, new JSONObject(Map.of("code", category)));

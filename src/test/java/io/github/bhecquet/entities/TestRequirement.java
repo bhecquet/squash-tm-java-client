@@ -540,34 +540,48 @@ public class TestRequirement extends SquashTMTest {
     @Test
     public void testCreateRequirementNoFolder() {
         HttpRequestWithBody postRequest = (HttpRequestWithBody) createServerMock("POST", "/requirements", 200, REQUIREMENT_REPLY_DATA3, "request");
-        Requirement.create(project, false, "myRequirement", "some description", new HashMap<>(), (ParentEntity) null, Requirement.Criticality.UNDEFINED, "Business");
+        Requirement.create(project, false, "myRequirement", "some description", new HashMap<>(), (ParentEntity) null, Requirement.Criticality.UNDEFINED, "Business", Requirement.Status.WORK_IN_PROGRESS);
+        verify(postRequest).body(new JSONObject("{\"_type\":\"requirement\",\"parent\":{\"id\":1,\"_type\":\"project\"},\"current_version\":{\"_type\":\"requirement-version\",\"name\":\"myRequirement\",\"criticality\":\"UNDEFINED\",\"description\":\"some description\",\"status\":\"WORK_IN_PROGRESS\",\"category\":{\"code\":\"Business\"}}}"));
+    }
+
+    @Test
+    public void testCreateRequirementNoFolderOtherStatus() {
+        HttpRequestWithBody postRequest = (HttpRequestWithBody) createServerMock("POST", "/requirements", 200, REQUIREMENT_REPLY_DATA3, "request");
+        Requirement.create(project, false, "myRequirement", "some description", new HashMap<>(), (ParentEntity) null, Requirement.Criticality.UNDEFINED, "Business", Requirement.Status.OBSOLETE);
+        verify(postRequest).body(new JSONObject("{\"_type\":\"requirement\",\"parent\":{\"id\":1,\"_type\":\"project\"},\"current_version\":{\"_type\":\"requirement-version\",\"name\":\"myRequirement\",\"criticality\":\"UNDEFINED\",\"description\":\"some description\",\"status\":\"OBSOLETE\",\"category\":{\"code\":\"Business\"}}}"));
+    }
+
+    @Test
+    public void testCreateRequirementNoFolderNullStatus() {
+        HttpRequestWithBody postRequest = (HttpRequestWithBody) createServerMock("POST", "/requirements", 200, REQUIREMENT_REPLY_DATA3, "request");
+        Requirement.create(project, false, "myRequirement", "some description", new HashMap<>(), (ParentEntity) null, Requirement.Criticality.UNDEFINED, "Business", null);
         verify(postRequest).body(new JSONObject("{\"_type\":\"requirement\",\"parent\":{\"id\":1,\"_type\":\"project\"},\"current_version\":{\"_type\":\"requirement-version\",\"name\":\"myRequirement\",\"criticality\":\"UNDEFINED\",\"description\":\"some description\",\"status\":\"WORK_IN_PROGRESS\",\"category\":{\"code\":\"Business\"}}}"));
     }
 
     @Test
     public void testCreateRequirementNoFolder2() {
         HttpRequestWithBody postRequest = (HttpRequestWithBody) createServerMock("POST", "/requirements", 200, REQUIREMENT_REPLY_DATA3, "request");
-        Requirement.create(project, false, "myRequirement", "some description", new HashMap<>(), new ParentEntity(project), Requirement.Criticality.UNDEFINED, "Business");
+        Requirement.create(project, false, "myRequirement", "some description", new HashMap<>(), new ParentEntity(project), Requirement.Criticality.UNDEFINED, "Business", Requirement.Status.WORK_IN_PROGRESS);
         verify(postRequest).body(new JSONObject("{\"_type\":\"requirement\",\"parent\":{\"id\":1,\"_type\":\"project\"},\"current_version\":{\"_type\":\"requirement-version\",\"name\":\"myRequirement\",\"criticality\":\"UNDEFINED\",\"description\":\"some description\",\"status\":\"WORK_IN_PROGRESS\",\"category\":{\"code\":\"Business\"}}}"));
     }
 
     @Test
     public void testCreateHighLevelRequirementNoFolder() {
         HttpRequestWithBody postRequest = (HttpRequestWithBody) createServerMock("POST", "/requirements", 200, REQUIREMENT_REPLY_DATA3, "request");
-        Requirement.create(project, true, "myRequirement", "some description", new HashMap<>(), (ParentEntity) null, Requirement.Criticality.UNDEFINED, "Business");
+        Requirement.create(project, true, "myRequirement", "some description", new HashMap<>(), (ParentEntity) null, Requirement.Criticality.UNDEFINED, "Business", Requirement.Status.WORK_IN_PROGRESS);
         verify(postRequest).body(new JSONObject("{\"_type\":\"high-level-requirement\",\"parent\":{\"id\":1,\"_type\":\"project\"},\"current_version\":{\"_type\":\"requirement-version\",\"name\":\"myRequirement\",\"criticality\":\"UNDEFINED\",\"description\":\"some description\",\"status\":\"WORK_IN_PROGRESS\",\"category\":{\"code\":\"Business\"}}}"));
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "Requirement name cannot be null or empty")
     public void testCreateRequirementNoName() {
         createServerMock("POST", "/requirements", 200, REQUIREMENT_REPLY_DATA3, "request");
-        Requirement.create(project, false, null, "some description", new HashMap<>(), (ParentEntity) null, Requirement.Criticality.UNDEFINED, "Business");
+        Requirement.create(project, false, null, "some description", new HashMap<>(), (ParentEntity) null, Requirement.Criticality.UNDEFINED, "Business", Requirement.Status.WORK_IN_PROGRESS);
     }
 
     @Test
     public void testCreateRequirementWithCustomFields() {
         HttpRequestWithBody postRequest = (HttpRequestWithBody) createServerMock("POST", "/requirements", 200, REQUIREMENT_REPLY_DATA3, "request");
-        Requirement.create(project, false, "myRequirement", "some description", Map.of("APP", List.of("comp1", "comp2")), (ParentEntity) null, Requirement.Criticality.UNDEFINED, "Business");
+        Requirement.create(project, false, "myRequirement", "some description", Map.of("APP", List.of("comp1", "comp2")), (ParentEntity) null, Requirement.Criticality.UNDEFINED, "Business", Requirement.Status.WORK_IN_PROGRESS);
         verify(postRequest).body(new JSONObject("{\"_type\":\"requirement\",\"parent\":{\"id\":1,\"_type\":\"project\"},\"current_version\":{\"_type\":\"requirement-version\",\"name\":\"myRequirement\",\"criticality\":\"UNDEFINED\",\"description\":\"some description\",\"status\":\"WORK_IN_PROGRESS\",\"category\":{\"code\":\"Business\"},\"custom_fields\":[{\"code\":\"APP\",\"value\":[\"comp1\",\"comp2\"]}]}}"));
     }
 
@@ -582,7 +596,7 @@ public class TestRequirement extends SquashTMTest {
                 "foo",
                 project,
                 null);
-        Requirement.create(project, false, "myRequirement", "some description", Map.of("APP", List.of("comp1", "comp2")), new ParentEntity(requirementFolder2), Requirement.Criticality.UNDEFINED, "Business");
+        Requirement.create(project, false, "myRequirement", "some description", Map.of("APP", List.of("comp1", "comp2")), new ParentEntity(requirementFolder2), Requirement.Criticality.UNDEFINED, "Business", Requirement.Status.WORK_IN_PROGRESS);
 
         verify(postRequest).body(new JSONObject("{\"_type\":\"requirement\",\"parent\":{\"id\":7,\"_type\":\"requirement-folder\"},\"current_version\":{\"_type\":\"requirement-version\",\"name\":\"myRequirement\",\"criticality\":\"UNDEFINED\",\"description\":\"some description\",\"status\":\"WORK_IN_PROGRESS\",\"category\":{\"code\":\"Business\"},\"custom_fields\":[{\"code\":\"APP\",\"value\":[\"comp1\",\"comp2\"]}]}}"));
     }
@@ -599,7 +613,7 @@ public class TestRequirement extends SquashTMTest {
             when(requirementFolder.getId()).thenReturn(1);
             when(requirementFolder.getType()).thenReturn("requirement-folder");
 
-            Requirement.create(project, false, "myRequirement", "some description", new HashMap<>(), "folder1/folder2", Requirement.Criticality.UNDEFINED, "Business");
+            Requirement.create(project, false, "myRequirement", "some description", new HashMap<>(), "folder1/folder2", Requirement.Criticality.UNDEFINED, "Business", Requirement.Status.WORK_IN_PROGRESS);
 
             verify(postRequest).body(new JSONObject("{\"_type\":\"requirement\",\"parent\":{\"id\":1,\"_type\":\"requirement-folder\"},\"current_version\":{\"_type\":\"requirement-version\",\"name\":\"myRequirement\",\"criticality\":\"UNDEFINED\",\"description\":\"some description\",\"status\":\"WORK_IN_PROGRESS\",\"category\":{\"code\":\"Business\"}}}"));
             mockedRequirementFolder.verify(() -> RequirementFolder.createRequirementFolderTree(eq(project), eq(List.of("folder1", "folder2"))));
@@ -622,8 +636,8 @@ public class TestRequirement extends SquashTMTest {
             when(requirementFolder.getId()).thenReturn(1);
             when(requirementFolder.getType()).thenReturn("requirement-folder");
 
-            Requirement.create(project, false, "myRequirement", "some description", new HashMap<>(), "folder1/folder2", Requirement.Criticality.UNDEFINED, "Business");
-            Requirement.create(project, false, "myRequirement", "some description", new HashMap<>(), "folder1/folder2", Requirement.Criticality.UNDEFINED, "Business");
+            Requirement.create(project, false, "myRequirement", "some description", new HashMap<>(), "folder1/folder2", Requirement.Criticality.UNDEFINED, "Business", Requirement.Status.WORK_IN_PROGRESS);
+            Requirement.create(project, false, "myRequirement", "some description", new HashMap<>(), "folder1/folder2", Requirement.Criticality.UNDEFINED, "Business", Requirement.Status.WORK_IN_PROGRESS);
 
             // with cache, called only once
             mockedRequirement.verify(() -> Requirement.getAll(project), times(2)); // once for cache, once for mock
@@ -649,8 +663,8 @@ public class TestRequirement extends SquashTMTest {
             when(requirementFolder.getId()).thenReturn(1);
             when(requirementFolder.getType()).thenReturn("requirement-folder");
 
-            Requirement.create(project, false, "myRequirement", "some description", new HashMap<>(), "folder1/folder2", Requirement.Criticality.UNDEFINED, "Business");
-            Requirement.create(project, false, "myRequirement", "some description", new HashMap<>(), "folder1/folder2", Requirement.Criticality.UNDEFINED, "Business");
+            Requirement.create(project, false, "myRequirement", "some description", new HashMap<>(), "folder1/folder2", Requirement.Criticality.UNDEFINED, "Business", Requirement.Status.WORK_IN_PROGRESS);
+            Requirement.create(project, false, "myRequirement", "some description", new HashMap<>(), "folder1/folder2", Requirement.Criticality.UNDEFINED, "Business", Requirement.Status.WORK_IN_PROGRESS);
 
             // with cache, called only once
             mockedRequirement.verify(() -> Requirement.getAll(project), times(3)); // 2 for cache, once for mock
@@ -676,7 +690,7 @@ public class TestRequirement extends SquashTMTest {
                     List.of(new Requirement("https://localhost:4321/requirements/1", "requirement", 1, "myRequirement", "/project/myRequirement"),
                             new Requirement("https://localhost:4321/requirements/1", "requirement", 2, "myRequirement", "/project/folder1/folder2/myRequirement")));
 
-            Requirement requirement = Requirement.create(project, false, "myRequirement", "some description", new HashMap<>(), "folder1/folder2", Requirement.Criticality.UNDEFINED, "Business");
+            Requirement requirement = Requirement.create(project, false, "myRequirement", "some description", new HashMap<>(), "folder1/folder2", Requirement.Criticality.UNDEFINED, "Business", Requirement.Status.WORK_IN_PROGRESS);
             Assert.assertEquals(requirement.getId(), 2); // check this is the requirement within the requested folder which is chosen
             verify(postRequest, never()).body(any(JSONObject.class));
             mockedRequirementFolder.verify(() -> RequirementFolder.createRequirementFolderTree(eq(project), eq(List.of("folder1", "folder2"))));
@@ -699,7 +713,7 @@ public class TestRequirement extends SquashTMTest {
                             new Requirement("https://localhost:4321/requirements/1", "requirement", 2, "myRequirement", "/project/folder1/folder2/myRequirement")));
 
 
-            Requirement requirement = Requirement.create(project, false, "myRequirement", "some description", new HashMap<>(), (String) null, Requirement.Criticality.UNDEFINED, "Business");
+            Requirement requirement = Requirement.create(project, false, "myRequirement", "some description", new HashMap<>(), (String) null, Requirement.Criticality.UNDEFINED, "Business", Requirement.Status.WORK_IN_PROGRESS);
 
             Assert.assertEquals(requirement.getId(), 1); // check this is the requirement within the requested folder which is chosen
             verify(postRequest, never()).body(any(JSONObject.class));
@@ -719,7 +733,7 @@ public class TestRequirement extends SquashTMTest {
                 "foo",
                 project,
                 null);
-        Requirement.create(project, false, "myRequirement", "some description", Map.of("APP", List.of("comp1", "comp2")), new ParentEntity(requirementFolder2), Requirement.Criticality.UNDEFINED, "Business");
+        Requirement.create(project, false, "myRequirement", "some description", Map.of("APP", List.of("comp1", "comp2")), new ParentEntity(requirementFolder2), Requirement.Criticality.UNDEFINED, "Business", Requirement.Status.WORK_IN_PROGRESS);
 
     }
 
