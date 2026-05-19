@@ -54,7 +54,7 @@ public class Execution extends Entity {
         executionSteps = new ArrayList<>();
 
         try {
-            status = json.getString(FIELD_EXECUTION_STATUS);
+            status = json.optString(FIELD_EXECUTION_STATUS, "");
         } catch (JSONException e) {/* ignore */}
         try {
             order = json.getInt(FIELD_EXECUTION_ORDER);

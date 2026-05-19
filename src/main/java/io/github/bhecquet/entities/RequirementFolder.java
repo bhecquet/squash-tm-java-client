@@ -1,6 +1,5 @@
 package io.github.bhecquet.entities;
 
-import io.github.bhecquet.exceptions.NotImplementedException;
 import io.github.bhecquet.exceptions.SquashTmException;
 import kong.unirest.core.UnirestException;
 import kong.unirest.core.json.JSONArray;
@@ -19,9 +18,11 @@ public class RequirementFolder extends Entity {
     public static final String REQUIREMENT_FOLDER_URL = "requirement-folders";
     public static final String REQUIREMENT_FOLDER_TREE_URL = REQUIREMENT_FOLDER_URL + "/" + "tree/%s";
     public static final String REQUIREMENT_FOLDER_CONTENT_URL = "requirement-folders/%s/content";
+    private static final String FIELD_DESCRIPTION = "description";
 
     private Project project;
     private Entity parent;
+    private String description;
 
     public RequirementFolder(String url, String type, int id, String name, Project project, Entity parent) {
         super(url, type, id, name);
@@ -31,8 +32,6 @@ public class RequirementFolder extends Entity {
 
     /**
      * Get all requirement folders (should not be used on large instances)
-     *
-     * @return
      */
     public static List<RequirementFolder> getAll() {
         try {
@@ -53,8 +52,6 @@ public class RequirementFolder extends Entity {
 
     /**
      * Get all requirement folders for this project
-     *
-     * @return
      */
     public static List<RequirementFolder> getAll(Project project) {
         try {
@@ -174,17 +171,9 @@ public class RequirementFolder extends Entity {
     public static RequirementFolder fromJson(JSONObject json) {
 
         try {
-            Entity parent;
+            Entity parent = null;
             if (json.has(FIELD_PARENT)) {
-                if (TYPE_PROJECT.equals(json.getJSONObject(FIELD_PARENT).getString(FIELD_TYPE))) {
-                    parent = Project.fromJson(json.getJSONObject(FIELD_PARENT));
-                } else if (TYPE_REQUIREMENT_FOLDER.equals(json.getJSONObject(FIELD_PARENT).getString(FIELD_TYPE))) {
-                    parent = RequirementFolder.fromJson(json.getJSONObject(FIELD_PARENT));
-                } else {
-                    parent = null;
-                }
-            } else {
-                parent = null;
+                parent = Entity.entityFromJson(json.getJSONObject(FIELD_PARENT));
             }
 
             Project project = null;
@@ -192,13 +181,15 @@ public class RequirementFolder extends Entity {
                 project = Project.fromJson(json.getJSONObject(TYPE_PROJECT));
             }
 
-            return new RequirementFolder(json.getJSONObject("_links").getJSONObject("self").getString("href"),
+            RequirementFolder requirementFolder = new RequirementFolder(json.getJSONObject("_links").getJSONObject("self").getString("href"),
                     json.getString(FIELD_TYPE),
                     json.getInt(FIELD_ID),
                     json.getString(FIELD_NAME),
                     project,
                     parent
             );
+            requirementFolder.completeDetails(json);
+            return requirementFolder;
         } catch (JSONException e) {
             throw new SquashTmException(String.format("Cannot create RequirementFolder from JSON [%s] data: %s", json.toString(), e.getMessage()));
         }
@@ -246,9 +237,49 @@ public class RequirementFolder extends Entity {
 
     }
 
+    /**
+     * Update requirement folder
+     *
+     * @param name        the updated name or null if we should not update it
+     * @param description the updated description or null if we should not update it
+     * @return this
+     */
+    public RequirementFolder update(String name, String description) {
+        try {
+            JSONObject body = new JSONObject();
+            body.put(FIELD_TYPE, "requirement-folder");
+
+            if (name != null && !name.isEmpty()) {
+                body.put(FIELD_NAME, name);
+            } else {
+                body.put(FIELD_NAME, this.name);
+            }
+            if (description != null) {
+                body.put(FIELD_DESCRIPTION, description);
+            }
+
+            JSONObject json = getJSonResponse(buildPatchRequest(String.format(apiRootUrl + REQUIREMENT_FOLDER_URL + "/%d", id)).body(body));
+
+            completeDetails(json);
+            return this;
+        } catch (UnirestException e) {
+            throw new SquashTmException("Cannot update requirement folder", e);
+        }
+    }
+
     @Override
     public void completeDetails() {
-        throw new NotImplementedException();
+        JSONObject json = getJSonResponse(buildGetRequest(url));
+        completeDetails(json);
+    }
+
+    private void completeDetails(JSONObject json) {
+        try {
+            name = json.optString(FIELD_NAME, "");
+        } catch (JSONException e) {/* ignore */}
+        try {
+            description = json.optString(FIELD_DESCRIPTION, "");
+        } catch (JSONException e) {/* ignore */}
     }
 
     public static String getRequirementFolderUrl() {
@@ -273,5 +304,9 @@ public class RequirementFolder extends Entity {
 
     public static Map<Project, EntityCache<RequirementFolder>> getRequirementFolderCaches() {
         return requirementFolderCaches;
+    }
+
+    public String getDescription() {
+        return description;
     }
 }

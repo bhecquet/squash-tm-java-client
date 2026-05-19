@@ -2,7 +2,6 @@ package io.github.bhecquet.entities;
 
 
 import io.github.bhecquet.SquashTMTest;
-import io.github.bhecquet.exceptions.NotImplementedException;
 import io.github.bhecquet.exceptions.SquashTmException;
 import kong.unirest.core.*;
 import kong.unirest.core.json.JSONObject;
@@ -40,14 +39,12 @@ public class TestRequirementFolder extends SquashTMTest {
             "      }\n" +
             "    }\n" +
             "  },\n" +
-            "  \"custom_fields\" : [ ],\n" +
             "  \"name\" : \"embedded folder\",\n" +
             "  \"created_by\" : \"User-1\",\n" +
             "  \"created_on\" : \"2017-07-19T10:00:00.000+00:00\",\n" +
             "  \"last_modified_by\" : \"User-2\",\n" +
             "  \"last_modified_on\" : \"2017-07-20T10:00:00.000+00:00\",\n" +
             "  \"description\" : \"<p>An embedded folder...</p>\",\n" +
-            "  \"attachments\" : [ ],\n" +
             "  \"_links\" : {\n" +
             "    \"self\" : {\n" +
             "      \"href\" : \"https://localhost:4321/requirement-folders/356\"\n" +
@@ -880,11 +877,12 @@ public class TestRequirementFolder extends SquashTMTest {
         RequirementFolder requirementFolder = RequirementFolder.get(100);
     }
 
-    @Test(expectedExceptions = NotImplementedException.class)
+    @Test
     public void testCompleteDetails() {
         createServerMock("GET", "/requirement-folders/100", 200, REQ_FOLDER_100_REPLY_DATA);
         RequirementFolder requirementFolder = RequirementFolder.get(100);
         requirementFolder.completeDetails();
+        Assert.assertEquals(requirementFolder.getDescription(), "<p>where all the old requirements go</p>");
     }
 
     @Test
@@ -898,6 +896,43 @@ public class TestRequirementFolder extends SquashTMTest {
         Assert.assertEquals(requirementFolder.getParent().getName(), "folder2");
         Assert.assertEquals(requirementFolder.getProject().getId(), 1281);
         Assert.assertEquals(requirementFolder.getProject().getName(), "project test");
+    }
+
+    @Test
+    public void testUpdate() {
+        HttpRequestWithBody patchRequest = (HttpRequestWithBody) createServerMock("PATCH", "/requirement-folders/356", 200, SIMPLE_GET_REQ_FOLDER, "request");
+        RequirementFolder requirementFolder = new RequirementFolder("https://localhost:4321/requirement-folders/356", "requirement-folder", 356, "folder", project, project);
+        requirementFolder.update("embedded folder", "<p>An embedded folder...</p>");
+        verify(patchRequest).body(new JSONObject("{\"_type\":\"requirement-folder\",\"name\":\"embedded folder\",\"description\":\"<p>An embedded folder...</p>\"}"));
+        Assert.assertEquals(requirementFolder.getName(), "embedded folder");
+        Assert.assertEquals(requirementFolder.getDescription(), "<p>An embedded folder...</p>");
+    }
+
+    @Test
+    public void testUpdateNoName() {
+        HttpRequestWithBody patchRequest = (HttpRequestWithBody) createServerMock("PATCH", "/requirement-folders/356", 200, SIMPLE_GET_REQ_FOLDER, "request");
+        RequirementFolder requirementFolder = new RequirementFolder("https://localhost:4321/requirement-folders/356", "requirement-folder", 356, "folder", project, project);
+        requirementFolder.update(null, "<p>An embedded folder...</p>");
+        verify(patchRequest).body(new JSONObject("{\"_type\":\"requirement-folder\",\"name\":\"folder\",\"description\":\"<p>An embedded folder...</p>\"}"));
+        Assert.assertEquals(requirementFolder.getDescription(), "<p>An embedded folder...</p>");
+    }
+
+    @Test
+    public void testUpdateNoDescription() {
+        HttpRequestWithBody patchRequest = (HttpRequestWithBody) createServerMock("PATCH", "/requirement-folders/356", 200, SIMPLE_GET_REQ_FOLDER, "request");
+        RequirementFolder requirementFolder = new RequirementFolder("https://localhost:4321/requirement-folders/356", "requirement-folder", 356, "folder", project, project);
+        requirementFolder.update("embedded folder", null);
+        verify(patchRequest).body(new JSONObject("{\"_type\":\"requirement-folder\",\"name\":\"embedded folder\"}"));
+        Assert.assertEquals(requirementFolder.getName(), "embedded folder");
+    }
+
+    @Test(expectedExceptions = SquashTmException.class, expectedExceptionsMessageRegExp = "Cannot update requirement folder")
+    public void testUpdateWithError() {
+        RequestBodyEntity patchRequest = (RequestBodyEntity) createServerMock("PATCH", "/requirement-folders/356", 200, "{}", "requestBodyEntity");
+        when(patchRequest.asJson()).thenThrow(UnirestException.class);
+        RequirementFolder requirementFolder = new RequirementFolder("https://localhost:4321/requirement-folders/356", "requirement-folder", 356, "folder", project, project);
+        requirementFolder.update("embedded folder", "<p>An embedded folder...</p>");
+
     }
 
 }

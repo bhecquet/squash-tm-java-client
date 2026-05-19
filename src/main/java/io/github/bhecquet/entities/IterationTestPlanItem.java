@@ -95,7 +95,7 @@ public class IterationTestPlanItem extends Entity {
     private void completeDetails(JSONObject json) {
         executions = new ArrayList<>();
 
-        status = json.optString(FIELD_EXECUTION_STATUS, null);
+        status = json.optString(FIELD_EXECUTION_STATUS, "");
         lastExecutedBy = json.optString(FIELD_LAST_EXECUTED_BY, "");
         lastExecutedOn = json.optString(FIELD_LAST_EXECUTED_ON, "");
 

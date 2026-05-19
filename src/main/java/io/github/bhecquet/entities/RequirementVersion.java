@@ -64,13 +64,13 @@ public class RequirementVersion extends Entity {
 
     private void completeDetails(JSONObject json) {
 
-        name = json.getString(FIELD_NAME);
+        name = json.optString(FIELD_NAME, "");
         description = json.getString(FIELD_DESCRIPTION);
         requirementId = json.getJSONObject(FIELD_REQUIREMENT).getInt(FIELD_ID);
-        requirementName = json.getJSONObject(FIELD_REQUIREMENT).getString(FIELD_NAME);
-        reference = json.getString(FIELD_REFERENCE);
-        status = json.getString(FIELD_STATUS);
-        criticality = json.getString(FIELD_CRITICALITY);
+        requirementName = json.getJSONObject(FIELD_REQUIREMENT).optString(FIELD_NAME, "");
+        reference = json.optString(FIELD_REFERENCE, "");
+        status = json.optString(FIELD_STATUS, "");
+        criticality = json.optString(FIELD_CRITICALITY, "");
         category = json.getJSONObject(FIELD_CATEGORY).getString("code");
 
         readCustomFields(json.getJSONArray(FIELD_CUSTOM_FIELDS));

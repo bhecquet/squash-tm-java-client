@@ -80,7 +80,7 @@ public class ExecutionStep extends Step {
 
     private void completeDetails(JSONObject json) {
         try {
-            status = json.getString(FIELD_EXECUTION_STATUS);
+            status = json.optString(FIELD_EXECUTION_STATUS, "");
         } catch (JSONException e) {/* ignore */}
         try {
             order = json.getInt(FIELD_EXECUTION_STEP_ORDER);
