@@ -6,8 +6,10 @@ import kong.unirest.core.UnirestException;
 import kong.unirest.core.json.JSONException;
 import kong.unirest.core.json.JSONObject;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -150,6 +152,31 @@ public class TestCase extends Entity {
 
     }
 
+    /**
+     * Update a test case param
+     *
+     * @param testCaseId   id of the test case to update
+     * @param updatedDatas datas to update (eg. id, description, ...)
+     * @return updated test case
+     */
+    public TestCase updateTestCase(int testCaseId, Map<String, Object> updatedDatas) {
+
+        try {
+            JSONObject updJson = new JSONObject();
+            updJson.put("_type", "test-case");
+            for (var entry : updatedDatas.entrySet()) {
+                updJson.put(entry.getKey(), entry.getValue());
+            }
+
+            JSONObject json = getJSonResponse(buildPatchRequest(apiRootUrl + String.format(TEST_CASE_URL, testCaseId)).body(updJson));
+
+            return fromJson(json);
+
+        } catch (UnirestException e) {
+            throw new SquashTmException(String.format("Cannot update testcase %s", testCaseId), e);
+        }
+    }
+
     public List<TestStep> getTestSteps() {
         return testSteps;
     }
@@ -236,5 +263,13 @@ public class TestCase extends Entity {
             }
         }
         return coveredRequirements;
+    }
+
+    public void uploadAttachment(File f, int id) {
+        try {
+            getJSonResponse(buildPostRequestAuthOnly(String.format(apiRootUrl + "test-cases/%d/attachments", id)).field("files", f));
+        } catch (UnirestException e) {
+            throw new SquashTmException(String.format("Cannot upload attachment for test step %s", id), e);
+        }
     }
 }

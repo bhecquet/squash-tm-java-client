@@ -4,6 +4,7 @@ import io.github.bhecquet.SquashTMTest;
 import io.github.bhecquet.exceptions.SquashTmException;
 import kong.unirest.core.GetRequest;
 import kong.unirest.core.HttpRequestWithBody;
+import kong.unirest.core.MultipartBody;
 import kong.unirest.core.UnirestException;
 import kong.unirest.core.json.JSONObject;
 import org.mockito.ArgumentCaptor;
@@ -11,9 +12,14 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -556,5 +562,72 @@ public class TestTestCase extends SquashTMTest {
         Assert.assertEquals(coveredRequirements.size(), 1);
         Assert.assertEquals(coveredRequirements.get(0).getId(), 255);
         Assert.assertEquals(coveredRequirements.get(0).getName(), "Must have legs");
+    }
+
+    @Test
+    public void testUpdateTestCase() {
+        HttpRequestWithBody patchRequest = (HttpRequestWithBody) createServerMock("PATCH", "/test-cases/12", 200, TEST_CASE_REPLY_DATA, "request");
+
+        TestCase testCase = new TestCase("https://localhost:4321/test-cases/12", "test-case", 12, "walking test");
+        TestCase updated = testCase.updateTestCase(12, Map.of("name", "new name", "description", "new description"));
+
+        ArgumentCaptor<JSONObject> jsonCaptor = ArgumentCaptor.forClass(JSONObject.class);
+        verify(patchRequest).body(jsonCaptor.capture());
+
+        JSONObject sentBody = jsonCaptor.getValue();
+        Assert.assertEquals(sentBody.getString("_type"), "test-case");
+        Assert.assertEquals(sentBody.getString("name"), "new name");
+        Assert.assertEquals(sentBody.getString("description"), "new description");
+        Assert.assertNotNull(updated);
+        Assert.assertEquals(updated.getId(), 12);
+    }
+
+    @Test
+    public void testUpdateTestCaseSingleField() {
+        HttpRequestWithBody patchRequest = (HttpRequestWithBody) createServerMock("PATCH", "/test-cases/12", 200, TEST_CASE_REPLY_DATA, "request");
+
+        TestCase testCase = new TestCase("https://localhost:4321/test-cases/12", "test-case", 12, "walking test");
+        testCase.updateTestCase(12, Map.of("status", "APPROVED"));
+
+        ArgumentCaptor<JSONObject> jsonCaptor = ArgumentCaptor.forClass(JSONObject.class);
+        verify(patchRequest).body(jsonCaptor.capture());
+
+        JSONObject sentBody = jsonCaptor.getValue();
+        Assert.assertEquals(sentBody.getString("_type"), "test-case");
+        Assert.assertEquals(sentBody.getString("status"), "APPROVED");
+    }
+
+    @Test(expectedExceptions = SquashTmException.class)
+    public void testUpdateTestCaseWithError() {
+        HttpRequestWithBody patchRequest = (HttpRequestWithBody) createServerMock("PATCH", "/test-cases/12", 500, "{\"message\":\"error\"}", "request");
+        when(patchRequest.body(any(JSONObject.class))).thenThrow(UnirestException.class);
+
+        TestCase testCase = new TestCase("https://localhost:4321/test-cases/12", "test-case", 12, "walking test");
+        testCase.updateTestCase(12, Map.of("name", "new name"));
+    }
+
+    @Test
+    public void testUploadAttachment() throws IOException {
+        HttpRequestWithBody postRequest = (HttpRequestWithBody) createServerMock("POST", "/test-cases/12/attachments", 200, "{}", "request");
+
+        File tempFile = Files.createTempFile("attachment", ".txt").toFile();
+        tempFile.deleteOnExit();
+
+        TestCase testCase = new TestCase("https://localhost:4321/test-cases/12", "test-case", 12, "walking test");
+        testCase.uploadAttachment(tempFile, 12);
+
+        verify(postRequest).field(eq("files"), eq(tempFile));
+    }
+
+    @Test(expectedExceptions = SquashTmException.class)
+    public void testUploadAttachmentWithError() throws IOException {
+        HttpRequestWithBody postRequest = (HttpRequestWithBody) createServerMock("POST", "/test-cases/12/attachments", 200, "{}", "request");
+        when(postRequest.field(eq("files"), any(File.class))).thenThrow(UnirestException.class);
+
+        File tempFile = Files.createTempFile("attachment", ".txt").toFile();
+        tempFile.deleteOnExit();
+
+        TestCase testCase = new TestCase("https://localhost:4321/test-cases/12", "test-case", 12, "walking test");
+        testCase.uploadAttachment(tempFile, 12);
     }
 }
