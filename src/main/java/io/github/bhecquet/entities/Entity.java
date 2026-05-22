@@ -147,6 +147,16 @@ public abstract class Entity {
         }
     }
 
+    protected static HttpRequestWithBody buildPostRequestAuthOnly(String url) {
+        if (apiToken == null) {
+            return Unirest.post(updateUrl(url))
+                    .basicAuth(user, password);
+        } else {
+            return Unirest.post(updateUrl(url))
+                    .headerReplace(HEADER_AUTHORIZATION, HEADER_AUTHORIZATION_BEARER + apiToken);
+        }
+    }
+
     protected static HttpRequestWithBody buildPatchRequest(String url) {
         if (apiToken == null) {
             return Unirest.patch(updateUrl(url)).basicAuth(user, password)
