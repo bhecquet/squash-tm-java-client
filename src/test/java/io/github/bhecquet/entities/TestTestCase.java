@@ -4,7 +4,6 @@ import io.github.bhecquet.SquashTMTest;
 import io.github.bhecquet.exceptions.SquashTmException;
 import kong.unirest.core.GetRequest;
 import kong.unirest.core.HttpRequestWithBody;
-import kong.unirest.core.MultipartBody;
 import kong.unirest.core.UnirestException;
 import kong.unirest.core.json.JSONObject;
 import org.mockito.ArgumentCaptor;
@@ -569,7 +568,7 @@ public class TestTestCase extends SquashTMTest {
         HttpRequestWithBody patchRequest = (HttpRequestWithBody) createServerMock("PATCH", "/test-cases/12", 200, TEST_CASE_REPLY_DATA, "request");
 
         TestCase testCase = new TestCase("https://localhost:4321/test-cases/12", "test-case", 12, "walking test");
-        TestCase updated = testCase.updateTestCase(12, Map.of("name", "new name", "description", "new description"));
+        TestCase updated = testCase.update(12, Map.of("name", "new name", "description", "new description"));
 
         ArgumentCaptor<JSONObject> jsonCaptor = ArgumentCaptor.forClass(JSONObject.class);
         verify(patchRequest).body(jsonCaptor.capture());
@@ -587,7 +586,7 @@ public class TestTestCase extends SquashTMTest {
         HttpRequestWithBody patchRequest = (HttpRequestWithBody) createServerMock("PATCH", "/test-cases/12", 200, TEST_CASE_REPLY_DATA, "request");
 
         TestCase testCase = new TestCase("https://localhost:4321/test-cases/12", "test-case", 12, "walking test");
-        testCase.updateTestCase(12, Map.of("status", "APPROVED"));
+        testCase.update(12, Map.of("status", "APPROVED"));
 
         ArgumentCaptor<JSONObject> jsonCaptor = ArgumentCaptor.forClass(JSONObject.class);
         verify(patchRequest).body(jsonCaptor.capture());
@@ -603,7 +602,7 @@ public class TestTestCase extends SquashTMTest {
         when(patchRequest.body(any(JSONObject.class))).thenThrow(UnirestException.class);
 
         TestCase testCase = new TestCase("https://localhost:4321/test-cases/12", "test-case", 12, "walking test");
-        testCase.updateTestCase(12, Map.of("name", "new name"));
+        testCase.update(12, Map.of("name", "new name"));
     }
 
     @Test

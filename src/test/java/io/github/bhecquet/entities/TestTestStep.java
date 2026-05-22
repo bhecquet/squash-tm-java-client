@@ -232,7 +232,7 @@ public class TestTestStep extends SquashTMTest {
     public void testCreate() {
         HttpRequestWithBody postRequest = (HttpRequestWithBody) createServerMock("POST", "/test-cases/10/steps", 200, TEST_STEP_REPLY_DATA, "request");
 
-        TestStep step = TestStep.create(10, Map.of("action", "<p>click</p>", "expectedResult", "<p>ok</p>"));
+        TestStep step = TestStep.create(10, Map.of("action", "<p>click</p>", "expected_result", "<p>ok</p>"));
 
         ArgumentCaptor<JSONObject> captor = ArgumentCaptor.forClass(JSONObject.class);
         verify(postRequest).body(captor.capture());
@@ -259,7 +259,7 @@ public class TestTestStep extends SquashTMTest {
         HttpRequestWithBody patchRequest = (HttpRequestWithBody) createServerMock("PATCH", "/test-steps/165", 200, TEST_STEP_REPLY_DATA, "request");
 
         TestStep ts = new TestStep("https://localhost:4321/test-steps/165", "action-step", 165, 0, "", "");
-        TestStep updated = ts.updateTestStep(165, "<p>new action</p>", "<p>new result</p>");
+        TestStep updated = ts.update(165, "<p>new action</p>", "<p>new result</p>");
 
         ArgumentCaptor<JSONObject> captor = ArgumentCaptor.forClass(JSONObject.class);
         verify(patchRequest).body(captor.capture());
@@ -277,7 +277,7 @@ public class TestTestStep extends SquashTMTest {
         when(patchRequest.body(any(JSONObject.class))).thenThrow(UnirestException.class);
 
         TestStep ts = new TestStep("https://localhost:4321/test-steps/165", "action-step", 165, 0, "", "");
-        ts.updateTestStep(165, "<p>new action</p>", "<p>new result</p>");
+        ts.update(165, "<p>new action</p>", "<p>new result</p>");
     }
 
     // ── delete ────────────────────────────────────────────────────────────────

@@ -159,7 +159,7 @@ public class TestCase extends Entity {
      * @param updatedDatas datas to update (eg. id, description, ...)
      * @return updated test case
      */
-    public TestCase updateTestCase(int testCaseId, Map<String, Object> updatedDatas) {
+    public TestCase update(int testCaseId, Map<String, Object> updatedDatas) {
 
         try {
             JSONObject updJson = new JSONObject();

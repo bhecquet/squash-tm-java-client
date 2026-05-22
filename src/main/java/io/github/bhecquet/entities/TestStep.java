@@ -9,6 +9,7 @@ import kong.unirest.core.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -62,15 +63,7 @@ public class TestStep extends Step {
         try {
             String stepType = json.getString(FIELD_TYPE);
             if ("action-step".equals(stepType)) {
-                TestStep testStep = new TestStep(
-
-                        json.getJSONObject("_links").getJSONObject("self").getString("href"),
-                        json.getString(FIELD_TYPE),
-                        json.getInt(FIELD_ID),
-                        json.getInt(FIELD_INDEX),
-                        json.optString(FIELD_EXPECTED_RESULT, ""),
-                        json.optString(FIELD_ACTION, "")
-                );
+                TestStep testStep = fromJsonOne(json);
                 testStep.readCustomFields(json.getJSONArray(FIELD_CUSTOM_FIELDS));
                 return List.of(testStep);
             } else if ("call-step".equals(stepType)) {
@@ -98,6 +91,17 @@ public class TestStep extends Step {
         this.expectedResult = expectedResult;
     }
 
+    public static JSONObject buildAPIBody(Map<String, Object> datas) {
+        JSONObject bodyJson = new JSONObject();
+        bodyJson.put(FIELD_TYPE, "action-step");
+        for (var entry : datas.entrySet()) {
+            bodyJson.put(entry.getKey(), entry.getValue());
+        }
+        bodyJson.put(CustomField.FIELD_CUSTOM_FIELDS, new JSONArray());
+
+        return bodyJson;
+    }
+
     /**
      * Create a test step
      *
@@ -108,13 +112,7 @@ public class TestStep extends Step {
     public static TestStep create(int testCaseId, Map<String, Object> datas) {
 
         try {
-            JSONObject updJson = new JSONObject();
-            updJson.put(FIELD_TYPE, "action-step");
-            updJson.put(FIELD_ACTION, datas.get("action"));
-            updJson.put(FIELD_EXPECTED_RESULT, datas.get("expectedResult"));
-            updJson.put(CustomField.FIELD_CUSTOM_FIELDS, new JSONArray());
-            JSONObject json = getJSonResponse(buildPostRequest(apiRootUrl + String.format(TEST_CASE_URL, testCaseId) + "/steps").body(updJson));
-
+            JSONObject json = getJSonResponse(buildPostRequest(apiRootUrl + String.format(TEST_CASE_URL, testCaseId) + "/steps").body(buildAPIBody(datas)));
             return fromJsonOne(json);
 
         } catch (UnirestException e) {
@@ -130,15 +128,13 @@ public class TestStep extends Step {
      * @param expectedResult new expected result value format is html, empty if not to be modified
      * @return updated test case
      */
-    public TestStep updateTestStep(int testStepId, String action, String expectedResult) {
+    public TestStep update(int testStepId, String action, String expectedResult) {
 
         try {
-            JSONObject updJson = new JSONObject();
-            updJson.put(FIELD_TYPE, "action-step");
-            updJson.put(FIELD_ACTION, action);
-            updJson.put(FIELD_EXPECTED_RESULT, expectedResult);
-            updJson.put(CustomField.FIELD_CUSTOM_FIELDS, new JSONArray());
-            JSONObject json = getJSonResponse(buildPatchRequest(apiRootUrl + String.format(TEST_STEP_URL, testStepId)).body(updJson));
+            Map<String, Object> datas = new HashMap<>();
+            datas.put(FIELD_ACTION, action);
+            datas.put(FIELD_EXPECTED_RESULT, expectedResult);
+            JSONObject json = getJSonResponse(buildPatchRequest(apiRootUrl + String.format(TEST_STEP_URL, testStepId)).body(buildAPIBody(datas)));
 
             return fromJsonOne(json);
 
