@@ -908,6 +908,49 @@ public class TestCampaignFolder extends SquashTMTest {
         verify(postRequest).body(new JSONObject("{\"_type\":\"campaign-folder\",\"name\":\"bar\",\"parent\":{\"_type\":\"campaign-folder\",\"id\":1000,\"name\":\"sub-folder1\"}}"));
     }
 
+    /**
+     * Non-regression: when both /A/B and /B exist, path A/B/C must use /A/B as parent for C
+     */
+    @Test
+    public void testCreateCampaignFolderTreeWithAmbiguousRootSibling() {
+        CampaignFolder.getCampaignFolderCaches().clear();
+
+        HttpRequestWithBody postRequest = (HttpRequestWithBody) createServerMock("POST", "/campaign-folders", 200, CAMPAIGN_FOLDER_POST_REPLY_DATA, "request");
+
+        createServerMock("GET", "/campaign-folders/tree/14", 200, "[ {"
+                + "  \"_type\" : \"project\","
+                + "  \"id\" : 14,"
+                + "  \"name\" : \"Test Project 1\","
+                + "  \"folders\" : [ {"
+                + "    \"_type\" : \"campaign-folder\","
+                + "    \"id\" : 200,"
+                + "    \"name\" : \"A\","
+                + "    \"url\" : \"https://localhost:4321/campaign-folders/200\","
+                + "    \"children\" : [ {"
+                + "      \"_type\" : \"campaign-folder\","
+                + "      \"id\" : 201,"
+                + "      \"name\" : \"B\","
+                + "      \"url\" : \"https://localhost:4321/campaign-folders/201\","
+                + "      \"children\" : [ ]"
+                + "    } ]"
+                + "  }, {"
+                + "    \"_type\" : \"campaign-folder\","
+                + "    \"id\" : 300,"
+                + "    \"name\" : \"B\","
+                + "    \"url\" : \"https://localhost:4321/campaign-folders/300\","
+                + "    \"children\" : [ ]"
+                + "  } ]"
+                + "}]"
+        );
+
+        CampaignFolder createdFolder = CampaignFolder.createCampaignFolderTree(project, "A/B/C");
+        Assert.assertEquals(createdFolder.getId(), 33);
+
+        verify(postRequest, never()).body(new JSONObject("{\"_type\":\"campaign-folder\",\"name\":\"B\",\"parent\":{\"_type\":\"project\",\"id\":14,\"name\":\"Test Project 1\"}}"));
+        verify(postRequest).body(new JSONObject("{\"_type\":\"campaign-folder\",\"name\":\"C\",\"parent\":{\"_type\":\"campaign-folder\",\"id\":201,\"name\":\"B\"}}"));
+        verify(postRequest, never()).body(new JSONObject("{\"_type\":\"campaign-folder\",\"name\":\"C\",\"parent\":{\"_type\":\"campaign-folder\",\"id\":300,\"name\":\"B\"}}"));
+    }
+
     @Test
     public void testGetFromId() {
         createServerMock("GET", "/campaign-folders/100", 200, CAMPAIGN_FOLDER_100_REPLY_DATA);

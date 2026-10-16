@@ -127,10 +127,8 @@ public class CampaignFolder extends Entity {
         boolean folderExists = false;
         for (CampaignFolder existingFolder : campaignFolders) {
             if (existingFolder.getName().equals(folderName)
-                    && (existingFolder.getProject() == null || existingFolder.getProject() != null && existingFolder.getProject().getId() == project.getId())
-                    && (existingFolder.getParent() == null
-                    || parentFolder == null && existingFolder.getParent() != null && existingFolder.getParent() instanceof Project
-                    || (parentFolder != null && existingFolder.getParent() != null && existingFolder.getParent() instanceof CampaignFolder && existingFolder.getParent().getId() == parentFolder.getId()))) {
+                    && (existingFolder.getProject() == null || existingFolder.getProject().getId() == project.getId())
+                    && hasSameParent(existingFolder, parentFolder)) {
                 folderExists = true;
                 parentFolder = existingFolder;
                 break;
@@ -142,6 +140,18 @@ public class CampaignFolder extends Entity {
         }
 
         return parentFolder;
+    }
+
+    private static boolean hasSameParent(CampaignFolder existingFolder, CampaignFolder expectedParentFolder) {
+        Entity existingParent = existingFolder.getParent();
+
+        // Root-level folder: parent can be null or project
+        if (expectedParentFolder == null) {
+            return existingParent == null || existingParent instanceof Project;
+        }
+
+        // Nested folder: parent must be the expected campaign folder
+        return existingParent instanceof CampaignFolder && existingParent.getId() == expectedParentFolder.getId();
     }
 
     public static CampaignFolder get(int id) {
